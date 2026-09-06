@@ -4,7 +4,7 @@ Modern esnaf ihtiyaçları ile bulut mimarisini harmanlayan, istemci tarafında 
 
 ## 🚀 Canlı Demo
 
-**[https://budakhuseyin.github.io/aybars/](https://budakhuseyin.github.io/aybars/)**
+**[https://qrowlenq.github.io/aybars-pos/](https://qrowlenq.github.io/aybars-pos/)**
 
 ## ✨ Özellikler
 
