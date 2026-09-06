@@ -1,95 +1,257 @@
 /* ===================================================================
-   EXPENSES MODULE — Daily & Major Expenses & VAT Reconciliation
+   EXPENSES MODULE — Unified Ledger Stream & Tax Shield Rules Engine
    =================================================================== */
+
+// ── Tax Rules Calculation Engine ──
+function calculateExpenseTaxRules(amt, vatRate, hasVat, mainCategory) {
+  amt = Number(amt) || 0;
+  vatRate = Number(vatRate) || 0;
+  hasVat = Boolean(hasVat);
+
+  let netAmount = amt;
+  let vatAmount = 0;
+  let taxDeduction = 0;
+  let kkeg = 0;
+  let withholdingTax = 0;
+  let deductibleVat = 0;
+
+  if (hasVat && vatRate > 0) {
+    netAmount = Number((amt / (1 + vatRate / 100)).toFixed(2));
+    vatAmount = Number((amt - netAmount).toFixed(2));
+  } else {
+    netAmount = amt;
+    vatAmount = 0;
+  }
+
+  switch (mainCategory) {
+    case "Genel Dükkân / Sarf":
+      // %100 matrah indirimi + tam KDV mahsubu
+      taxDeduction = hasVat ? netAmount : 0;
+      deductibleVat = hasVat ? vatAmount : 0;
+      kkeg = 0;
+      withholdingTax = 0;
+      break;
+
+    case "Binek Taşıt & Akaryakıt":
+      // %70 matrah indirimi - %30 KKEG kısıtlaması, KDV %70 oranında mahsup
+      if (hasVat) {
+        taxDeduction = Number((netAmount * 0.70).toFixed(2));
+        kkeg = Number((netAmount * 0.30).toFixed(2));
+        deductibleVat = Number((vatAmount * 0.70).toFixed(2));
+      } else {
+        taxDeduction = 0;
+        kkeg = amt;
+        deductibleVat = 0;
+      }
+      withholdingTax = 0;
+      break;
+
+    case "Banka & POS Komisyon Kesintisi":
+      // %100 finansman gideri matrah indirimi (KDV genellikle 0 veya BSMV dahil)
+      taxDeduction = amt;
+      deductibleVat = 0;
+      kkeg = 0;
+      withholdingTax = 0;
+      break;
+
+    case "Sabit Kira / Stopaj":
+      // %20 stopaj takibi ile: Brüt Kira = Net / 0.80, Stopaj = Brüt * 0.20
+      if (amt > 0) {
+        const grossRent = Number((amt / 0.80).toFixed(2));
+        withholdingTax = Number((grossRent * 0.20).toFixed(2));
+        taxDeduction = grossRent; // Brüt kira toplam giderdir
+      }
+      deductibleVat = 0;
+      kkeg = 0;
+      break;
+
+    case "Demirbaş Alımı":
+      // Eğer tutar > 12.000 TL ise amortismana tabidir (doğrudan tek seferde gider yazılamaz)
+      if (amt > 12000) {
+        // Amortismana tabi: ilk yıl için tahmini %20 amortisman payı veya 0
+        taxDeduction = Number((netAmount * 0.20).toFixed(2)); // Yıllık amortisman payı
+      } else {
+        taxDeduction = hasVat ? netAmount : 0;
+      }
+      deductibleVat = hasVat ? vatAmount : 0;
+      kkeg = 0;
+      withholdingTax = 0;
+      break;
+
+    default:
+      taxDeduction = hasVat ? netAmount : 0;
+      deductibleVat = hasVat ? vatAmount : 0;
+      kkeg = 0;
+      withholdingTax = 0;
+      break;
+  }
+
+  return {
+    netAmount,
+    vatAmount,
+    taxDeduction,
+    kkeg,
+    withholdingTax,
+    deductibleVat
+  };
+}
+
+function handleExpenseCategoryChange() {
+  const cat = document.getElementById("expMainCategory")?.value || "Genel Dükkân / Sarf";
+  const vatRateEl = document.getElementById("expVatRate");
+  const subTypeEl = document.getElementById("expSubType");
+
+  if (cat === "Sabit Kira / Stopaj") {
+    if (vatRateEl) vatRateEl.value = "0";
+    if (subTypeEl && !subTypeEl.value) subTypeEl.value = "Dükkân Kirası";
+  } else if (cat === "Banka & POS Komisyon Kesintisi") {
+    if (vatRateEl) vatRateEl.value = "0";
+    if (subTypeEl && !subTypeEl.value) subTypeEl.value = "POS Komisyon Kesintisi";
+  } else if (cat === "Binek Taşıt & Akaryakıt") {
+    if (vatRateEl) vatRateEl.value = "20";
+    if (subTypeEl && !subTypeEl.value) subTypeEl.value = "Servis Aracı Mazot";
+  } else if (cat === "Demirbaş Alımı") {
+    if (vatRateEl) vatRateEl.value = "20";
+    if (subTypeEl && !subTypeEl.value) subTypeEl.value = "Demirbaş / Ekipman";
+  }
+
+  calculateExpenseTaxShieldLive();
+}
 
 function toggleExpenseVatInputs() {
   const chk = document.getElementById("expHasVat");
   const container = document.getElementById("expVatInputsContainer");
   if (!chk || !container) return;
   container.style.display = chk.checked ? "block" : "none";
-  if (chk.checked) {
-    calculateExpenseVatLive();
-  } else {
-    const vatAmtEl = document.getElementById("expVatAmount");
-    if (vatAmtEl) vatAmtEl.value = "";
-  }
+  calculateExpenseTaxShieldLive();
 }
 
-function calculateExpenseVatLive() {
-  const chk = document.getElementById("expHasVat");
-  if (!chk || !chk.checked) return;
+function calculateExpenseTaxShieldLive() {
   const amt = Number(document.getElementById("expAmount")?.value) || 0;
-  const rate = Number(document.getElementById("expVatRate")?.value) || 0;
-  const vatAmt = rate > 0 ? amt - (amt / (1 + rate / 100)) : 0;
+  const mainCat = document.getElementById("expMainCategory")?.value || "Genel Dükkân / Sarf";
+  const hasVat = document.getElementById("expHasVat") ? document.getElementById("expHasVat").checked : true;
+  const vatRate = hasVat ? (Number(document.getElementById("expVatRate")?.value) || 0) : 0;
+
+  const rules = calculateExpenseTaxRules(amt, vatRate, hasVat, mainCat);
+
+  // Vat amount field
   const vatAmtEl = document.getElementById("expVatAmount");
-  if (vatAmtEl) vatAmtEl.value = vatAmt > 0 ? vatAmt.toFixed(2) : "0.00";
+  if (vatAmtEl) vatAmtEl.value = rules.vatAmount > 0 ? rules.vatAmount.toFixed(2) : "0.00";
+
+  // Modal Live Preview
+  const netEl = document.getElementById("expNetAmtDisplay");
+  const dedVatEl = document.getElementById("expDeductibleVatDisplay");
+  const taxDedEl = document.getElementById("expTaxDeductionDisplay");
+  const kkegEl = document.getElementById("expKkegDisplay");
+  const kkegRow = document.getElementById("expKkegRow");
+  const withEl = document.getElementById("expWithholdingDisplay");
+  const withRow = document.getElementById("expWithholdingRow");
+  const amortAlert = document.getElementById("expAmortizationAlert");
+
+  if (netEl) netEl.innerText = rules.netAmount.toFixed(2) + " ₺";
+  if (dedVatEl) dedVatEl.innerText = rules.deductibleVat.toFixed(2) + " ₺";
+  if (taxDedEl) taxDedEl.innerText = rules.taxDeduction.toFixed(2) + " ₺";
+
+  if (kkegRow && kkegEl) {
+    if (rules.kkeg > 0) {
+      kkegRow.style.display = "flex";
+      kkegEl.innerText = rules.kkeg.toFixed(2) + " ₺";
+    } else {
+      kkegRow.style.display = "none";
+    }
+  }
+
+  if (withRow && withEl) {
+    if (rules.withholdingTax > 0) {
+      withRow.style.display = "flex";
+      withEl.innerText = rules.withholdingTax.toFixed(2) + " ₺";
+    } else {
+      withRow.style.display = "none";
+    }
+  }
+
+  if (amortAlert) {
+    amortAlert.style.display = (mainCat === "Demirbaş Alımı" && amt > 12000) ? "flex" : "none";
+  }
 }
 
-function openAddExpenseModal(isMajor) {
-  document.getElementById("expIsMajor").value = isMajor ? "true" : "false";
-  document.getElementById("expModalTitle").innerText = isMajor ? "🏢 Sabit & Majör Gider (Kira, Fatura, Maaş)" : "☕ Günlük Küçük Gider (Kasa Masrafları)";
-  const catSel = document.getElementById("expCategory");
-  if (isMajor) {
-    catSel.innerHTML = `
-      <option value="Dükkân Kirası">🏢 Dükkân Kirası</option>
-      <option value="Elektrik Faturası">⚡ Elektrik Faturası</option>
-      <option value="Su / İnternet / Aidat">💧 Su / İnternet / Aidat</option>
-      <option value="Personel Maaşı">👥 Personel Maaşı</option>
-      <option value="Vergi / Muhasebe / Harç">🏛️ Vergi / Muhasebe / Harç</option>
-      <option value="Banka / POS Komisyonu">💳 Banka / POS Komisyonu</option>
-      <option value="Diğer Sabit & Majör Gider">📌 Diğer Sabit & Majör Gider</option>
-    `;
-  } else {
-    catSel.innerHTML = `
-      <option value="Yemek / Su / Çay">🍽️ Yemek / Su / Çay</option>
-      <option value="Dükkân Sarf (Poşet/Fiş)">🛍️ Dükkân Sarf (Poşet / Temizlik)</option>
-      <option value="Ulaşım / Kurye Yakıtı">🛵 Ulaşım / Kurye Yakıtı</option>
-      <option value="Ufak Tamirat / Hırdavat">🔧 Ufak Tamirat / Hırdavat</option>
-      <option value="Kırtasiye / Sarf">📎 Kırtasiye / Sarf</option>
-      <option value="Diğer Günlük Masraf">☕ Diğer Günlük Masraf</option>
-    `;
+// Backward compatibility alias
+function calculateExpenseVatLive() {
+  calculateExpenseTaxShieldLive();
+}
+
+function openAddExpenseModal(isMajor = false) {
+  const isMajEl = document.getElementById("expIsMajor");
+  if (isMajEl) isMajEl.value = isMajor ? "true" : "false";
+
+  const mainCatSel = document.getElementById("expMainCategory");
+  if (mainCatSel) {
+    mainCatSel.value = isMajor ? "Sabit Kira / Stopaj" : "Genel Dükkân / Sarf";
   }
+
+  const subTypeEl = document.getElementById("expSubType");
+  if (subTypeEl) subTypeEl.value = isMajor ? "Dükkân Kirası" : "";
+
   document.getElementById("expAmount").value = "";
   document.getElementById("expDesc").value = "";
 
   const chk = document.getElementById("expHasVat");
-  if (chk) {
-    chk.checked = false;
-    toggleExpenseVatInputs();
-  }
-  const vatRateEl = document.getElementById("expVatRate");
-  if (vatRateEl) vatRateEl.value = "20";
-  const vatAmtEl = document.getElementById("expVatAmount");
-  if (vatAmtEl) vatAmtEl.value = "";
+  if (chk) chk.checked = true;
+  toggleExpenseVatInputs();
 
+  handleExpenseCategoryChange();
   openModal("addExpenseModal");
 }
 
 function saveExpense() {
-  const isMajor = document.getElementById("expIsMajor").value === "true";
-  const cat = document.getElementById("expCategory").value;
-  const src = document.getElementById("expSource").value;
-  const amt = Number(document.getElementById("expAmount").value);
-  const desc = (document.getElementById("expDesc").value || "").trim();
-  const hasVat = document.getElementById("expHasVat")?.checked || false;
+  const mainCat = document.getElementById("expMainCategory")?.value || "Genel Dükkân / Sarf";
+  const subType = (document.getElementById("expSubType")?.value || "").trim() || mainCat;
+  const src = document.getElementById("expSource")?.value || "Kasa (Nakit)";
+  const amt = Number(document.getElementById("expAmount")?.value);
+  const desc = (document.getElementById("expDesc")?.value || "").trim() || subType;
+  const hasVat = document.getElementById("expHasVat") ? document.getElementById("expHasVat").checked : true;
   const vatRate = hasVat ? (Number(document.getElementById("expVatRate")?.value) || 0) : 0;
-  const vatAmount = hasVat && vatRate > 0 ? Number((amt - (amt / (1 + vatRate / 100))).toFixed(2)) : 0;
 
-  if (!amt || amt <= 0) return toast("Geçerli bir tutar girin!", "error");
+  if (!amt || amt <= 0) return toast("Geçerli bir gider tutarı girin!", "error");
+
+  const rules = calculateExpenseTaxRules(amt, vatRate, hasVat, mainCat);
+
+  const isMajor = (
+    mainCat.includes("Sabit") ||
+    mainCat.includes("Kira") ||
+    mainCat.includes("Taşıt") ||
+    mainCat.includes("Demirbaş") ||
+    mainCat.includes("Personel")
+  );
+
+  let invoiceStatus = "⚠️ Faturasız";
+  if (hasVat) {
+    if (rules.withholdingTax > 0) invoiceStatus = "🧾 Stopajlı (%20 Stopaj)";
+    else if (rules.kkeg > 0) invoiceStatus = "🧾 Faturalı (%70 Mahsup)";
+    else invoiceStatus = "🧾 Faturalı";
+  }
 
   const expRecord = {
     id: Date.now(),
     date: nowDate(),
     time: nowTime(),
-    expenseType: isMajor ? "major" : "daily",
-    category: cat,
-    source: src,
+    mainCategory: mainCat,
+    subType: subType,
+    category: mainCat, // backward compatibility
+    desc: desc,
     amount: amt,
-    desc: desc || (isMajor ? "Sabit & Majör Gider" : "Günlük Küçük Masraf"),
+    vatRate: vatRate,
+    vatAmount: rules.vatAmount,
+    deductibleVat: rules.deductibleVat,
+    paymentMethod: src,
+    source: src, // backward compatibility
     hasInvoice: hasVat,
     isInvoice: hasVat,
-    vatRate: vatRate,
-    vatAmount: vatAmount
+    invoiceStatus: invoiceStatus,
+    taxDeduction: rules.taxDeduction,
+    kkeg: rules.kkeg,
+    withholdingTax: rules.withholdingTax,
+    expenseType: isMajor ? "major" : "daily"
   };
 
   expenses.unshift(expRecord);
@@ -100,20 +262,23 @@ function saveExpense() {
     dualData = calculateDualFinancialOverview();
   }
 
-  // Google E-Tabloya Gönder
+  // Google E-Tabloya 11 Kolonluk Kurumsal Konsolide Şema ile Gönder
   sendToGoogleSheets({
     action: "save_expense",
     date: expRecord.date,
     time: expRecord.time,
-    expenseType: isMajor ? "major" : "daily",
-    category: cat,
-    paymentSource: src,
+    mainCategory: expRecord.mainCategory,
+    subType: expRecord.subType,
     description: expRecord.desc,
-    amount: amt,
-    hasInvoice: hasVat,
-    isInvoice: hasVat,
-    vatRate: vatRate,
-    vatAmount: vatAmount,
+    amount: expRecord.amount,
+    vatRate: expRecord.vatRate,
+    vatAmount: expRecord.vatAmount,
+    paymentMethod: expRecord.paymentMethod,
+    invoiceStatus: expRecord.invoiceStatus,
+    taxDeduction: expRecord.taxDeduction,
+    kkeg: expRecord.kkeg,
+    withholdingTax: expRecord.withholdingTax,
+    hasInvoice: expRecord.hasInvoice,
     status: "Ödendi",
     officialSales: dualData ? Number(dualData.officialSales.toFixed(2)) : undefined,
     invoicedPurchases: dualData ? Number(dualData.invoicedPurchases.toFixed(2)) : undefined,
@@ -133,12 +298,11 @@ function saveExpense() {
   renderDualFinancialOverviewCard();
   updateAllBadges();
 
-  // Otomatik E-Tablo Mali Rapor senkronizasyonu
   if (typeof syncTaxReportToSheets === "function") {
     setTimeout(() => syncTaxReportToSheets(false), 600);
   }
 
-  toast(`💸 ${amt.toFixed(2)} ₺ ${isMajor ? 'sabit/majör gider' : 'küçük masraf'} kaydedildi!`);
+  toast(`💸 ${amt.toFixed(2)} ₺ gider kaydedildi! (Matrah İndirimi: ${rules.taxDeduction.toFixed(2)} ₺)`);
 }
 
 // ── Dual Financial Overview: Fiili Kâr vs. Vergi Dengesi ──
@@ -441,90 +605,197 @@ function deleteExpense(expId) {
   toast("🗑️ Gider kaydı silindi ve E-Tablo güncellendi!");
 }
 
-function renderExpensesTable() {
-  const procTbody = document.getElementById("procurementExpenseTableBody");
-  const majorTbody = document.getElementById("majorExpenseTableBody");
-  const dailyTbody = document.getElementById("dailyExpenseTableBody");
-  if (!procTbody || !majorTbody || !dailyTbody) return;
+// ── Dynamic Top-of-Page KPI Summary Cards ──
+function renderUnifiedExpenseKPIs() {
+  const today = nowDate();
+  let curMonth = "";
+  let curYear = "";
 
-  procTbody.innerHTML = ""; majorTbody.innerHTML = ""; dailyTbody.innerHTML = "";
+  if (today && today.includes(".")) {
+    const p = today.split(".");
+    curMonth = p[1];
+    curYear = p[2];
+  }
 
-  const procExpenses = expenses.filter(e => e.expenseType === "procurement");
-  const majorExpenses = expenses.filter(e => e.expenseType === "major");
-  const dailyExpenses = expenses.filter(e => e.expenseType === "daily" || !e.expenseType);
-
-  // 1. Ürün & Mal Alımları
+  let todayTotal = 0;
+  let w1Total = 0;
+  let w2Total = 0;
+  let w3Total = 0;
+  let w4Total = 0;
+  let fixedTotal = 0;
   let procTotal = 0;
-  if (procExpenses.length === 0) {
-    procTbody.innerHTML = `<tr><td colspan="6" class="empty-state">Henüz mal alımı kaydedilmedi.</td></tr>`;
-  } else {
-    procExpenses.forEach(e => {
-      procTotal += Number(e.amount) || 0;
-      const isInv = e.hasInvoice !== undefined ? e.hasInvoice : (e.isInvoice !== undefined ? e.isInvoice : (e.vatAmount > 0));
-      const vatBadge = isInv && e.vatAmount > 0
-        ? `<br><span class="badge" style="font-size:10px; background:#f0fdf4; color:#166534;">🧾 Faturalı (KDV %${e.vatRate || 20}: ${Number(e.vatAmount).toFixed(2)} ₺)</span>`
-        : `<br><span class="badge" style="font-size:10px; background:#fef2f2; color:#b91c1c;">⚠️ Faturasız Alım</span>`;
-      procTbody.innerHTML += `<tr>
-        <td><b>${e.date}</b></td>
-        <td><b>${e.supplierName || '-'}</b></td>
-        <td>${e.desc || '-'}${vatBadge}</td>
-        <td><b style="color:${(e.status||'').includes('Borç') ? 'var(--danger)' : 'var(--success)'};">${e.status || 'Ödendi'}</b></td>
-        <td style="color:var(--success-dark); font-weight:800;">${Number(e.amount).toFixed(2)} ₺</td>
-        <td><button class="btn btn-danger btn-xs" onclick="deleteExpense(${e.id})" title="Sil">🗑️</button></td>
-      </tr>`;
-    });
-  }
-  const procTotalEl = document.getElementById("procurementTotalBadge");
-  if (procTotalEl) procTotalEl.innerText = `Toplam: ${procTotal.toFixed(2)} ₺`;
+  let monthlyTotal = 0;
 
-  // 2. Sabit & Majör Giderler
-  let majorTotal = 0;
-  if (majorExpenses.length === 0) {
-    majorTbody.innerHTML = `<tr><td colspan="6" class="empty-state">Sabit & Majör gider kaydı yok.</td></tr>`;
-  } else {
-    majorExpenses.forEach(e => {
-      majorTotal += Number(e.amount) || 0;
-      const isInv = e.hasInvoice !== undefined ? e.hasInvoice : e.isInvoice;
-      const vatBadge = isInv && e.vatAmount > 0
-        ? ` <span class="badge" style="font-size:10px; background:#eff6ff; color:#1d4ed8; font-weight:600;">🧾 Faturalı (KDV %${e.vatRate}: ${Number(e.vatAmount).toFixed(2)} ₺)</span>`
-        : ` <span class="badge" style="font-size:10px; background:#f8fafc; color:#64748b;">Fişsiz/Faturasız</span>`;
-      majorTbody.innerHTML += `<tr>
-        <td><b>${e.date}</b></td>
-        <td><b>${e.category}</b>${vatBadge}</td>
-        <td>${e.source || '-'}</td>
-        <td>${e.desc || '-'}</td>
-        <td class="text-danger font-bold">${Number(e.amount).toFixed(2)} ₺</td>
-        <td><button class="btn btn-danger btn-xs" onclick="deleteExpense(${e.id})" title="Sil">🗑️</button></td>
-      </tr>`;
-    });
-  }
-  const majorTotalEl = document.getElementById("majorTotalBadge");
-  if (majorTotalEl) majorTotalEl.innerText = `Toplam: ${majorTotal.toFixed(2)} ₺`;
+  (expenses || []).forEach(e => {
+    const amt = Number(e.amount) || 0;
+    const dateStr = String(e.date || "");
 
-  // 3. Günlük Küçük Giderler
-  let dailyTotal = 0;
-  if (dailyExpenses.length === 0) {
-    dailyTbody.innerHTML = `<tr><td colspan="7" class="empty-state">Günlük küçük masraf yok.</td></tr>`;
+    // Today
+    if (dateStr === today) {
+      todayTotal += amt;
+    }
+
+    // Check if in current month
+    let day = 0;
+    let inCurMonth = true;
+    if (dateStr.includes(".")) {
+      const parts = dateStr.split(".");
+      day = parseInt(parts[0], 10) || 0;
+      if (curMonth && curYear && (parts[1] !== curMonth || parts[2] !== curYear)) {
+        inCurMonth = false;
+      }
+    }
+
+    if (inCurMonth) {
+      monthlyTotal += amt;
+
+      // Weeks breakdown
+      if (day >= 1 && day <= 7) w1Total += amt;
+      else if (day >= 8 && day <= 14) w2Total += amt;
+      else if (day >= 15 && day <= 21) w3Total += amt;
+      else if (day >= 22) w4Total += amt;
+
+      // Sabit Masraflar (Kira, Stopaj, Elektrik, Su, Doğalgaz, Maaş)
+      const mainCat = String(e.mainCategory || e.category || "");
+      const sub = String(e.subType || "").toLowerCase();
+      const desc = String(e.desc || "").toLowerCase();
+      const isFixed = (
+        mainCat.includes("Kira") ||
+        mainCat.includes("Sabit") ||
+        mainCat.includes("Personel") ||
+        sub.includes("kira") ||
+        sub.includes("elektrik") ||
+        sub.includes("su") ||
+        sub.includes("internet") ||
+        sub.includes("maaş") ||
+        sub.includes("aidat") ||
+        desc.includes("kira") ||
+        desc.includes("elektrik") ||
+        desc.includes("fatura")
+      );
+      if (isFixed) fixedTotal += amt;
+
+      // Toptancı Alımları & Mal Maliyeti
+      const isProc = (
+        mainCat === "Toptancı Alımı" ||
+        e.expenseType === "procurement" ||
+        e.category === "Ürün Alımı" ||
+        e.supplierName
+      );
+      if (isProc) procTotal += amt;
+    }
+  });
+
+  const setTxt = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.innerText = val.toFixed(2) + " ₺";
+  };
+
+  setTxt("kpiExpToday", todayTotal);
+  setTxt("kpiExpW1", w1Total);
+  setTxt("kpiExpW2", w2Total);
+  setTxt("kpiExpW3", w3Total);
+  setTxt("kpiExpW4", w4Total);
+  setTxt("kpiExpFixed", fixedTotal);
+  setTxt("kpiExpProc", procTotal);
+  setTxt("kpiExpTotal", monthlyTotal);
+
+  const monthLabel = document.getElementById("kpiExpMonthLabel");
+  if (monthLabel) {
+    monthLabel.innerText = `${getMonthYearHeader(today)} Toplamı`;
+  }
+}
+
+function renderExpensesTable() {
+  renderUnifiedExpenseKPIs();
+
+  const unifiedTbody = document.getElementById("unifiedExpensesTableBody");
+  if (!unifiedTbody) return;
+
+  const catFilter = document.getElementById("expenseCategoryFilter")?.value || "TÜMÜ";
+  const searchQ = (document.getElementById("expenseSearchInput")?.value || "").trim().toLowerCase();
+
+  unifiedTbody.innerHTML = "";
+
+  const filtered = (expenses || []).filter(e => {
+    const mainCat = e.mainCategory || e.category || "Diğer";
+    if (catFilter !== "TÜMÜ" && mainCat !== catFilter) {
+      if (catFilter === "Toptancı Alımı" && e.expenseType !== "procurement") return false;
+      if (catFilter !== "Toptancı Alımı" && !mainCat.includes(catFilter)) return false;
+    }
+
+    if (searchQ) {
+      const matchText = [
+        e.date, e.mainCategory, e.subType, e.category, e.desc,
+        e.supplierName, e.paymentMethod, e.source
+      ].filter(Boolean).join(" ").toLowerCase();
+      if (!matchText.includes(searchQ)) return false;
+    }
+
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    unifiedTbody.innerHTML = `<tr><td colspan="12" class="empty-state">Kayıtlı gider bulunamadı.</td></tr>`;
   } else {
-    dailyExpenses.forEach(e => {
-      dailyTotal += Number(e.amount) || 0;
-      const isInv = e.hasInvoice !== undefined ? e.hasInvoice : e.isInvoice;
-      const vatBadge = isInv && e.vatAmount > 0
-        ? ` <span class="badge" style="font-size:10px; background:#eff6ff; color:#1d4ed8; font-weight:600;">🧾 Faturalı</span>`
-        : '';
-      dailyTbody.innerHTML += `<tr>
-        <td><b>${e.date}</b></td>
-        <td>${e.time || '-'}</td>
-        <td><b>${e.category}</b>${vatBadge}</td>
-        <td>${e.source || '-'}</td>
-        <td>${e.desc || '-'}</td>
-        <td class="text-danger font-bold">${Number(e.amount).toFixed(2)} ₺</td>
-        <td><button class="btn btn-danger btn-xs" onclick="deleteExpense(${e.id})" title="Sil">🗑️</button></td>
-      </tr>`;
+    filtered.forEach(e => {
+      const amt = Number(e.amount) || 0;
+      const vatRate = e.vatRate !== undefined ? e.vatRate : 20;
+      const vatAmt = Number(e.vatAmount || 0);
+      const isInv = e.hasInvoice !== undefined ? Boolean(e.hasInvoice) : Boolean(e.isInvoice);
+
+      // Tax shield deduction
+      let taxDed = 0;
+      if (e.taxDeduction !== undefined) {
+        taxDed = Number(e.taxDeduction);
+      } else if (isInv) {
+        taxDed = vatRate > 0 ? (amt - vatAmt) : amt;
+      }
+
+      // Invoice status badge
+      let invBadge = "";
+      if (isInv) {
+        invBadge = `<span class="badge" style="background:#f0fdf4; color:#166534; font-weight:600; font-size:11px;">${e.invoiceStatus || '🧾 Faturalı'}</span>`;
+      } else {
+        invBadge = `<span class="badge" style="background:#fef2f2; color:#b91c1c; font-weight:600; font-size:11px;">⚠️ Faturasız</span>`;
+      }
+
+      // Category color tag
+      const mainCat = e.mainCategory || (e.expenseType === "procurement" ? "Toptancı Alımı" : (e.expenseType === "major" ? "Sabit & Majör Gider" : "Genel Dükkân / Sarf"));
+      let catTagClass = "chip-info";
+      if (mainCat.includes("Toptancı")) catTagClass = "chip-ok";
+      else if (mainCat.includes("Taşıt")) catTagClass = "chip-warn";
+      else if (mainCat.includes("Kira")) catTagClass = "chip-info";
+
+      // Tax shield badges with KKEG and withholding
+      let taxShieldHtml = `<span class="badge-tax-shield">🛡️ ${taxDed.toFixed(2)} ₺</span>`;
+      if (e.kkeg && Number(e.kkeg) > 0) {
+        taxShieldHtml += `<br><span class="badge-kkeg mt-1">KKEG: ${Number(e.kkeg).toFixed(2)} ₺</span>`;
+      }
+      if (e.withholdingTax && Number(e.withholdingTax) > 0) {
+        taxShieldHtml += `<br><span class="badge" style="font-size:10px; background:#fffbeb; color:#b45309; margin-top:2px;">Stopaj: ${Number(e.withholdingTax).toFixed(2)} ₺</span>`;
+      }
+
+      unifiedTbody.innerHTML += `
+        <tr>
+          <td><b>${e.date}</b></td>
+          <td><span class="text-xs text-muted">${e.time || '-'}</span></td>
+          <td><span class="chip ${catTagClass}" style="font-size:10.5px;">${mainCat}</span></td>
+          <td><b>${e.subType || e.supplierName || e.category || '-'}</b></td>
+          <td style="max-width:240px; font-size:12px;">${e.desc || '-'}</td>
+          <td><b style="color:var(--danger); font-size:13px;">${amt.toFixed(2)} ₺</b></td>
+          <td><span class="badge" style="background:#f1f5f9; color:#475569;">%${vatRate}</span></td>
+          <td class="text-sm font-bold" style="color:var(--primary);">${vatAmt.toFixed(2)} ₺</td>
+          <td class="text-xs">${e.paymentMethod || e.source || '-'}</td>
+          <td>${invBadge}</td>
+          <td>${taxShieldHtml}</td>
+          <td>
+            <button class="btn btn-danger btn-xs" onclick="deleteExpense(${e.id})" title="Gideri Sil">🗑️</button>
+          </td>
+        </tr>
+      `;
     });
   }
-  const dailyTotalEl = document.getElementById("dailyTotalBadge");
-  if (dailyTotalEl) dailyTotalEl.innerText = `Toplam: ${dailyTotal.toFixed(2)} ₺`;
 
   renderDualFinancialOverviewCard();
 }

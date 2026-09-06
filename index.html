@@ -139,6 +139,34 @@
       </div>
 
       <div id="subtab-inv-stock" class="subtab-view active">
+        <!-- 🛰️ SKT RADARI (FIFO EXPIRY RADAR WIDGET) -->
+        <div class="skt-radar-container" id="sktRadarContainer">
+          <div class="skt-radar-header">
+            <div class="skt-radar-title">
+              <span style="font-size:24px;">🛰️</span>
+              <div>
+                <h3>SKT Radarı & FIFO Parti Takibi</h3>
+                <p>Yaklaşan son kullanma tarihlerini anlık izleyin, kritik partilere indirim uygulayın ve stok kaybını önleyin.</p>
+              </div>
+            </div>
+            <div class="skt-radar-counters">
+              <div class="skt-counter-pill alert-red">
+                <span>🚨 &lt; 15 Gün:</span>
+                <b id="sktRedCount">0 Kalem</b>
+              </div>
+              <div class="skt-counter-pill alert-yellow">
+                <span>⚠️ &lt; 30 Gün:</span>
+                <b id="sktYellowCount">0 Kalem</b>
+              </div>
+              <div class="skt-counter-pill alert-safe">
+                <span>✅ Güvenli Stok:</span>
+                <b id="sktSafeCount">0 Kalem</b>
+              </div>
+            </div>
+          </div>
+          <div id="sktRadarBatchList" class="skt-batch-list"></div>
+        </div>
+
         <div class="flex gap-2 mb-3 items-center">
           <input type="text" id="invSearchInput" class="search-input" placeholder="🔍 Ürün Ara..." oninput="renderInventoryTable()">
           <select id="invCatFilter" class="fc" style="width:200px;" onchange="renderInventoryTable()"></select>
@@ -284,15 +312,89 @@
 
     <!-- 6. GİDERLER -->
     <section id="tab-expenses" class="tab-pane subtabs-container">
-      <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+      <div class="flex justify-between items-center mb-3 flex-wrap gap-2">
         <div>
-          <h2>💸 Giderler & Mal Alımları Yönetimi</h2>
-          <span class="text-xs text-muted">Küçük Giderler (Kasa), Sabit/Majör Giderler ve Toptancı Alımları bağımsız panellerde takip edilir.</span>
+          <h2>💸 Kurumsal Gider & Vergi Yönetimi</h2>
+          <span class="text-xs text-muted">Tekilleştirilmiş gider akışı (Unified Ledger Stream), dinamik haftalık KPI kartları ve vergi kalkanı optimizasyonu.</span>
         </div>
         <div class="flex gap-2 flex-wrap">
-          <button class="btn btn-primary" onclick="openAddExpenseModal(false)">+ ☕ Günlük Küçük Masraf Ekle</button>
-          <button class="btn btn-purple" onclick="openAddExpenseModal(true)">+ 🏢 Sabit & Majör Gider Ekle</button>
+          <button class="btn btn-primary" onclick="openAddExpenseModal(false)">+ 💸 Yeni Gider / Masraf Ekle</button>
           <button class="btn btn-success" onclick="openSupplierIntakeModal()">+ 📦 Yeni Mal / Fatura Girişi</button>
+        </div>
+      </div>
+
+      <!-- 📊 DİNAMİK HAFTALIK & AYLIK KPI ÖZET KARTLARI (TOP-OF-PAGE SUMMARY CARDS) -->
+      <div class="expense-kpi-grid">
+        <div class="expense-kpi-card kpi-today">
+          <div class="expense-kpi-title">
+            <span>📅 Bugün</span>
+            <span class="expense-kpi-tag" style="background:#eff6ff; color:#1d4ed8;">Günlük</span>
+          </div>
+          <div class="expense-kpi-value" id="kpiExpToday">0.00 ₺</div>
+          <div class="expense-kpi-sub">Bugünkü tüm giderler</div>
+        </div>
+
+        <div class="expense-kpi-card kpi-w1">
+          <div class="expense-kpi-title">
+            <span>1. Hafta</span>
+            <span class="expense-kpi-tag" style="background:#eef2ff; color:#4338ca;">1 - 7 Gün</span>
+          </div>
+          <div class="expense-kpi-value" id="kpiExpW1">0.00 ₺</div>
+          <div class="expense-kpi-sub">1. Hafta gider toplamı</div>
+        </div>
+
+        <div class="expense-kpi-card kpi-w2">
+          <div class="expense-kpi-title">
+            <span>2. Hafta</span>
+            <span class="expense-kpi-tag" style="background:#f5f3ff; color:#6d28d9;">8 - 14 Gün</span>
+          </div>
+          <div class="expense-kpi-value" id="kpiExpW2">0.00 ₺</div>
+          <div class="expense-kpi-sub">2. Hafta gider toplamı</div>
+        </div>
+
+        <div class="expense-kpi-card kpi-w3">
+          <div class="expense-kpi-title">
+            <span>3. Hafta</span>
+            <span class="expense-kpi-tag" style="background:#fdf2f8; color:#be185d;">15 - 21 Gün</span>
+          </div>
+          <div class="expense-kpi-value" id="kpiExpW3">0.00 ₺</div>
+          <div class="expense-kpi-sub">3. Hafta gider toplamı</div>
+        </div>
+
+        <div class="expense-kpi-card kpi-w4">
+          <div class="expense-kpi-title">
+            <span>4. Hafta +</span>
+            <span class="expense-kpi-tag" style="background:#fff1f2; color:#be123c;">22 - 31 Gün</span>
+          </div>
+          <div class="expense-kpi-value" id="kpiExpW4">0.00 ₺</div>
+          <div class="expense-kpi-sub">Ay sonu kalan giderler</div>
+        </div>
+
+        <div class="expense-kpi-card kpi-fixed">
+          <div class="expense-kpi-title">
+            <span>🏢 Sabit Masraflar</span>
+            <span class="expense-kpi-tag" style="background:#fef3c7; color:#b45309;">Kira/Fatura</span>
+          </div>
+          <div class="expense-kpi-value" id="kpiExpFixed">0.00 ₺</div>
+          <div class="expense-kpi-sub">Kira, stopaj, fatura, maaş</div>
+        </div>
+
+        <div class="expense-kpi-card kpi-proc">
+          <div class="expense-kpi-title">
+            <span>📦 Mal Maliyeti</span>
+            <span class="expense-kpi-tag" style="background:#ecfdf5; color:#047857;">Toptancı</span>
+          </div>
+          <div class="expense-kpi-value" id="kpiExpProc">0.00 ₺</div>
+          <div class="expense-kpi-sub">Toptancı alımları toplamı</div>
+        </div>
+
+        <div class="expense-kpi-card kpi-total">
+          <div class="expense-kpi-title">
+            <span>💰 Aylık Toplam</span>
+            <span class="expense-kpi-tag" style="background:#fee2e2; color:#b91c1c;">Tüm Giderler</span>
+          </div>
+          <div class="expense-kpi-value text-danger" id="kpiExpTotal">0.00 ₺</div>
+          <div class="expense-kpi-sub" id="kpiExpMonthLabel">Bu ayın toplam gideri</div>
         </div>
       </div>
 
@@ -376,49 +478,48 @@
         </div>
       </div>
 
-      <!-- Panel 3: Ürün & Mal Alımları (Toptancı Faturaları) -->
-      <div class="expense-section procurement mb-4">
-        <div class="flex justify-between items-center mb-2">
+      <!-- 📋 TEKİLLEŞTİRİLMİŞ GİDER LİSTESİ (UNIFIED EXPENSE LEDGER STREAM - 11 KOLON) -->
+      <div style="background:white; padding:18px 20px; border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow-sm);">
+        <div class="flex justify-between items-center mb-3 flex-wrap gap-2">
           <div>
-            <h3>📦 Ürün & Mal Alımları (Toptancı Faturaları)</h3>
-            <p>E-Tablo'da yeşil başlıklı <b>Q-W sütunlarında</b> bağımsız toplanır.</p>
+            <h3 style="margin:0; font-size:16px;">📑 Birleşik Gider ve Alım Günlüğü (Unified Ledger Stream)</h3>
+            <span class="text-xs text-muted">E-Tablo'daki <code>GİDER - [AY YIL]</code> sayfasına satır satır işlenen 11 kolonluk tekilleştirilmiş akış</span>
           </div>
-          <span class="badge" id="procurementTotalBadge" style="background:#065f46; color:white; font-size:12px; padding:6px 12px;">Toplam: 0.00 ₺</span>
-        </div>
-        <table class="data-table mt-2" style="background:rgba(255,255,255,0.95);">
-          <thead><tr><th>Tarih</th><th>Toptancı Firma</th><th>Alınan Kalemler</th><th>Ödeme Durumu</th><th>Tutar</th><th>İşlem</th></tr></thead>
-          <tbody id="procurementExpenseTableBody"></tbody>
-        </table>
-      </div>
-
-      <div class="form-row form-row-2">
-        <!-- Panel 2: Sabit & Majör İşletme Giderleri -->
-        <div class="expense-section major">
-          <div class="flex justify-between items-center mb-2">
-            <div>
-              <h3>🏢 Sabit & Majör Giderler</h3>
-              <p>Kira, Fatura, Maaş vb. (E-Tablo <b>I-O sütunları</b>)</p>
-            </div>
-            <span class="badge" id="majorTotalBadge" style="background:#312e81; color:white; font-size:12px; padding:6px 12px;">Toplam: 0.00 ₺</span>
+          <div class="flex gap-2 flex-wrap items-center">
+            <input type="text" id="expenseSearchInput" class="search-input" placeholder="🔍 Gider veya firma ara..." style="width:200px;" oninput="renderExpensesTable()">
+            <select id="expenseCategoryFilter" class="fc" style="width:190px;" onchange="renderExpensesTable()">
+              <option value="TÜMÜ">Tüm Kategoriler</option>
+              <option value="Toptancı Alımı">📦 Toptancı Alımı</option>
+              <option value="Genel Dükkân / Sarf">🛍️ Genel Dükkân / Sarf</option>
+              <option value="Binek Taşıt & Akaryakıt">🚗 Binek Taşıt & Mazot</option>
+              <option value="Banka & POS Komisyon Kesintisi">💳 POS Komisyonu</option>
+              <option value="Sabit Kira / Stopaj">🏢 Sabit Kira / Stopaj</option>
+              <option value="Demirbaş Alımı">🛠️ Demirbaş Alımı</option>
+              <option value="Personel Maaşı & SGK">👥 Personel Maaşı</option>
+              <option value="Diğer">📌 Diğer Giderler</option>
+            </select>
           </div>
-          <table class="data-table mt-2" style="background:rgba(255,255,255,0.95);">
-            <thead><tr><th>Tarih</th><th>Gider Kalemi</th><th>Ödenen Kaynak</th><th>Açıklama</th><th>Tutar</th><th>İşlem</th></tr></thead>
-            <tbody id="majorExpenseTableBody"></tbody>
-          </table>
         </div>
 
-        <!-- Panel 1: Günlük Küçük Masraflar -->
-        <div class="expense-section" style="background:#f8fafc; border:1px solid var(--border);">
-          <div class="flex justify-between items-center mb-2">
-            <div>
-              <h3 class="text-text">☕ Günlük Küçük Giderler</h3>
-              <p class="text-muted">Kasa içi çıkışlar (Yemek, sarf, poşet - E-Tablo <b>A-G sütunları</b>)</p>
-            </div>
-            <span class="badge" id="dailyTotalBadge" style="background:#1e293b; color:white; font-size:12px; padding:6px 12px;">Toplam: 0.00 ₺</span>
-          </div>
-          <table class="data-table mt-2">
-            <thead><tr><th>Tarih</th><th>Saat</th><th>Kategori</th><th>Kaynak</th><th>Açıklama</th><th>Tutar</th><th>İşlem</th></tr></thead>
-            <tbody id="dailyExpenseTableBody"></tbody>
+        <div style="overflow-x:auto;">
+          <table class="data-table mb-0" id="unifiedExpensesTable">
+            <thead>
+              <tr>
+                <th>Tarih</th>
+                <th>Saat</th>
+                <th>Ana Kategori</th>
+                <th>Alt Tür</th>
+                <th>Açıklama</th>
+                <th>Tutar</th>
+                <th>KDV</th>
+                <th>KDV Tutarı</th>
+                <th>Ödeme Yöntemi</th>
+                <th>Fatura Durumu</th>
+                <th>Matrah İndirimi</th>
+                <th>İşlem</th>
+              </tr>
+            </thead>
+            <tbody id="unifiedExpensesTableBody"></tbody>
           </table>
         </div>
       </div>
@@ -705,6 +806,18 @@
         </div>
       </div>
 
+      <!-- Parti / Lot No & Son Kullanma Tarihi (SKT - FIFO) -->
+      <div class="form-row form-row-2">
+        <div class="fg">
+          <label>Parti / Lot No</label>
+          <input type="text" id="intakeLotNumber" class="fc" placeholder="Örn: LOT-2026/09-01">
+        </div>
+        <div class="fg">
+          <label>Son Kullanma Tarihi (SKT - Ay/Yıl)</label>
+          <input type="month" id="intakeBatchExpiry" class="fc">
+        </div>
+      </div>
+
       <!-- Fatura Tutarları (İki Yönlü Hesaplama) -->
       <div class="form-row form-row-2">
         <div class="fg">
@@ -801,47 +914,124 @@
     </div>
   </div>
 
-  <!-- Add Expense -->
+  <!-- Add Expense Modal (Advanced Tax Shield & Expense Engine) -->
   <div class="modal-overlay" id="addExpenseModal">
-    <div class="modal-box" style="max-width:440px;">
-      <div class="modal-title" id="expModalTitle">Gider Ekle</div>
+    <div class="modal-box" style="max-width:500px;">
+      <div class="modal-title" id="expModalTitle">💸 Yeni Gider & Vergi Kalkanı Girişi</div>
       <input type="hidden" id="expIsMajor">
-      <div class="fg"><label>Kategori</label><select id="expCategory" class="fc"></select></div>
-      <div class="fg"><label>Tutar (₺ - KDV Dahil)</label><input type="number" id="expAmount" class="fc" oninput="calculateExpenseVatLive()"></div>
-      <div class="fg"><label>Ödeme Kaynağı</label>
-        <select id="expSource" class="fc"><option>Kasa (Nakit)</option><option>Banka Hesabı</option><option>Şahsi Hesap</option></select>
+
+      <!-- Ana Kategori / Vergi Kalkanı Kategorisi -->
+      <div class="fg">
+        <label>Ana Kategori (Vergi Kalkanı Mantığı)</label>
+        <select id="expMainCategory" class="fc font-bold" onchange="handleExpenseCategoryChange()">
+          <option value="Genel Dükkân / Sarf">🛍️ Genel Dükkân / Sarf (%100 Matrah İndirimi + Tam KDV)</option>
+          <option value="Binek Taşıt & Akaryakıt">🚗 Binek Taşıt & Akaryakıt (%70 Matrah, %30 KKEG Kısıtı)</option>
+          <option value="Banka & POS Komisyon Kesintisi">💳 Banka & POS Komisyon Kesintisi (%100 Finansman)</option>
+          <option value="Sabit Kira / Stopaj">🏢 Sabit Kira / Stopaj (%20 Stopaj Takibi İle)</option>
+          <option value="Demirbaş Alımı">🛠️ Demirbaş Alımı (&gt; 12.000 TL Amortisman Kuralı)</option>
+          <option value="Personel Maaşı & SGK">👥 Personel Maaşı & SGK / Yemek</option>
+          <option value="Diğer">📌 Diğer İşletme Gideri</option>
+        </select>
       </div>
-      <div class="fg"><label>Kısa Açıklama</label><input type="text" id="expDesc" class="fc" placeholder="Örn: Elektrik faturası, temizlik malzemeleri"></div>
-      
-      <!-- Faturalı Harcama (KDV Dahil) Toggle & Rate -->
+
+      <!-- Alt Tür / Gider Kalemi -->
+      <div class="form-row form-row-2">
+        <div class="fg">
+          <label>Alt Tür (Gider Kalemi)</label>
+          <input type="text" id="expSubType" class="fc" placeholder="Örn: Kira, Mazot, Elektrik..." list="expSubTypesList">
+          <datalist id="expSubTypesList">
+            <option value="Dükkân Kirası">
+            <option value="Elektrik Faturası">
+            <option value="Su / İnternet / Aidat">
+            <option value="Servis Aracı Mazot">
+            <option value="POS Komisyon Kesintisi">
+            <option value="Poşet / Sarf / Temizlik">
+            <option value="Personel Maaşı">
+            <option value="Personel Öğle Yemeği">
+            <option value="Kırtasiye / Fiş Rulosu">
+            <option value="Kedi / Köpek Taşıma Masrafı">
+          </datalist>
+        </div>
+        <div class="fg">
+          <label>Ödeme Yöntemi</label>
+          <select id="expSource" class="fc">
+            <option>Kasa (Nakit)</option>
+            <option>Banka Hesabı</option>
+            <option>Şahsi Hesap</option>
+            <option>Kredi Kartı</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Tutar & Açıklama -->
+      <div class="form-row form-row-2">
+        <div class="fg">
+          <label>Tutar (₺ - KDV Dahil)</label>
+          <input type="number" id="expAmount" class="fc font-bold" placeholder="Örn: 1500" step="any" oninput="calculateExpenseTaxShieldLive()">
+        </div>
+        <div class="fg">
+          <label>Kısa Açıklama</label>
+          <input type="text" id="expDesc" class="fc" placeholder="Örn: Eylül ayı mazot / fiş...">
+        </div>
+      </div>
+
+      <!-- Faturalı / Resmi Harcama Toggle & KDV Oranı -->
       <div class="fg mb-2" style="background:var(--bg); padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius-sm);">
         <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600; margin-bottom:0;">
-          <input type="checkbox" id="expHasVat" onchange="toggleExpenseVatInputs()" style="width:16px; height:16px; cursor:pointer;">
-          🧾 Faturalı Harcama (KDV Dahil)
+          <input type="checkbox" id="expHasVat" checked onchange="toggleExpenseVatInputs()" style="width:16px; height:16px; cursor:pointer;">
+          <span>🧾 Fatura / Fiş / Dekont Mevcut (Resmi Gider)</span>
         </label>
-        <div id="expVatInputsContainer" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--border);">
+        <div id="expVatInputsContainer" style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--border);">
           <div class="form-row form-row-2">
             <div class="fg mb-0">
               <label class="text-xs">KDV Oranı</label>
-              <select id="expVatRate" class="fc text-sm" onchange="calculateExpenseVatLive()">
-                <option value="20" selected>%20</option>
-                <option value="10">%10</option>
-                <option value="1">%1</option>
-                <option value="0">%0 (Muaf)</option>
+              <select id="expVatRate" class="fc text-sm" onchange="calculateExpenseTaxShieldLive()">
+                <option value="20" selected>%20 (Genel / Mazot / Sarf)</option>
+                <option value="10">%10 (Gıda / Yemek)</option>
+                <option value="1">%1 (Tohum / Yem)</option>
+                <option value="0">%0 (Kira / POS / Muaf)</option>
               </select>
             </div>
             <div class="fg mb-0">
-              <label class="text-xs">Hesaplanan KDV (₺)</label>
+              <label class="text-xs">KDV Tutarı (₺)</label>
               <input type="number" id="expVatAmount" class="fc text-sm" readonly style="background:#f1f5f9; font-weight:600; color:var(--primary);">
             </div>
           </div>
-          <div class="text-xs text-muted mt-1">İndirilecek KDV olarak ay sonu mutabakatına dahil edilir.</div>
+        </div>
+      </div>
+
+      <!-- ⚠️ DEMİRBAŞ AMORTİSMAN UYARISI BANNERI (> 12.000 TL) -->
+      <div id="expAmortizationAlert" class="tax-alert-banner danger" style="display:none;">
+        <span>⚠️ <b>Demirbaş Amortisman Uyarısı:</b> Girilen tutar 12.000 TL amortisman sınırını aştığı için doğrudan tek seferde gider yazılamaz, faydalı ömre göre amortismana tabidir.</span>
+      </div>
+
+      <!-- 🛡️ CANLI VERGİ KALKANI VE MATRAH HESAP KARTI -->
+      <div class="tax-shield-box" id="expTaxShieldBox">
+        <div class="tax-shield-row">
+          <span class="text-muted">KDV Hariç Net Tutar:</span>
+          <b id="expNetAmtDisplay">0.00 ₺</b>
+        </div>
+        <div class="tax-shield-row" style="color:var(--primary);">
+          <span>Mahsup Edilebilir KDV Tutarı:</span>
+          <b id="expDeductibleVatDisplay">0.00 ₺</b>
+        </div>
+        <div class="tax-shield-row" style="color:#16a34a;">
+          <span>🛡️ Vergi Matrah İndirimi:</span>
+          <b id="expTaxDeductionDisplay">0.00 ₺</b>
+        </div>
+        <div class="tax-shield-row" id="expKkegRow" style="display:none; color:#dc2626;">
+          <span>⚠️ KKEG (%30 Kanunen Kabul Edilmeyen):</span>
+          <b id="expKkegDisplay">0.00 ₺</b>
+        </div>
+        <div class="tax-shield-row" id="expWithholdingRow" style="display:none; color:#d97706;">
+          <span>🏛️ Hesaplanan Stopaj (%20):</span>
+          <b id="expWithholdingDisplay">0.00 ₺</b>
         </div>
       </div>
 
       <div class="modal-actions">
         <button class="btn btn-ghost" onclick="closeModal('addExpenseModal')">İptal</button>
-        <button class="btn btn-primary" onclick="saveExpense()">Kaydet</button>
+        <button class="btn btn-primary" onclick="saveExpense()">Kaydet & Senkronize Et</button>
       </div>
     </div>
   </div>

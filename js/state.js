@@ -2,22 +2,97 @@
    STATE MANAGEMENT — localStorage + Sample Data
    =================================================================== */
 
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxnbRqagTU9C9C1UTK6jIyJnTUw_kUddnBBmHgM7grmhQVGr-vXLo0oThKAgvPvR4gv/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxaGgSwt6Iaer3jg5uxyRlKmzhz030jxA7wxJ6G2lNRI6hASrgB6Ww6mT4fTejd-oQ/exec";
 
 const defaultCategories = ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum / Kozmetik", "Kampanyalar"];
 
 // ── Sample Data ──
 const sampleProducts = [
-  { id: 101, name: "Reflex Plus Somonlu Yetişkin Kedi Maması 15kg", category: "Kedi", price: 1150, cost: 780, vatRate: 20, stock: 12, supplier: "Marmara Pet Toptan" },
-  { id: 102, name: "Pro Plan Somonlu Kısırlaştırılmış Kedi 3kg", category: "Kedi", price: 820, cost: 580, vatRate: 20, stock: 8, supplier: "Marmara Pet Toptan" },
-  { id: 103, name: "Royal Canin Fit 32 Yetişkin Kedi Maması 4kg", category: "Kedi", price: 950, cost: 690, vatRate: 20, stock: 5, supplier: "Anadolu Mama Dağıtım" },
-  { id: 104, name: "Reflex Aktif Karbonlu Topaklanan Kedi Kumu 10L", category: "Kum / Kozmetik", price: 190, cost: 120, vatRate: 20, stock: 24, supplier: "Ege Pet Depo" },
-  { id: 105, name: "Sanicat Marsilya Sabunlu İnce Kedi Kumu 10L", category: "Kum / Kozmetik", price: 240, cost: 155, vatRate: 20, stock: 15, supplier: "Ege Pet Depo" },
-  { id: 106, name: "Royal Canin Mini Adult Yetişkin Köpek Maması 8kg", category: "Köpek", price: 1450, cost: 1050, vatRate: 20, stock: 6, supplier: "Anadolu Mama Dağıtım" },
-  { id: 107, name: "Reflex Kuzu Etli & Pirinçli Yetişkin Köpek 15kg", category: "Köpek", price: 1080, cost: 720, vatRate: 20, stock: 9, supplier: "Marmara Pet Toptan" },
-  { id: 108, name: "Gold Wings Premium Muhabbet Kuşu Yemi 1kg", category: "Kuş / Kemirgen", price: 95, cost: 60, vatRate: 20, stock: 30, supplier: "Kuzey Kuş & Pet" },
-  { id: 109, name: "Quik Kemirgen & Tavşan Yemi 750gr", category: "Kuş / Kemirgen", price: 85, cost: 52, vatRate: 20, stock: 16, supplier: "Kuzey Kuş & Pet" },
-  { id: 110, name: "Tavuklu Açık Kedi Maması (1 Kilo)", category: "Açık Mama", price: 85, cost: 50, vatRate: 20, stock: 45, supplier: "Marmara Pet Toptan" }
+  { 
+    id: 101, 
+    name: "Reflex Plus Somonlu Yetişkin Kedi Maması 15kg", 
+    category: "Kedi", 
+    price: 1150, 
+    cost: 780, 
+    vatRate: 20, 
+    stock: 12, 
+    supplier: "Marmara Pet Toptan",
+    batches: [
+      { lotNumber: "LOT-2608-A", expiry: "2026-09", qty: 3, cost: 780, date: "10.08.2026" },
+      { lotNumber: "LOT-2609-B", expiry: "2027-05", qty: 9, cost: 780, date: "02.09.2026" }
+    ]
+  },
+  { 
+    id: 102, 
+    name: "Pro Plan Somonlu Kısırlaştırılmış Kedi 3kg", 
+    category: "Kedi", 
+    price: 820, 
+    cost: 580, 
+    vatRate: 20, 
+    stock: 8, 
+    supplier: "Marmara Pet Toptan",
+    batches: [
+      { lotNumber: "LOT-PP-2610", expiry: "2026-10", qty: 2, cost: 580, date: "15.08.2026" },
+      { lotNumber: "LOT-PP-2706", expiry: "2027-06", qty: 6, cost: 580, date: "01.09.2026" }
+    ]
+  },
+  { 
+    id: 103, 
+    name: "Royal Canin Fit 32 Yetişkin Kedi Maması 4kg", 
+    category: "Kedi", 
+    price: 950, 
+    cost: 690, 
+    vatRate: 20, 
+    stock: 5, 
+    supplier: "Anadolu Mama Dağıtım",
+    batches: [
+      { lotNumber: "LOT-RC-0918", expiry: "2026-09-18", qty: 2, cost: 690, date: "01.09.2026" },
+      { lotNumber: "LOT-RC-2708", expiry: "2027-08-01", qty: 3, cost: 690, date: "01.09.2026" }
+    ]
+  },
+  { 
+    id: 104, 
+    name: "Reflex Aktif Karbonlu Topaklanan Kedi Kumu 10L", 
+    category: "Kum / Kozmetik", 
+    price: 190, 
+    cost: 120, 
+    vatRate: 20, 
+    stock: 24, 
+    supplier: "Ege Pet Depo",
+    batches: [
+      { lotNumber: "LOT-RK-2812", expiry: "2028-12", qty: 24, cost: 120, date: "28.08.2026" }
+    ]
+  },
+  { 
+    id: 105, 
+    name: "Sanicat Marsilya Sabunlu İnce Kedi Kumu 10L", 
+    category: "Kum / Kozmetik", 
+    price: 240, 
+    cost: 155, 
+    vatRate: 20, 
+    stock: 15, 
+    supplier: "Ege Pet Depo",
+    batches: [
+      { lotNumber: "LOT-SC-2701", expiry: "2027-01", qty: 15, cost: 155, date: "28.08.2026" }
+    ]
+  },
+  { 
+    id: 106, 
+    name: "Royal Canin Mini Adult Yetişkin Köpek Maması 8kg", 
+    category: "Köpek", 
+    price: 1450, 
+    cost: 1050, 
+    vatRate: 20, 
+    stock: 6, 
+    supplier: "Anadolu Mama Dağıtım",
+    batches: [
+      { lotNumber: "LOT-RC-2704", expiry: "2027-04", qty: 6, cost: 1050, date: "01.09.2026" }
+    ]
+  },
+  { id: 107, name: "Reflex Kuzu Etli & Pirinçli Yetişkin Köpek 15kg", category: "Köpek", price: 1080, cost: 720, vatRate: 20, stock: 9, supplier: "Marmara Pet Toptan", batches: [] },
+  { id: 108, name: "Gold Wings Premium Muhabbet Kuşu Yemi 1kg", category: "Kuş / Kemirgen", price: 95, cost: 60, vatRate: 20, stock: 30, supplier: "Kuzey Kuş & Pet", batches: [] },
+  { id: 109, name: "Quik Kemirgen & Tavşan Yemi 750gr", category: "Kuş / Kemirgen", price: 85, cost: 52, vatRate: 20, stock: 16, supplier: "Kuzey Kuş & Pet", batches: [] },
+  { id: 110, name: "Tavuklu Açık Kedi Maması (1 Kilo)", category: "Açık Mama", price: 85, cost: 50, vatRate: 20, stock: 45, supplier: "Marmara Pet Toptan", batches: [] }
 ];
 
 const sampleBundles = [
@@ -54,6 +129,128 @@ const sampleWaste = [
   { id: 501, date: "04.09.2026", time: "10:15", productName: "Reflex Aktif Karbonlu Topaklanan Kedi Kumu 10L", qty: 1, unitCost: 120, totalLoss: 120, reason: "Ambalaj Yırtıldı / Patladı", note: "İçeri taşırken palet köşesine takıldı" }
 ];
 
+// ── Unified Sample Expenses (11-Column Schema) ──
+const sampleExpenses = [
+  {
+    id: 601,
+    date: "01.09.2026",
+    time: "09:30",
+    mainCategory: "Sabit Kira / Stopaj",
+    subType: "Dükkân Kirası",
+    desc: "Eylül Ayı Dükkân Kirası (Net Ödeme)",
+    amount: 12000,
+    vatRate: 0,
+    vatAmount: 0,
+    paymentMethod: "Banka Hesabı",
+    invoiceStatus: "🧾 Stopajlı (%20 Stopaj)",
+    hasInvoice: true,
+    taxDeduction: 15000, // Brütleştirilmiş kira matrah indirimi (12.000 / 0.80)
+    kkeg: 0,
+    withholdingTax: 3000,
+    expenseType: "major"
+  },
+  {
+    id: 602,
+    date: "02.09.2026",
+    time: "11:30",
+    mainCategory: "Toptancı Alımı",
+    subType: "Mal Alımı",
+    desc: "5 Koli Reflex Mama + 2 Çuval Açık Mama (Marmara Pet)",
+    amount: 5400,
+    vatRate: 20,
+    vatAmount: 900,
+    paymentMethod: "Açık Hesap (Borç)",
+    invoiceStatus: "🧾 Faturalı",
+    hasInvoice: true,
+    taxDeduction: 4500, // KDV hariç matrah
+    kkeg: 0,
+    supplierName: "Marmara Pet Toptan",
+    expenseType: "procurement",
+    status: "Açık Hesap (Borç)"
+  },
+  {
+    id: 603,
+    date: "03.09.2026",
+    time: "14:20",
+    mainCategory: "Binek Taşıt & Akaryakıt",
+    subType: "Servis Aracı Mazot",
+    desc: "Kurye / Servis Aracı Mazot Alımı",
+    amount: 1200,
+    vatRate: 20,
+    vatAmount: 200,
+    paymentMethod: "Kasa (Nakit)",
+    invoiceStatus: "🧾 Faturalı (%70 Mahsup)",
+    hasInvoice: true,
+    taxDeduction: 700, // %70 matrah indirimi (KDV hariç 1000 TL * 0.70)
+    kkeg: 300, // %30 KKEG
+    expenseType: "major"
+  },
+  {
+    id: 604,
+    date: "04.09.2026",
+    time: "16:10",
+    mainCategory: "Banka & POS Komisyon Kesintisi",
+    subType: "POS Komisyonu",
+    desc: "Haftalık POS Slipleri Komisyon Kesintisi",
+    amount: 420,
+    vatRate: 0,
+    vatAmount: 0,
+    paymentMethod: "Banka Hesabı",
+    invoiceStatus: "🧾 Banka Dekontu",
+    hasInvoice: true,
+    taxDeduction: 420, // %100 Finansman gideri matrah indirimi
+    kkeg: 0,
+    expenseType: "major"
+  },
+  {
+    id: 605,
+    date: "05.09.2026",
+    time: "12:45",
+    mainCategory: "Genel Dükkân / Sarf",
+    subType: "Poşet / Temizlik",
+    desc: "Baskılı Poşet ve Dükkân Temizlik Sarfı",
+    amount: 350,
+    vatRate: 20,
+    vatAmount: 58.33,
+    paymentMethod: "Kasa (Nakit)",
+    invoiceStatus: "🧾 Faturalı",
+    hasInvoice: true,
+    taxDeduction: 291.67,
+    kkeg: 0,
+    expenseType: "daily"
+  },
+  {
+    id: 606,
+    date: "06.09.2026",
+    time: "10:15",
+    mainCategory: "Genel Dükkân / Sarf",
+    subType: "Yemek / Çay",
+    desc: "Personel Öğle Yemeği & Kasa İkramı",
+    amount: 180,
+    vatRate: 10,
+    vatAmount: 16.36,
+    paymentMethod: "Kasa (Nakit)",
+    invoiceStatus: "🧾 Fişli",
+    hasInvoice: true,
+    taxDeduction: 163.64,
+    kkeg: 0,
+    expenseType: "daily"
+  }
+];
+
+const TURKISH_MONTHS = ["OCAK", "ŞUBAT", "MART", "NİSAN", "MAYIS", "HAZİRAN", "TEMMUZ", "AĞUSTOS", "EYLÜL", "EKİM", "KASIM", "ARALIK"];
+
+function getMonthYearHeader(dateStr) {
+  if (dateStr && typeof dateStr === "string" && dateStr.includes(".")) {
+    const parts = dateStr.split(".");
+    const m = parseInt(parts[1], 10) - 1;
+    const y = parts[2];
+    if (m >= 0 && m < 12) return `${TURKISH_MONTHS[m]} ${y}`;
+  }
+  const d = new Date();
+  return `${TURKISH_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+}
+
 // ── Load from localStorage or use samples ──
 function loadState() {
   const raw = k => JSON.parse(localStorage.getItem(k));
@@ -63,10 +260,12 @@ function loadState() {
 
   let prods = raw("ps_products");
   window.products = (prods && prods.length > 0) ? prods : [...sampleProducts, ...sampleBundles];
-  // Ensure every product has a valid vatRate
+  
+  // Ensure product integrity & batches array
   window.products.forEach(p => {
     if (p.vatRate === undefined || p.vatRate === null) p.vatRate = 20;
     else p.vatRate = Number(p.vatRate);
+    if (!Array.isArray(p.batches)) p.batches = [];
   });
 
   let sups = raw("ps_suppliers");
@@ -85,7 +284,10 @@ function loadState() {
   window.platformPendingOrders = raw("ps_platform_pending") || [];
   window.deliveredOrders = raw("ps_delivered_orders") || [];
   window.salesHistory = raw("ps_sales_history") || [];
-  window.expenses = raw("ps_expenses") || [];
+  
+  let exp = raw("ps_expenses");
+  window.expenses = (exp && exp.length > 0) ? exp : [...sampleExpenses];
+  
   window.manualDeficits = raw("ps_deficits") || [];
   window.heldCarts = raw("ps_held_carts") || [];
 
@@ -115,6 +317,11 @@ function saveData() {
 }
 
 function sendToGoogleSheets(payload) {
+  if (payload && !payload.supplierDebts && Array.isArray(window.suppliers)) {
+    payload.supplierDebts = window.suppliers
+      .filter(s => (s.balance || 0) > 0)
+      .map(s => ({ name: s.name, balance: Number(s.balance || 0) }));
+  }
   fetch(GOOGLE_SCRIPT_URL, {
     method: "POST",
     mode: "no-cors",

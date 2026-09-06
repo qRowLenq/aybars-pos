@@ -143,16 +143,46 @@ function completeSale(payType, splitDetails = null) {
   const custName = cust ? cust.name : "Tezgâh";
   const itemsSummary = cart.map(i => `${i.qty}x ${i.name} (${i.customPrice.toFixed(2)} ₺)`).join(", ");
 
-  // Stock deduction
+// ── FIFO Batch Stock Deduction Engine ──
+function deductProductStockFIFO(prod, qtyNeeded) {
+  if (!prod) return;
+  prod.stock = Math.max(0, (Number(prod.stock) || 0) - qtyNeeded);
+
+  if (Array.isArray(prod.batches) && prod.batches.length > 0) {
+    // Sort batches ascending by expiry (FIFO): earliest expiring first
+    prod.batches.sort((a, b) => {
+      const expA = a.expiry || "9999-99";
+      const expB = b.expiry || "9999-99";
+      return expA.localeCompare(expB);
+    });
+
+    let remainingNeeded = qtyNeeded;
+    for (let i = 0; i < prod.batches.length; i++) {
+      const b = prod.batches[i];
+      if (b.qty <= 0) continue;
+
+      if (b.qty >= remainingNeeded) {
+        b.qty -= remainingNeeded;
+        remainingNeeded = 0;
+        break;
+      } else {
+        remainingNeeded -= b.qty;
+        b.qty = 0;
+      }
+    }
+  }
+}
+
+  // Stock deduction (FIFO Lot / Batch-based)
   cart.forEach(item => {
     if (item.isBundle && item.bundleItems) {
       item.bundleItems.forEach(bItem => {
         const realProd = products.find(p => p.id === bItem.productId);
-        if (realProd) realProd.stock -= (bItem.qty * item.qty);
+        if (realProd) deductProductStockFIFO(realProd, (bItem.qty * item.qty));
       });
     } else {
       const p = products.find(prod => prod.id === item.id);
-      if (p) p.stock -= item.qty;
+      if (p) deductProductStockFIFO(p, item.qty);
     }
   });
 
@@ -223,6 +253,7 @@ function completeSale(payType, splitDetails = null) {
   cart = [];
   if (document.getElementById("cartCustomerSelect")) document.getElementById("cartCustomerSelect").value = "";
   renderCart(); renderCatalog(); renderPosSalesHistory(); saveData(); updateAllBadges();
+  if (typeof renderSktRadarWidget === "function") renderSktRadarWidget();
   toast(`✅ ${total.toFixed(2)} ₺ satış tamamlandı! ${isOfficial ? '(🧾 Resmi)' : '(📝 Fişsiz)'}`);
 }
 

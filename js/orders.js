@@ -61,16 +61,29 @@ function saveDispatchOrder() {
     items: [...cart], total
   };
 
-  // Deduct stock
+  // Deduct stock (FIFO Lot/Batch deduction)
   cart.forEach(item => {
     if (item.isBundle && item.bundleItems) {
-      item.bundleItems.forEach(bItem => { const rp = products.find(p => p.id === bItem.productId); if (rp) rp.stock -= (bItem.qty * item.qty); });
-    } else { const p = products.find(prod => prod.id === item.id); if (p) p.stock -= item.qty; }
+      item.bundleItems.forEach(bItem => {
+        const rp = products.find(p => p.id === bItem.productId);
+        if (rp) {
+          if (typeof deductProductStockFIFO === "function") deductProductStockFIFO(rp, (bItem.qty * item.qty));
+          else rp.stock -= (bItem.qty * item.qty);
+        }
+      });
+    } else {
+      const p = products.find(prod => prod.id === item.id);
+      if (p) {
+        if (typeof deductProductStockFIFO === "function") deductProductStockFIFO(p, item.qty);
+        else p.stock -= item.qty;
+      }
+    }
   });
 
   orders.unshift(order);
   cart = [];
   renderCart(); renderCatalog(); closeModal("dispatchModal"); saveData(); updateAllBadges();
+  if (typeof renderSktRadarWidget === "function") renderSktRadarWidget();
   toast("🛵 Sipariş yola çıktı!");
 }
 

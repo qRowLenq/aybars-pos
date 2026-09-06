@@ -69,8 +69,154 @@ function saveNewProduct() {
   renderCatalog(); renderInventoryTable(); populateAllProductDatalists();
 }
 
+// ── SKT (FIFO Expiry) Radar Calculation Engine ──
+function getDaysUntilExpiry(expiryStr) {
+  if (!expiryStr) return 9999;
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+
+  let targetDate = null;
+  if (typeof expiryStr === "string") {
+    if (expiryStr.includes("-")) {
+      const parts = expiryStr.split("-");
+      if (parts.length === 2) {
+        // YYYY-MM -> set to last day of that month
+        const y = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10);
+        targetDate = new Date(y, m, 0);
+      } else if (parts.length === 3) {
+        // YYYY-MM-DD
+        targetDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+      }
+    } else if (expiryStr.includes(".")) {
+      const parts = expiryStr.split(".");
+      if (parts.length === 3) {
+        // DD.MM.YYYY
+        targetDate = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+      } else if (parts.length === 2) {
+        // MM.YYYY
+        targetDate = new Date(parseInt(parts[1], 10), parseInt(parts[0], 10), 0);
+      }
+    }
+  }
+
+  if (!targetDate || isNaN(targetDate.getTime())) return 9999;
+  const diffTime = targetDate.getTime() - now.getTime();
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+}
+
+function renderSktRadarWidget() {
+  const container = document.getElementById("sktRadarBatchList");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  let redBatches = [];
+  let yellowBatches = [];
+  let safeCount = 0;
+
+  (products || []).forEach(p => {
+    if (p.isBundle) return;
+    if (Array.isArray(p.batches) && p.batches.length > 0) {
+      p.batches.forEach(b => {
+        if (b.qty <= 0) return;
+        const days = getDaysUntilExpiry(b.expiry);
+        const item = { product: p, batch: b, days };
+
+        if (days <= 15) {
+          redBatches.push(item);
+        } else if (days <= 30) {
+          yellowBatches.push(item);
+        } else {
+          safeCount++;
+        }
+      });
+    }
+  });
+
+  // Sort batches: earliest expiry first
+  redBatches.sort((a, b) => a.days - b.days);
+  yellowBatches.sort((a, b) => a.days - b.days);
+
+  const redCountEl = document.getElementById("sktRedCount");
+  const yellowCountEl = document.getElementById("sktYellowCount");
+  const safeCountEl = document.getElementById("sktSafeCount");
+
+  if (redCountEl) redCountEl.innerText = `${redBatches.length} Kalem`;
+  if (yellowCountEl) yellowCountEl.innerText = `${yellowBatches.length} Kalem`;
+  if (safeCountEl) safeCountEl.innerText = `${safeCount} Kalem`;
+
+  const allAlerts = [...redBatches, ...yellowBatches];
+
+  if (allAlerts.length === 0) {
+    container.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align:center; padding:18px; color:#94a3b8; font-size:12px;">
+        ✅ Önümüzdeki 30 gün içinde son kullanma tarihi yaklaşan kritik parti bulunmuyor. Tüm stoklar güvenli aralıkta.
+      </div>`;
+    return;
+  }
+
+  allAlerts.forEach(item => {
+    const isRed = item.days <= 15;
+    const borderClass = isRed ? "border-red" : "border-yellow";
+    const chipClass = isRed ? "chip-red" : "chip-yellow";
+    let countdownText = "";
+    if (item.days <= 0) countdownText = "🚨 SÜRESİ DOLDU";
+    else if (isRed) countdownText = `🚨 ${item.days} Gün Kaldı`;
+    else countdownText = `⚠️ ${item.days} Gün Kaldı`;
+
+    container.innerHTML += `
+      <div class="skt-batch-card ${borderClass}">
+        <div class="skt-batch-info">
+          <b>${item.product.name}</b>
+          <span>Parti: <code>${item.batch.lotNumber || '-'}</code> · SKT: <b>${item.batch.expiry || '-'}</b> · Kalan: <b style="color:${isRed ? '#fca5a5' : '#fde68a'}; font-size:13px;">${item.batch.qty} adet</b></span>
+        </div>
+        <div class="skt-batch-actions">
+          <span class="skt-days-chip ${chipClass}">${countdownText}</span>
+          <button class="skt-quick-action-btn" onclick="quickPromoBatch(${item.product.id}, '${item.batch.lotNumber}')" title="Bu partiyi eritmek için kampanya paketine dönüştür veya indirim uygula">
+            🎁 Paket Yap / İndirimli Satış
+          </button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function quickPromoBatch(productId, lotNumber) {
+  const p = products.find(prod => prod.id === productId);
+  if (!p) return;
+
+  const b = (p.batches || []).find(item => item.lotNumber === lotNumber);
+  const lotInfo = b ? `(Parti: ${b.lotNumber} · SKT: ${b.expiry} · ${b.qty} adet)` : '';
+
+  const choice = confirm(
+    `"${p.name}" ${lotInfo} için hızlı eritme aksiyonu:\n\n` +
+    `[TAMAM] -> Bu ürünü Kampanya Paketi (Bundle) oluşturma ekranına otomatik ekle.\n` +
+    `[İPTAL] -> Rafta anında %25 acil indirimli satış fiyatı uygula.`
+  );
+
+  if (choice) {
+    openAddBundleModal();
+    const existing = tempBundleItems.find(i => i.productId === p.id);
+    if (existing) existing.qty += 1;
+    else tempBundleItems.push({ productId: p.id, name: p.name, qty: 1 });
+    renderTempBundleItems();
+    toast(`🎁 "${p.name}" yeni kampanya paketine eklendi!`, "info");
+  } else {
+    const oldPrice = p.price;
+    const discounted = Math.round(oldPrice * 0.75);
+    p.price = discounted;
+    saveData();
+    renderInventoryTable();
+    renderCatalog();
+    toast(`🏷️ "${p.name}" fiyatı %25 indirimle ${discounted} ₺ olarak güncellendi!`);
+  }
+}
+
 // ── Inventory Table ──
 function renderInventoryTable() {
+  renderSktRadarWidget();
+
   const q = (document.getElementById("invSearchInput")?.value || "").trim().toLowerCase();
   const cat = (document.getElementById("invCatFilter")?.value || "TÜMÜ").trim();
   const tbody = document.getElementById("inventoryTableBody");
@@ -97,9 +243,28 @@ function renderInventoryTable() {
     const margin = numCost > 0 ? (((numPrice - numCost) / numCost) * 100).toFixed(0) + "%" : "-";
     const stockVal = isNaN(Number(p.stock)) ? 0 : Number(p.stock);
     const vatRate = p.vatRate !== undefined ? p.vatRate : 20;
+
+    // Nearest batch expiry tag
+    let batchTag = "";
+    if (Array.isArray(p.batches) && p.batches.length > 0) {
+      const activeBatches = p.batches.filter(b => b.qty > 0);
+      if (activeBatches.length > 0) {
+        activeBatches.sort((a, b) => getDaysUntilExpiry(a.expiry) - getDaysUntilExpiry(b.expiry));
+        const nearest = activeBatches[0];
+        const days = getDaysUntilExpiry(nearest.expiry);
+        if (days <= 15) {
+          batchTag = `<br><span class="badge" style="font-size:10px; background:#fee2e2; color:#b91c1c; border:1px solid #fecaca;">🚨 SKT: ${nearest.expiry} (${nearest.qty} ad.)</span>`;
+        } else if (days <= 30) {
+          batchTag = `<br><span class="badge" style="font-size:10px; background:#fef3c7; color:#b45309; border:1px solid #fde68a;">⚠️ SKT: ${nearest.expiry} (${nearest.qty} ad.)</span>`;
+        } else if (nearest.expiry) {
+          batchTag = `<br><span class="badge" style="font-size:10px; background:#f8fafc; color:#64748b;">📅 SKT: ${nearest.expiry}</span>`;
+        }
+      }
+    }
+
     tbody.innerHTML += `
       <tr>
-        <td><b>${p.name || '-'}</b></td>
+        <td><b>${p.name || '-'}</b>${batchTag}</td>
         <td>${p.category || '-'}</td>
         <td>${p.supplier || '-'}</td>
         <td>${numCost > 0 ? numCost.toFixed(2) + ' ₺' : '-'}</td>

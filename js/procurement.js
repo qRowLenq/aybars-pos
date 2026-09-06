@@ -72,6 +72,10 @@ function openSupplierIntakeModal() {
   document.getElementById("intakeVatRate").value = "20";
   document.getElementById("intakeVatType").value = "included";
   document.getElementById("intakeInvoiceImg").value = "";
+  const lotEl = document.getElementById("intakeLotNumber");
+  if (lotEl) lotEl.value = "";
+  const expEl = document.getElementById("intakeBatchExpiry");
+  if (expEl) expEl.value = "";
   document.getElementById("invoiceImgPreviewContainer").style.display = "none";
   currentInvoiceBase64 = null;
 
@@ -258,6 +262,10 @@ function saveSupplierIntake() {
   const totalInvoice = Number(grossTotal.toFixed(2));
   const finalPrice = (priceInput > 0) ? priceInput : Number((unitCostWithVat * 1.4).toFixed(2));
 
+  const lotNumber = (document.getElementById("intakeLotNumber")?.value || "").trim();
+  const batchExpiry = (document.getElementById("intakeBatchExpiry")?.value || "").trim();
+  const lotNo = lotNumber || `LOT-${Date.now().toString().slice(-4)}`;
+
   const sup = suppliers.find(s => s.name === supName);
 
   let p = products.find(prod => prod.name.toLowerCase() === prodName.toLowerCase());
@@ -269,8 +277,18 @@ function saveSupplierIntake() {
     if (priceInput > 0) p.price = priceInput;
     p.supplier = supName;
     if (p.vatRate === undefined || p.vatRate === null) p.vatRate = vatRate;
+
+    if (!Array.isArray(p.batches)) p.batches = [];
+    p.batches.push({
+      lotNumber: lotNo,
+      expiry: batchExpiry,
+      qty: qty,
+      initialQty: qty,
+      cost: unitCostWithVat,
+      date: nowDate()
+    });
   } else {
-    products.push({
+    p = {
       id: Date.now(),
       name: prodName,
       category: categories[0] || "Genel",
@@ -278,13 +296,23 @@ function saveSupplierIntake() {
       cost: unitCostWithVat,
       vatRate: vatRate,
       stock: qty,
-      supplier: supName
-    });
+      supplier: supName,
+      batches: [{
+        lotNumber: lotNo,
+        expiry: batchExpiry,
+        qty: qty,
+        initialQty: qty,
+        cost: unitCostWithVat,
+        date: nowDate()
+      }]
+    };
+    products.push(p);
   }
 
   const isPaid = payStatus === "paid";
   const statusLabel = isPaid ? "Peşin Ödendi" : "Açık Hesap (Borç)";
-  const invoiceDesc = `${qty}x ${prodName} (Birim: ${unitCostWithVat.toFixed(2)} ₺${hasInvoice ? ` · KDV %${vatRate}: ${vatTotal.toFixed(2)} ₺` : ' · Faturasız'} · Toplam: ${totalInvoice.toFixed(2)} ₺)`;
+  const lotTag = (lotNumber || batchExpiry) ? ` [Lot: ${lotNo}${batchExpiry ? ` · SKT: ${batchExpiry}` : ''}]` : '';
+  const invoiceDesc = `${qty}x ${prodName}${lotTag} (Birim: ${unitCostWithVat.toFixed(2)} ₺${hasInvoice ? ` · KDV %${vatRate}: ${vatTotal.toFixed(2)} ₺` : ' · Faturasız'} · Toplam: ${totalInvoice.toFixed(2)} ₺)`;
 
   if (sup) {
     if (!sup.transactions) sup.transactions = [];
@@ -301,6 +329,8 @@ function saveSupplierIntake() {
       vatRate: vatRate,
       vatAmount: Number(vatTotal.toFixed(2)),
       status: statusLabel,
+      lotNumber: lotNo,
+      batchExpiry: batchExpiry,
       invoiceImg: currentInvoiceBase64
     });
   }
@@ -310,8 +340,9 @@ function saveSupplierIntake() {
       id: Date.now(),
       date: nowDate(),
       time: nowTime(),
-      expenseType: "procurement",
-      category: "Ürün Alımı",
+      mainCategory: "Toptancı Alımı",
+      subType: "Mal Alımı",
+      category: "Toptancı Alımı",
       supplierName: supName,
       status: statusLabel,
       amount: totalInvoice,
@@ -319,21 +350,31 @@ function saveSupplierIntake() {
       isInvoice: hasInvoice,
       vatRate: vatRate,
       vatAmount: Number(vatTotal.toFixed(2)),
-      desc: invoiceDesc
+      deductibleVat: hasInvoice ? Number(vatTotal.toFixed(2)) : 0,
+      taxDeduction: hasInvoice ? Number(netTotal.toFixed(2)) : 0,
+      paymentMethod: "Kasa (Nakit)",
+      source: "Kasa (Nakit)",
+      desc: invoiceDesc,
+      invoiceStatus: hasInvoice ? "🧾 Faturalı" : "⚠️ Faturasız",
+      expenseType: "procurement"
     });
+
     sendToGoogleSheets({
       action: "save_expense",
       date: nowDate(),
       time: nowTime(),
-      expenseType: "Mal Alımı",
+      mainCategory: "Toptancı Alımı",
+      subType: "Mal Alımı",
       category: supName,
-      paymentSource: "Kasa (Nakit)",
+      paymentMethod: "Kasa (Nakit)",
       description: invoiceDesc,
       amount: totalInvoice,
       hasInvoice: hasInvoice,
       isInvoice: hasInvoice,
       vatRate: vatRate,
       vatAmount: Number(vatTotal.toFixed(2)),
+      taxDeduction: hasInvoice ? Number(netTotal.toFixed(2)) : 0,
+      invoiceStatus: hasInvoice ? "🧾 Faturalı" : "⚠️ Faturasız",
       status: statusLabel
     });
 
@@ -346,6 +387,7 @@ function saveSupplierIntake() {
   saveData();
   renderCatalog();
   renderInventoryTable();
+  if (typeof renderSktRadarWidget === "function") renderSktRadarWidget();
   renderSuppliersTable();
   renderExpensesTable();
   renderAllPurchasesTable();

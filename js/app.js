@@ -27,31 +27,35 @@ function calculateDailyClose() {
 
   const today = nowDate();
   
-  // Calculate expected cash
-  let expectedCash = 0;
-  
-  // + Cash Sales
-  const todaySales = salesHistory.filter(s => s.date === today && s.paymentType.includes("Nakit"));
-  expectedCash += todaySales.reduce((s, x) => s + x.total, 0);
+  // Calculate expected cash: Günün Toplam Nakit Satışları - Günün Kasadan Çıkan Nakit Giderleri
+  let cashSales = 0;
+  const todaySales = salesHistory.filter(s => s.date === today && (s.paymentType || "").includes("Nakit"));
+  cashSales += todaySales.reduce((s, x) => s + (Number(x.total) || 0), 0);
   
   // + Debt Collections (Cash)
   customers.forEach(c => {
-    (c.purchaseHistory || []).filter(h => h.date === today && h.payment.includes("Nakit Tahsil Edildi")).forEach(h => {
-      expectedCash += h.total;
+    (c.purchaseHistory || []).filter(h => h.date === today && (h.payment || "").includes("Nakit")).forEach(h => {
+      cashSales += (Number(h.total) || 0);
     });
   });
 
+  let cashExpenses = 0;
   // - Expenses (Cash)
-  const todayExpenses = expenses.filter(e => e.date === today && (e.status === "Peşin Ödendi" || e.source === "Kasa (Nakit)"));
-  expectedCash -= todayExpenses.reduce((s, x) => s + x.amount, 0);
+  const todayExpenses = expenses.filter(e => e.date === today && (
+    (e.paymentMethod && (e.paymentMethod.includes("Nakit") || e.paymentMethod.includes("Kasa"))) ||
+    (e.source && (e.source.includes("Nakit") || e.source.includes("Kasa"))) ||
+    e.status === "Peşin Ödendi"
+  ));
+  cashExpenses += todayExpenses.reduce((s, x) => s + (Number(x.amount) || 0), 0);
 
   // - Supplier Payments (Cash)
   suppliers.forEach(s => {
-    (s.transactions || []).filter(t => t.date === today && t.type === "Ödeme" && t.item.includes("Kasa (Nakit)")).forEach(t => {
-      expectedCash -= t.amount;
+    (s.transactions || []).filter(t => t.date === today && t.type === "Ödeme" && (t.item || "").includes("Kasa (Nakit)")).forEach(t => {
+      cashExpenses += (Number(t.amount) || 0);
     });
   });
 
+  const expectedCash = cashSales - cashExpenses;
   document.getElementById("dcExpectedCash").innerText = expectedCash.toFixed(2) + " ₺";
   
   const diff = actualTotal - expectedCash;
@@ -61,15 +65,38 @@ function calculateDailyClose() {
 }
 
 function completeDailyClose() {
-  const diff = document.getElementById("dcDifference").innerText;
-  const actual = document.getElementById("dcTotalCash").innerText;
+  const actualStr = document.getElementById("dcTotalCash").innerText.replace("₺", "").trim();
+  const actualNum = parseFloat(actualStr.replace(/\./g, "").replace(",", ".")) || 0;
+  const expStr = document.getElementById("dcExpectedCash").innerText.replace("₺", "").trim();
+  const expNum = parseFloat(expStr.replace(/\./g, "").replace(",", ".")) || 0;
+  const diffNum = actualNum - expNum;
+
+  const today = nowDate();
+  let cashSales = 0;
+  salesHistory.filter(s => s.date === today && (s.paymentType || "").includes("Nakit")).forEach(s => cashSales += (Number(s.total) || 0));
+  customers.forEach(c => {
+    (c.purchaseHistory || []).filter(h => h.date === today && (h.payment || "").includes("Nakit")).forEach(h => cashSales += (Number(h.total) || 0));
+  });
+
+  let cashExpenses = 0;
+  expenses.filter(e => e.date === today && (
+    (e.paymentMethod && (e.paymentMethod.includes("Nakit") || e.paymentMethod.includes("Kasa"))) ||
+    (e.source && (e.source.includes("Nakit") || e.source.includes("Kasa"))) ||
+    e.status === "Peşin Ödendi"
+  )).forEach(e => cashExpenses += (Number(e.amount) || 0));
+  suppliers.forEach(s => {
+    (s.transactions || []).filter(t => t.date === today && t.type === "Ödeme" && (t.item || "").includes("Kasa (Nakit)")).forEach(t => cashExpenses += (Number(t.amount) || 0));
+  });
   
   sendToGoogleSheets({ 
     action: "daily_close", 
     date: nowDate(),
     time: nowTime(),
-    actualCash: actual,
-    difference: diff 
+    actualCash: actualNum,
+    expectedCash: expNum,
+    cashSales: cashSales,
+    cashExpenses: cashExpenses,
+    difference: diffNum 
   });
 
   closeModal("dailyCloseModal");
@@ -150,7 +177,7 @@ function initializeApp() {
   
   // Set version in footer
   const vEl = document.getElementById("appVersion");
-  if(vEl) vEl.innerText = "v2.1.0 (Smart VAT & Inventory Pro)";
+  if(vEl) vEl.innerText = "v3.0.0 (Enterprise Financial & Tax Architecture)";
 }
 
 // Start app when DOM is ready
