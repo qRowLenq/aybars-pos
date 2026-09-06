@@ -112,8 +112,14 @@ function updateAllBadges() {
 
 // ── Populate Datalists ──
 function populateAllProductDatalists() {
-  const rawProds = products.filter(p => !p.isBundle);
-  const opts = rawProds.map(p => `<option value="${p.name}">`).join("");
+  const rawProds = (window.products || []).filter(p => !p.isBundle);
+  const escapeAttr = s => String(s || "").replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  
+  const opts = rawProds.map(p => {
+    const safeName = escapeAttr(p.name);
+    const details = [p.barcode ? `Barkod: ${p.barcode}` : '', p.category ? `[${p.category}]` : '', `Stok: ${p.stock || 0}`].filter(Boolean).join(" · ");
+    return `<option value="${safeName}">${escapeAttr(details)}</option>`;
+  }).join("");
 
   ["existingProductsSearchList", "bundleProductsSearchList", "wasteProductsSearchList", "existingProductsForDeficitList", "existingProductsList"]
     .forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = opts; });

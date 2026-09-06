@@ -769,14 +769,14 @@
     <div class="modal-box" style="max-width:560px;">
       <div class="modal-title">📥 Toptancıdan Mal Girişi & Akıllı Fatura İşleme</div>
       <div class="form-row form-row-2">
-        <div class="fg"><label>Toptancı Seç</label><select id="intakeSupSelect" class="fc"></select></div>
-        <div class="fg"><label>Mevcut Ürünü Ara (İsteğe Bağlı)</label>
-          <input type="text" class="fc" list="existingProductsList" placeholder="🔍 Kayıtlı ürün ara..." onchange="handleSelectExistingProductForIntake(this.value)">
+        <div class="fg"><label>Toptancı Firma</label><select id="intakeSupSelect" class="fc"></select></div>
+        <div class="fg"><label>Mevcut Ürün Seç veya Barkod Ara</label>
+          <input type="text" id="intakeProductSearch" class="fc" list="existingProductsList" placeholder="🔍 Ürün ara, seç veya barkod okut..." autocomplete="off" oninput="handleSelectExistingProductForIntake(this.value)" onchange="handleSelectExistingProductForIntake(this.value)">
           <datalist id="existingProductsList"></datalist>
         </div>
       </div>
-      <hr style="margin:10px 0; border-top:1px dashed var(--border);">
-      <div class="fg"><label>Faturadaki Ürün Adı</label><input type="text" id="intakeProdName" class="fc" placeholder="Örn: Reflex Somonlu Mama 15kg"></div>
+      <div id="intakeMatchedProductBadge" style="display:none; margin:-2px 0 10px 0; padding:8px 12px; font-size:12.5px; border-radius:var(--radius-sm); background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; font-weight:500;"></div>
+      <div class="fg"><label>Faturadaki / Kaydedilecek Ürün Adı <span class="text-xs text-muted">(Oto dolar veya değiştirebilirsiniz)</span></label><input type="text" id="intakeProdName" class="fc" placeholder="Örn: Reflex Somonlu Mama 15kg" oninput="handleManualIntakeProdName(this.value)"></div>
 
       <!-- Fatura Durumu & Vergi Uyarısı -->
       <div class="fg mb-2" style="background:var(--bg); padding:10px 14px; border:1px solid var(--border); border-radius:var(--radius-sm);">

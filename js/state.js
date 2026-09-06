@@ -329,3 +329,43 @@ function sendToGoogleSheets(payload) {
     body: JSON.stringify(payload)
   }).catch(err => console.warn("Sheets sync error:", err));
 }
+
+// ── Global Resilient Product Finder (Supports Turkish casing, Barcodes, IDs, Substrings) ──
+function findMatchingProduct(query) {
+  if (!query || !Array.isArray(window.products)) return null;
+  const q = String(query).trim();
+  if (!q) return null;
+  const qTr = q.toLocaleLowerCase('tr-TR');
+  const qStd = q.toLowerCase();
+
+  // 1. Exact match by name (Turkish locale)
+  let found = window.products.find(p => p.name && p.name.trim().toLocaleLowerCase('tr-TR') === qTr);
+  if (found) return found;
+
+  // 2. Exact match by name (Standard locale fallback)
+  found = window.products.find(p => p.name && p.name.trim().toLowerCase() === qStd);
+  if (found) return found;
+
+  // 3. Exact match by barcode
+  found = window.products.find(p => p.barcode && String(p.barcode).trim() === q);
+  if (found) return found;
+
+  // 4. Exact match by ID
+  found = window.products.find(p => p.id && String(p.id).trim() === q);
+  if (found) return found;
+
+  // 5. Query contains product name or product name contains query
+  found = window.products.find(p => {
+    if (!p.name) return false;
+    const pTr = p.name.trim().toLocaleLowerCase('tr-TR');
+    return (pTr.length >= 3 && qTr.length >= 3) && (qTr === pTr || qTr.startsWith(pTr) || pTr.startsWith(qTr));
+  });
+  if (found) return found;
+
+  // 6. Barcode substring
+  found = window.products.find(p => p.barcode && q.includes(String(p.barcode).trim()));
+  if (found) return found;
+
+  return null;
+}
+

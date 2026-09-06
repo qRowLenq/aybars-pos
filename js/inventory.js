@@ -28,7 +28,7 @@ function openAddProductModal(preSelectedSupplier = null) {
 
 function handleAutoFillExistingProduct(val) {
   if (!val) return;
-  const p = products.find(prod => prod.name.toLowerCase() === val.trim().toLowerCase());
+  const p = (typeof findMatchingProduct === "function") ? findMatchingProduct(val) : products.find(prod => prod.name.toLowerCase() === val.trim().toLowerCase());
   if (p) {
     document.getElementById("npName").value = p.name;
     document.getElementById("npCategory").value = p.category || categories[0];
@@ -347,7 +347,7 @@ function openAddBundleModal() {
 function addProductToBundle() {
   const searchVal = document.getElementById("bundleProductSearch").value.trim();
   const qty = Number(document.getElementById("bundleProductQty").value) || 1;
-  const p = products.find(item => item.name.toLowerCase() === searchVal.toLowerCase());
+  const p = (typeof findMatchingProduct === "function") ? findMatchingProduct(searchVal) : products.find(item => item.name.toLowerCase() === searchVal.toLowerCase());
   if (!p) return toast("Geçerli bir ürün seçin!", "error");
   const existing = tempBundleItems.find(i => i.productId === p.id);
   if (existing) existing.qty += qty;
@@ -419,7 +419,7 @@ function openAddWasteModal() {
 
 function handleAutoFillWasteProduct(val) {
   if (!val) return;
-  const p = products.find(prod => prod.name.toLowerCase() === val.trim().toLowerCase());
+  const p = (typeof findMatchingProduct === "function") ? findMatchingProduct(val) : products.find(prod => prod.name.toLowerCase() === val.trim().toLowerCase());
   if (p) {
     document.getElementById("wasteProductNameDisplay").value = `${p.name} (Stok: ${p.stock})`;
     document.getElementById("wasteSelectedProductId").value = p.id;

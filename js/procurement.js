@@ -63,8 +63,16 @@ function toggleIntakeInvoice() {
 
 function openSupplierIntakeModal() {
   if (suppliers.length === 0) return toast("Önce toptancı ekleyin!", "warning");
-  populateSupplierDropdowns(); populateAllProductDatalists();
-  document.getElementById("intakeProdName").value = "";
+  populateSupplierDropdowns(); 
+  populateAllProductDatalists();
+
+  const searchEl = document.getElementById("intakeProductSearch");
+  if (searchEl) searchEl.value = "";
+  const prodNameEl = document.getElementById("intakeProdName");
+  if (prodNameEl) prodNameEl.value = "";
+  const badgeEl = document.getElementById("intakeMatchedProductBadge");
+  if (badgeEl) { badgeEl.style.display = "none"; badgeEl.innerHTML = ""; }
+
   document.getElementById("intakeQty").value = "1";
   document.getElementById("intakeTotalCost").value = "";
   document.getElementById("intakeCost").value = "";
@@ -89,10 +97,21 @@ function openSupplierIntakeModal() {
 }
 
 function handleSelectExistingProductForIntake(val) {
-  if (!val) return;
-  const p = products.find(prod => prod.name.toLowerCase() === val.trim().toLowerCase());
+  const raw = (val || "").trim();
+  const prodNameInput = document.getElementById("intakeProdName");
+  const badgeEl = document.getElementById("intakeMatchedProductBadge");
+
+  if (!raw) {
+    if (badgeEl) { badgeEl.style.display = "none"; badgeEl.innerHTML = ""; }
+    return;
+  }
+
+  const p = (typeof findMatchingProduct === "function") 
+    ? findMatchingProduct(raw) 
+    : products.find(prod => prod.name.toLowerCase() === raw.toLowerCase());
+
   if (p) {
-    document.getElementById("intakeProdName").value = p.name;
+    if (prodNameInput) prodNameInput.value = p.name;
     if (p.supplier && p.supplier !== "-") {
       const supSelect = document.getElementById("intakeSupSelect");
       if (supSelect && [...supSelect.options].some(o => o.value === p.supplier)) {
@@ -105,6 +124,64 @@ function handleSelectExistingProductForIntake(val) {
     }
     if (p.price && Number(p.price) > 0) {
       document.getElementById("intakePrice").value = Number(p.price).toFixed(2);
+    }
+    if (p.vatRate !== undefined && p.vatRate !== null) {
+      const vatEl = document.getElementById("intakeVatRate");
+      if (vatEl && [...vatEl.options].some(o => Number(o.value) === Number(p.vatRate))) {
+        vatEl.value = String(p.vatRate);
+        calculateIntakeLive("vat");
+      }
+    }
+    if (badgeEl) {
+      badgeEl.style.display = "block";
+      badgeEl.innerHTML = `✅ <b>Kayıtlı Ürün:</b> ${p.name} <span style="margin-left:6px; opacity:0.85;">(Mevcut Stok: <b>${p.stock || 0}</b> adet · Alış: <b>${(Number(p.cost)||0).toFixed(2)} ₺</b> · Satış: <b>${(Number(p.price)||0).toFixed(2)} ₺</b>)</span>`;
+    }
+  } else {
+    if (prodNameInput && (!prodNameInput.matches(':focus') || !prodNameInput.value)) {
+      prodNameInput.value = raw;
+    }
+    if (badgeEl) {
+      badgeEl.style.display = "block";
+      badgeEl.innerHTML = `✨ <b>Yeni Ürün Girişi:</b> "${raw}" (Stok kaydı yeni oluşturulacak)`;
+    }
+  }
+}
+
+function handleManualIntakeProdName(val) {
+  const raw = (val || "").trim();
+  const badgeEl = document.getElementById("intakeMatchedProductBadge");
+  const searchInput = document.getElementById("intakeProductSearch");
+  if (!raw) {
+    if (badgeEl) { badgeEl.style.display = "none"; badgeEl.innerHTML = ""; }
+    return;
+  }
+  const p = (typeof findMatchingProduct === "function") 
+    ? findMatchingProduct(raw) 
+    : products.find(prod => prod.name.toLowerCase() === raw.toLowerCase());
+
+  if (p) {
+    if (searchInput && !searchInput.matches(':focus')) searchInput.value = p.name;
+    if (p.supplier && p.supplier !== "-") {
+      const supSelect = document.getElementById("intakeSupSelect");
+      if (supSelect && [...supSelect.options].some(o => o.value === p.supplier)) {
+        supSelect.value = p.supplier;
+      }
+    }
+    if (p.cost && Number(p.cost) > 0 && !document.getElementById("intakeCost").value) {
+      document.getElementById("intakeCost").value = Number(p.cost).toFixed(2);
+      calculateIntakeLive("unit");
+    }
+    if (p.price && Number(p.price) > 0 && !document.getElementById("intakePrice").value) {
+      document.getElementById("intakePrice").value = Number(p.price).toFixed(2);
+    }
+    if (badgeEl) {
+      badgeEl.style.display = "block";
+      badgeEl.innerHTML = `✅ <b>Kayıtlı Ürün:</b> ${p.name} <span style="margin-left:6px; opacity:0.85;">(Mevcut Stok: <b>${p.stock || 0}</b> adet · Alış: <b>${(Number(p.cost)||0).toFixed(2)} ₺</b>)</span>`;
+    }
+  } else {
+    if (badgeEl) {
+      badgeEl.style.display = "block";
+      badgeEl.innerHTML = `✨ <b>Yeni Ürün Girişi:</b> "${raw}" (Stok kaydı yeni oluşturulacak)`;
     }
   }
 }
@@ -224,7 +301,10 @@ function previewInvoiceFile(event) {
 
 function saveSupplierIntake() {
   const supName = document.getElementById("intakeSupSelect").value;
-  const prodName = document.getElementById("intakeProdName").value.trim();
+  let prodName = (document.getElementById("intakeProdName")?.value || "").trim();
+  if (!prodName) {
+    prodName = (document.getElementById("intakeProductSearch")?.value || "").trim();
+  }
   const qty = Number(document.getElementById("intakeQty").value);
   const costInput = Number(document.getElementById("intakeCost").value);
   const totalCostInput = Number(document.getElementById("intakeTotalCost").value);
@@ -234,7 +314,7 @@ function saveSupplierIntake() {
   const priceInput = Number(document.getElementById("intakePrice").value);
   const payStatus = document.getElementById("intakePaymentStatus").value;
 
-  if (!prodName || isNaN(qty) || qty <= 0) return toast("Lütfen ürün adı ve geçerli adet girin!", "error");
+  if (!prodName || isNaN(qty) || qty <= 0) return toast("Lütfen ürün seçin veya geçerli ürün adı ve adet girin!", "error");
   if ((isNaN(costInput) || costInput <= 0) && (isNaN(totalCostInput) || totalCostInput <= 0)) {
     return toast("Lütfen birim geliş fiyatı veya toplam fatura tutarı girin!", "error");
   }
@@ -268,8 +348,12 @@ function saveSupplierIntake() {
 
   const sup = suppliers.find(s => s.name === supName);
 
-  let p = products.find(prod => prod.name.toLowerCase() === prodName.toLowerCase());
+  let p = (typeof findMatchingProduct === "function") 
+    ? findMatchingProduct(prodName) 
+    : products.find(prod => prod.name.toLowerCase() === prodName.toLowerCase());
+
   if (p) {
+    prodName = p.name; // Keep canonical product name
     const oldStock = Math.max(0, Number(p.stock) || 0);
     const oldCost = Number(p.cost) || unitCostWithVat;
     p.cost = Number(((oldStock * oldCost + qty * unitCostWithVat) / (oldStock + qty)).toFixed(2));
@@ -566,7 +650,9 @@ function renderDeficitsTable() {
 
 function handleSelectExistingProductForDeficit(val) {
   if (!val) return;
-  const p = products.find(prod => prod.name.toLowerCase() === val.trim().toLowerCase());
+  const p = (typeof findMatchingProduct === "function")
+    ? findMatchingProduct(val)
+    : products.find(prod => prod.name.toLowerCase() === val.trim().toLowerCase());
   if (p) { addProductToDeficits(p.id); document.getElementById("searchProductForDeficit").value = ""; }
 }
 
