@@ -81,7 +81,7 @@ Modern esnaf ihtiyaçları ile bulut mimarisini harmanlayan, istemci tarafında 
 3. **Source** olarak `Deploy from a branch` seçin
 4. **Branch** olarak `main` ve `/ (root)` seçin
 5. **Save** butonuna basın
-6. Site birkaç dakika içinde `https://budakhuseyin.github.io/aybars/` adresinde yayına alınır
+6. Site birkaç dakika içinde `https://qrowlenq.github.io/aybars-pos/` adresinde yayına alınır
 
 ## 📞 İletişim
 
