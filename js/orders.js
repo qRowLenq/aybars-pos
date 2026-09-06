@@ -132,6 +132,11 @@ function markOrderDelivered(idx) {
     isOfficial: isOrderOfficial
   });
 
+  let dualData = null;
+  if (typeof calculateDualFinancialOverview === "function") {
+    dualData = calculateDualFinancialOverview();
+  }
+
   sendToGoogleSheets({
     action: "save_sale",
     date: order.date || nowDate(),
@@ -142,8 +147,21 @@ function markOrderDelivered(idx) {
     paymentType: order.paymentMethod || "Nakit",
     total: order.total,
     vatTotal: Number(vatTotal.toFixed(2)),
-    isOfficial: isOrderOfficial
+    isOfficial: isOrderOfficial,
+    officialSales: dualData ? Number(dualData.officialSales.toFixed(2)) : undefined,
+    invoicedPurchases: dualData ? Number(dualData.invoicedPurchases.toFixed(2)) : undefined,
+    expensesTotal: dualData ? Number(dualData.totalInvoicedDeductions.toFixed(2)) : undefined,
+    taxBase: dualData ? Number(dualData.officialTaxBase.toFixed(2)) : undefined,
+    payableVat: dualData ? Number(dualData.payableVat.toFixed(2)) : undefined,
+    estimatedIncomeTax: dualData ? Number(dualData.estimatedIncomeTax.toFixed(2)) : undefined,
+    netCashProfit: dualData ? Number(dualData.realProfit.toFixed(2)) : undefined,
+    riskAmount: dualData ? Number(dualData.riskAmount.toFixed(2)) : undefined,
+    riskStatus: dualData ? (dualData.isHighRisk ? "Yüksek Risk" : "Güvenli") : "Güvenli"
   });
+
+  if (typeof syncTaxReportToSheets === "function") {
+    setTimeout(syncTaxReportToSheets, 600);
+  }
 
   if (isPlatform && order.paymentMethod === "Online / Platform") {
     platformPendingOrders.unshift({ ...order, deliveredAt: nowTime() });

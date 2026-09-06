@@ -131,6 +131,11 @@ function confirmDebtCollection() {
   if (!c.purchaseHistory) c.purchaseHistory = [];
   c.purchaseHistory.unshift({ date: nowDate(), time: nowTime(), items: "Veresiye Borç Kapatma Tahsilatı", total: amt, payment: `${method} Tahsil Edildi` });
 
+  let dualData = null;
+  if (typeof calculateDualFinancialOverview === "function") {
+    dualData = calculateDualFinancialOverview();
+  }
+
   sendToGoogleSheets({
     action: "save_sale",
     date: nowDate(),
@@ -141,8 +146,21 @@ function confirmDebtCollection() {
     paymentType: method,
     total: amt,
     vatTotal: 0,
-    isOfficial: method.includes("Kart") || method.includes("Havale") || method.includes("Banka")
+    isOfficial: method.includes("Kart") || method.includes("Havale") || method.includes("Banka"),
+    officialSales: dualData ? Number(dualData.officialSales.toFixed(2)) : undefined,
+    invoicedPurchases: dualData ? Number(dualData.invoicedPurchases.toFixed(2)) : undefined,
+    expensesTotal: dualData ? Number(dualData.totalInvoicedDeductions.toFixed(2)) : undefined,
+    taxBase: dualData ? Number(dualData.officialTaxBase.toFixed(2)) : undefined,
+    payableVat: dualData ? Number(dualData.payableVat.toFixed(2)) : undefined,
+    estimatedIncomeTax: dualData ? Number(dualData.estimatedIncomeTax.toFixed(2)) : undefined,
+    netCashProfit: dualData ? Number(dualData.realProfit.toFixed(2)) : undefined,
+    riskAmount: dualData ? Number(dualData.riskAmount.toFixed(2)) : undefined,
+    riskStatus: dualData ? (dualData.isHighRisk ? "Yüksek Risk" : "Güvenli") : "Güvenli"
   });
+
+  if (typeof syncTaxReportToSheets === "function") {
+    setTimeout(syncTaxReportToSheets, 600);
+  }
 
   closeModal("collectDebtModal"); renderCRM(); renderCreditBook(); saveData();
   toast(`💰 ${amt.toFixed(2)} ₺ tahsil edildi!`);

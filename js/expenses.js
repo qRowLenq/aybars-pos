@@ -27,12 +27,27 @@ function calculateExpenseVatLive() {
 
 function openAddExpenseModal(isMajor) {
   document.getElementById("expIsMajor").value = isMajor ? "true" : "false";
-  document.getElementById("expModalTitle").innerText = isMajor ? "🏢 Sabit Gider (Kira vb.)" : "☕ Günlük Masraf";
+  document.getElementById("expModalTitle").innerText = isMajor ? "🏢 Sabit & Majör Gider (Kira, Fatura, Maaş)" : "☕ Günlük Küçük Gider (Kasa Masrafları)";
   const catSel = document.getElementById("expCategory");
   if (isMajor) {
-    catSel.innerHTML = `<option value="Dükkân Kirası">Dükkân Kirası</option><option value="Elektrik Faturası">Elektrik Faturası</option><option value="Su / İnternet">Su / İnternet / Aidat</option><option value="Personel Maaşı">Personel Maaşı</option><option value="Vergi / Muhasebe">Vergi / Muhasebe</option><option value="Diğer Sabit Gider">Diğer Sabit Gider</option>`;
+    catSel.innerHTML = `
+      <option value="Dükkân Kirası">🏢 Dükkân Kirası</option>
+      <option value="Elektrik Faturası">⚡ Elektrik Faturası</option>
+      <option value="Su / İnternet / Aidat">💧 Su / İnternet / Aidat</option>
+      <option value="Personel Maaşı">👥 Personel Maaşı</option>
+      <option value="Vergi / Muhasebe / Harç">🏛️ Vergi / Muhasebe / Harç</option>
+      <option value="Banka / POS Komisyonu">💳 Banka / POS Komisyonu</option>
+      <option value="Diğer Sabit & Majör Gider">📌 Diğer Sabit & Majör Gider</option>
+    `;
   } else {
-    catSel.innerHTML = `<option value="Yemek / Mutfak">Yemek / Su / Çay</option><option value="Dükkân Sarf (Poşet/Fiş)">Poşet / Temizlik</option><option value="Ulaşım / Kurye Yakıtı">Kurye Yakıtı</option><option value="Ufak Tamirat / Hırdavat">Ufak Tamirat</option><option value="Kırtasiye / Sarf">Kırtasiye / Sarf</option><option value="Diğer Masraf">Diğer Masraf</option>`;
+    catSel.innerHTML = `
+      <option value="Yemek / Su / Çay">🍽️ Yemek / Su / Çay</option>
+      <option value="Dükkân Sarf (Poşet/Fiş)">🛍️ Dükkân Sarf (Poşet / Temizlik)</option>
+      <option value="Ulaşım / Kurye Yakıtı">🛵 Ulaşım / Kurye Yakıtı</option>
+      <option value="Ufak Tamirat / Hırdavat">🔧 Ufak Tamirat / Hırdavat</option>
+      <option value="Kırtasiye / Sarf">📎 Kırtasiye / Sarf</option>
+      <option value="Diğer Günlük Masraf">☕ Diğer Günlük Masraf</option>
+    `;
   }
   document.getElementById("expAmount").value = "";
   document.getElementById("expDesc").value = "";
@@ -70,7 +85,7 @@ function saveExpense() {
     category: cat,
     source: src,
     amount: amt,
-    desc: desc || (isMajor ? "Sabit Gider" : "Günlük Masraf"),
+    desc: desc || (isMajor ? "Sabit & Majör Gider" : "Günlük Küçük Masraf"),
     hasInvoice: hasVat,
     isInvoice: hasVat,
     vatRate: vatRate,
@@ -79,12 +94,18 @@ function saveExpense() {
 
   expenses.unshift(expRecord);
 
-  // Standardized sendToGoogleSheets payload
+  // Canlı Mali Veriler
+  let dualData = null;
+  if (typeof calculateDualFinancialOverview === "function") {
+    dualData = calculateDualFinancialOverview();
+  }
+
+  // Google E-Tabloya Gönder
   sendToGoogleSheets({
     action: "save_expense",
     date: expRecord.date,
     time: expRecord.time,
-    expenseType: isMajor ? "Sabit Gider" : "Günlük Masraf",
+    expenseType: isMajor ? "major" : "daily",
     category: cat,
     paymentSource: src,
     description: expRecord.desc,
@@ -93,7 +114,16 @@ function saveExpense() {
     isInvoice: hasVat,
     vatRate: vatRate,
     vatAmount: vatAmount,
-    status: "Ödendi"
+    status: "Ödendi",
+    officialSales: dualData ? Number(dualData.officialSales.toFixed(2)) : undefined,
+    invoicedPurchases: dualData ? Number(dualData.invoicedPurchases.toFixed(2)) : undefined,
+    expensesTotal: dualData ? Number(dualData.totalInvoicedDeductions.toFixed(2)) : undefined,
+    taxBase: dualData ? Number(dualData.officialTaxBase.toFixed(2)) : undefined,
+    payableVat: dualData ? Number(dualData.payableVat.toFixed(2)) : undefined,
+    estimatedIncomeTax: dualData ? Number(dualData.estimatedIncomeTax.toFixed(2)) : undefined,
+    netCashProfit: dualData ? Number(dualData.realProfit.toFixed(2)) : undefined,
+    riskAmount: dualData ? Number(dualData.riskAmount.toFixed(2)) : undefined,
+    riskStatus: dualData ? (dualData.isHighRisk ? "Yüksek Risk" : "Güvenli") : "Güvenli"
   });
 
   closeModal("addExpenseModal");
@@ -102,7 +132,13 @@ function saveExpense() {
   updateVatReconciliationWidget();
   renderDualFinancialOverviewCard();
   updateAllBadges();
-  toast(`💸 ${amt.toFixed(2)} ₺ gider kaydedildi!`);
+
+  // Otomatik E-Tablo Mali Rapor senkronizasyonu
+  if (typeof syncTaxReportToSheets === "function") {
+    setTimeout(() => syncTaxReportToSheets(false), 600);
+  }
+
+  toast(`💸 ${amt.toFixed(2)} ₺ ${isMajor ? 'sabit/majör gider' : 'küçük masraf'} kaydedildi!`);
 }
 
 // ── Dual Financial Overview: Fiili Kâr vs. Vergi Dengesi ──
@@ -341,10 +377,10 @@ function renderDualFinancialOverviewCard() {
 }
 
 // ── Google Sheets Tax Report Sync ──
-function syncTaxReportToSheets() {
+function syncTaxReportToSheets(isManual = false) {
   const data = calculateDualFinancialOverview();
   const btn = document.getElementById("btnSyncTaxReport");
-  if (btn) btn.disabled = true;
+  if (btn && isManual) btn.disabled = true;
 
   sendToGoogleSheets({
     action: "sync_tax_report",
@@ -366,11 +402,12 @@ function syncTaxReportToSheets() {
     invoicedExpenses: Number(data.invoicedExpenses.toFixed(2))
   });
 
-  setTimeout(() => {
-    if (btn) btn.disabled = false;
-  }, 1200);
-
-  toast("☁️ Mali Rapor ve Vergi Analizi Google E-Tablo'ya gönderildi!");
+  if (isManual) {
+    setTimeout(() => {
+      if (btn) btn.disabled = false;
+    }, 1200);
+    toast("☁️ Mali Rapor ve Vergi Analizi Google E-Tablo'ya gönderildi!");
+  }
 }
 
 // ── KDV Mutabakat Hesabı (Legacy Wrapper) ──
@@ -389,6 +426,21 @@ function updateVatReconciliationWidget() {
   renderDualFinancialOverviewCard();
 }
 
+function deleteExpense(expId) {
+  const exp = expenses.find(e => e.id === expId);
+  if (!exp) return;
+  if (!confirm(`"${exp.desc || exp.category}" kaydını silmek istiyor musunuz?`)) return;
+
+  expenses = expenses.filter(e => e.id !== expId);
+  saveData();
+  renderExpensesTable();
+  updateVatReconciliationWidget();
+  renderDualFinancialOverviewCard();
+  updateAllBadges();
+  syncTaxReportToSheets(false);
+  toast("🗑️ Gider kaydı silindi ve E-Tablo güncellendi!");
+}
+
 function renderExpensesTable() {
   const procTbody = document.getElementById("procurementExpenseTableBody");
   const majorTbody = document.getElementById("majorExpenseTableBody");
@@ -401,60 +453,78 @@ function renderExpensesTable() {
   const majorExpenses = expenses.filter(e => e.expenseType === "major");
   const dailyExpenses = expenses.filter(e => e.expenseType === "daily" || !e.expenseType);
 
+  // 1. Ürün & Mal Alımları
+  let procTotal = 0;
   if (procExpenses.length === 0) {
-    procTbody.innerHTML = `<tr><td colspan="5" class="empty-state">Henüz mal alımı kaydedilmedi.</td></tr>`;
+    procTbody.innerHTML = `<tr><td colspan="6" class="empty-state">Henüz mal alımı kaydedilmedi.</td></tr>`;
   } else {
     procExpenses.forEach(e => {
+      procTotal += Number(e.amount) || 0;
       const isInv = e.hasInvoice !== undefined ? e.hasInvoice : (e.isInvoice !== undefined ? e.isInvoice : (e.vatAmount > 0));
       const vatBadge = isInv && e.vatAmount > 0
         ? `<br><span class="badge" style="font-size:10px; background:#f0fdf4; color:#166534;">🧾 Faturalı (KDV %${e.vatRate || 20}: ${Number(e.vatAmount).toFixed(2)} ₺)</span>`
         : `<br><span class="badge" style="font-size:10px; background:#fef2f2; color:#b91c1c;">⚠️ Faturasız Alım</span>`;
       procTbody.innerHTML += `<tr>
-        <td>${e.date}</td>
+        <td><b>${e.date}</b></td>
         <td><b>${e.supplierName || '-'}</b></td>
         <td>${e.desc || '-'}${vatBadge}</td>
         <td><b style="color:${(e.status||'').includes('Borç') ? 'var(--danger)' : 'var(--success)'};">${e.status || 'Ödendi'}</b></td>
         <td style="color:var(--success-dark); font-weight:800;">${Number(e.amount).toFixed(2)} ₺</td>
+        <td><button class="btn btn-danger btn-xs" onclick="deleteExpense(${e.id})" title="Sil">🗑️</button></td>
       </tr>`;
     });
   }
+  const procTotalEl = document.getElementById("procurementTotalBadge");
+  if (procTotalEl) procTotalEl.innerText = `Toplam: ${procTotal.toFixed(2)} ₺`;
 
+  // 2. Sabit & Majör Giderler
+  let majorTotal = 0;
   if (majorExpenses.length === 0) {
-    majorTbody.innerHTML = `<tr><td colspan="5" class="empty-state">Sabit gider kaydı yok.</td></tr>`;
+    majorTbody.innerHTML = `<tr><td colspan="6" class="empty-state">Sabit & Majör gider kaydı yok.</td></tr>`;
   } else {
     majorExpenses.forEach(e => {
+      majorTotal += Number(e.amount) || 0;
       const isInv = e.hasInvoice !== undefined ? e.hasInvoice : e.isInvoice;
       const vatBadge = isInv && e.vatAmount > 0
         ? ` <span class="badge" style="font-size:10px; background:#eff6ff; color:#1d4ed8; font-weight:600;">🧾 Faturalı (KDV %${e.vatRate}: ${Number(e.vatAmount).toFixed(2)} ₺)</span>`
         : ` <span class="badge" style="font-size:10px; background:#f8fafc; color:#64748b;">Fişsiz/Faturasız</span>`;
       majorTbody.innerHTML += `<tr>
-        <td>${e.date}</td>
+        <td><b>${e.date}</b></td>
         <td><b>${e.category}</b>${vatBadge}</td>
         <td>${e.source || '-'}</td>
         <td>${e.desc || '-'}</td>
         <td class="text-danger font-bold">${Number(e.amount).toFixed(2)} ₺</td>
+        <td><button class="btn btn-danger btn-xs" onclick="deleteExpense(${e.id})" title="Sil">🗑️</button></td>
       </tr>`;
     });
   }
+  const majorTotalEl = document.getElementById("majorTotalBadge");
+  if (majorTotalEl) majorTotalEl.innerText = `Toplam: ${majorTotal.toFixed(2)} ₺`;
 
+  // 3. Günlük Küçük Giderler
+  let dailyTotal = 0;
   if (dailyExpenses.length === 0) {
-    dailyTbody.innerHTML = `<tr><td colspan="6" class="empty-state">Günlük masraf yok.</td></tr>`;
+    dailyTbody.innerHTML = `<tr><td colspan="7" class="empty-state">Günlük küçük masraf yok.</td></tr>`;
   } else {
     dailyExpenses.forEach(e => {
+      dailyTotal += Number(e.amount) || 0;
       const isInv = e.hasInvoice !== undefined ? e.hasInvoice : e.isInvoice;
       const vatBadge = isInv && e.vatAmount > 0
-        ? ` <span class="badge" style="font-size:10px; background:#eff6ff; color:#1d4ed8; font-weight:600;">🧾 Faturalı (KDV %${e.vatRate}: ${Number(e.vatAmount).toFixed(2)} ₺)</span>`
+        ? ` <span class="badge" style="font-size:10px; background:#eff6ff; color:#1d4ed8; font-weight:600;">🧾 Faturalı</span>`
         : '';
       dailyTbody.innerHTML += `<tr>
-        <td>${e.date}</td>
+        <td><b>${e.date}</b></td>
         <td>${e.time || '-'}</td>
         <td><b>${e.category}</b>${vatBadge}</td>
         <td>${e.source || '-'}</td>
         <td>${e.desc || '-'}</td>
         <td class="text-danger font-bold">${Number(e.amount).toFixed(2)} ₺</td>
+        <td><button class="btn btn-danger btn-xs" onclick="deleteExpense(${e.id})" title="Sil">🗑️</button></td>
       </tr>`;
     });
   }
+  const dailyTotalEl = document.getElementById("dailyTotalBadge");
+  if (dailyTotalEl) dailyTotalEl.innerText = `Toplam: ${dailyTotal.toFixed(2)} ₺`;
 
   renderDualFinancialOverviewCard();
 }

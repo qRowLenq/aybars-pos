@@ -186,6 +186,12 @@ function completeSale(payType, splitDetails = null) {
     cust.purchaseHistory.unshift({ date: saleRecord.date, time: saleRecord.time, items: itemsSummary, total, payment: saleRecord.paymentType });
   }
 
+  // Canlı Mali Rapor & Vergi Verilerini Hesapla
+  let dualData = null;
+  if (typeof calculateDualFinancialOverview === "function") {
+    dualData = calculateDualFinancialOverview();
+  }
+
   sendToGoogleSheets({
     action: "save_sale",
     date: saleRecord.date,
@@ -196,8 +202,23 @@ function completeSale(payType, splitDetails = null) {
     paymentType: saleRecord.paymentType,
     total,
     vatTotal: Number(vatTotal.toFixed(2)),
-    isOfficial: saleRecord.isOfficial
+    isOfficial: saleRecord.isOfficial,
+    // Google E-Tablo Mali Rapor gün satırını anında güncellemek için dual data
+    officialSales: dualData ? Number(dualData.officialSales.toFixed(2)) : undefined,
+    invoicedPurchases: dualData ? Number(dualData.invoicedPurchases.toFixed(2)) : undefined,
+    expensesTotal: dualData ? Number(dualData.totalInvoicedDeductions.toFixed(2)) : undefined,
+    taxBase: dualData ? Number(dualData.officialTaxBase.toFixed(2)) : undefined,
+    payableVat: dualData ? Number(dualData.payableVat.toFixed(2)) : undefined,
+    estimatedIncomeTax: dualData ? Number(dualData.estimatedIncomeTax.toFixed(2)) : undefined,
+    netCashProfit: dualData ? Number(dualData.realProfit.toFixed(2)) : undefined,
+    riskAmount: dualData ? Number(dualData.riskAmount.toFixed(2)) : undefined,
+    riskStatus: dualData ? (dualData.isHighRisk ? "Yüksek Risk" : "Güvenli") : "Güvenli"
   });
+
+  // Otomatik E-Tablo Mali Rapor Senkronizasyonu
+  if (typeof syncTaxReportToSheets === "function") {
+    setTimeout(syncTaxReportToSheets, 600);
+  }
 
   cart = [];
   if (document.getElementById("cartCustomerSelect")) document.getElementById("cartCustomerSelect").value = "";
@@ -267,6 +288,12 @@ function refundSale(saleId) {
 
   salesHistory = salesHistory.filter(s => s.id !== saleId);
   saveData(); renderCatalog(); renderInventoryTable(); renderPosSalesHistory();
+
+  // İade sonrası E-Tablo Mali Raporu anında güncelle
+  if (typeof syncTaxReportToSheets === "function") {
+    setTimeout(syncTaxReportToSheets, 600);
+  }
+
   toast("↩️ Satış iade alındı, stok geri yüklendi!");
 }
 

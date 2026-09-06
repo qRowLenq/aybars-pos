@@ -284,11 +284,15 @@
 
     <!-- 6. GİDERLER -->
     <section id="tab-expenses" class="tab-pane subtabs-container">
-      <div class="flex justify-between mb-4">
-        <h2>💸 Giderler & Alımlar Tablosu</h2>
-        <div class="flex gap-2">
-          <button class="btn btn-primary" onclick="openAddExpenseModal(false)">☕ Günlük Masraf (Çay/Yemek)</button>
-          <button class="btn btn-purple" onclick="openAddExpenseModal(true)">🏢 Sabit Gider (Kira/Fatura)</button>
+      <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+        <div>
+          <h2>💸 Giderler & Mal Alımları Yönetimi</h2>
+          <span class="text-xs text-muted">Küçük Giderler (Kasa), Sabit/Majör Giderler ve Toptancı Alımları bağımsız panellerde takip edilir.</span>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <button class="btn btn-primary" onclick="openAddExpenseModal(false)">+ ☕ Günlük Küçük Masraf Ekle</button>
+          <button class="btn btn-purple" onclick="openAddExpenseModal(true)">+ 🏢 Sabit & Majör Gider Ekle</button>
+          <button class="btn btn-success" onclick="openSupplierIntakeModal()">+ 📦 Yeni Mal / Fatura Girişi</button>
         </div>
       </div>
 
@@ -298,12 +302,12 @@
           <div class="df-title-box">
             <span class="df-icon">📊</span>
             <div>
-              <div class="df-title">Mali Tablo: Fiili Kasa Kârı vs. Resmi Vergi Yükü</div>
-              <div class="df-subtitle">Gerçek Ticari Kâr (İç Kasa) ile Resmi Vergi Matrahı ve Denetim Riski Karşılaştırması</div>
+              <div class="df-title">Mali Tablo: Fiili Kasa Kârı vs. Resmi Vergi Yükü (Canlı Senkronizasyon)</div>
+              <div class="df-subtitle">Gerçek Ticari Kâr (İç Kasa) ile Resmi Vergi Matrahı ve Denetim Riski Karşılaştırması — Her Satışta Otomatik Güncellenir</div>
             </div>
           </div>
           <div class="df-actions">
-            <button class="btn btn-warning btn-sm" onclick="syncTaxReportToSheets()" id="btnSyncTaxReport">
+            <button class="btn btn-warning btn-sm" onclick="syncTaxReportToSheets(true)" id="btnSyncTaxReport">
               ☁️ Mali Raporu E-Tablo'ya Gönder
             </button>
           </div>
@@ -372,29 +376,48 @@
         </div>
       </div>
 
-      <div class="expense-section procurement">
-        <h3>📦 Ürün Alımları (Toptancı Faturaları)</h3>
-        <p>Tedarik sekmesinden girilen "Mal Kabulleri" otomatik buraya yansır.</p>
-        <table class="data-table mt-3" style="background:rgba(255,255,255,0.9);">
-          <thead><tr><th>Tarih</th><th>Toptancı</th><th>Kalemler</th><th>Ödeme Durumu</th><th>Tutar</th></tr></thead>
+      <!-- Panel 3: Ürün & Mal Alımları (Toptancı Faturaları) -->
+      <div class="expense-section procurement mb-4">
+        <div class="flex justify-between items-center mb-2">
+          <div>
+            <h3>📦 Ürün & Mal Alımları (Toptancı Faturaları)</h3>
+            <p>E-Tablo'da yeşil başlıklı <b>Q-W sütunlarında</b> bağımsız toplanır.</p>
+          </div>
+          <span class="badge" id="procurementTotalBadge" style="background:#065f46; color:white; font-size:12px; padding:6px 12px;">Toplam: 0.00 ₺</span>
+        </div>
+        <table class="data-table mt-2" style="background:rgba(255,255,255,0.95);">
+          <thead><tr><th>Tarih</th><th>Toptancı Firma</th><th>Alınan Kalemler</th><th>Ödeme Durumu</th><th>Tutar</th><th>İşlem</th></tr></thead>
           <tbody id="procurementExpenseTableBody"></tbody>
         </table>
       </div>
 
       <div class="form-row form-row-2">
+        <!-- Panel 2: Sabit & Majör İşletme Giderleri -->
         <div class="expense-section major">
-          <h3>🏢 Sabit Giderler</h3>
-          <p>Kira, Fatura, Maaş vb.</p>
-          <table class="data-table mt-3" style="background:rgba(255,255,255,0.9);">
-            <thead><tr><th>Tarih</th><th>Gider Kalemi</th><th>Ödenen Kaynak</th><th>Açıklama</th><th>Tutar</th></tr></thead>
+          <div class="flex justify-between items-center mb-2">
+            <div>
+              <h3>🏢 Sabit & Majör Giderler</h3>
+              <p>Kira, Fatura, Maaş vb. (E-Tablo <b>I-O sütunları</b>)</p>
+            </div>
+            <span class="badge" id="majorTotalBadge" style="background:#312e81; color:white; font-size:12px; padding:6px 12px;">Toplam: 0.00 ₺</span>
+          </div>
+          <table class="data-table mt-2" style="background:rgba(255,255,255,0.95);">
+            <thead><tr><th>Tarih</th><th>Gider Kalemi</th><th>Ödenen Kaynak</th><th>Açıklama</th><th>Tutar</th><th>İşlem</th></tr></thead>
             <tbody id="majorExpenseTableBody"></tbody>
           </table>
         </div>
+
+        <!-- Panel 1: Günlük Küçük Masraflar -->
         <div class="expense-section" style="background:#f8fafc; border:1px solid var(--border);">
-          <h3 class="text-text">☕ Günlük Masraflar</h3>
-          <p class="text-muted">Kasa içi çıkışlar (Yemek, su vb.)</p>
-          <table class="data-table mt-3">
-            <thead><tr><th>Tarih</th><th>Saat</th><th>Kategori</th><th>Kaynak</th><th>Açıklama</th><th>Tutar</th></tr></thead>
+          <div class="flex justify-between items-center mb-2">
+            <div>
+              <h3 class="text-text">☕ Günlük Küçük Giderler</h3>
+              <p class="text-muted">Kasa içi çıkışlar (Yemek, sarf, poşet - E-Tablo <b>A-G sütunları</b>)</p>
+            </div>
+            <span class="badge" id="dailyTotalBadge" style="background:#1e293b; color:white; font-size:12px; padding:6px 12px;">Toplam: 0.00 ₺</span>
+          </div>
+          <table class="data-table mt-2">
+            <thead><tr><th>Tarih</th><th>Saat</th><th>Kategori</th><th>Kaynak</th><th>Açıklama</th><th>Tutar</th><th>İşlem</th></tr></thead>
             <tbody id="dailyExpenseTableBody"></tbody>
           </table>
         </div>

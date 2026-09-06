@@ -2,22 +2,25 @@
  * ===================================================================
  * PETSHOP KASA & ENVANTER YÖNETİMİ — GOOGLE APPS SCRIPT BACKEND
  * Dual-Layer "Real Profit vs. Tax Exposure" Engine & Sheets Sync
- * Version: 2.3.0 (Fixed Alignment & KPI Dashboard Card Layout)
+ * Sürüm: 3.0.0 (Gün Gün Ayrılmış Tablolar & Küçük/Majör Gider Panelleri)
  * ===================================================================
  * 
- * BU GÜNCELLEME İLE DÜZELTİLENLER:
- * 1. GİDERLER TABLOSU DÜZELTİLDİ:
- *    - Yeni giderler satır 20 yerine en son dolu satırın hemen altına (örn. satır 8'e) ardışık eklenir.
- *    - Kolon hizalaması tam 7 kolon olarak kilitlendi:
- *      Tarih (A) | Saat (B) | Kategori (C) | Kaynak (D) | Açıklama (E) | Tutar (F) | Fatura Durumu (G)
- *    - "Faturalı" etiketinin M kolonuna taşması engellendi (H-Z kolonları temizlenir).
- *    - Hatalı "12.312.312,00 TL" değeri otomatik temizlenir ve TOPLAM formülü =SUM(F2:F...) olarak doğru yere konur.
+ * BU GÜNCELLEME İLE YAPILANLAR:
+ * 1. MALİ RAPOR & VERGİ ANALİZİ TABLOSU GÜN GÜN (DAY-BY-DAY) YAPILDI:
+ *    - Kullanıcı arayüzündeki tablo formatı (11 Kolon) birebir korundu.
+ *    - Her gün için ayrı bir satır tutulur (06.09.2026, 07.09.2026 vb.).
+ *    - POS'tan yapılan her satış ve girilen her gider anında o günün satırına
+ *      canlı olarak işlenir ve rakamlar anında güncellenir.
  * 
- * 2. MALİ RAPOR & VERGİ SEKME YENİLİĞİ:
- *    - 11 kolonluk geniş tablo yerine 2 adet şık KPI Dashboard Kartı oluşturuldu:
- *      * KART 1: 🏛️ KDV MUTABAKATI (Tahsil Edilen KDV, İndirilecek KDV, Net Ödenecek / Devreden KDV)
- *      * KART 2: 🛡️ RESMİ KÂR & VERGİ KALKANI (Resmi Satışlar, Faturalı Giderler, Vergi Matrahı, %20 Gelir Vergisi, Fiili Kasa Kârı)
- *    - Tüm kolon genişlikleri cömertçe ayarlandı, "Toplam Tutar" veya rakamların kırpılması önlendi.
+ * 2. GİDERLER TABLOSU ESKİ SÜRÜMDEKİ GİBİ 3 AYRI PANELE BÖLÜNDÜ:
+ *    - Panel 1 (A:G Kolonları): ☕ GÜNLÜK KÜÇÜK GİDERLER (Kasa Masrafları - Yemek, Poşet, Sarf)
+ *    - Panel 2 (I:O Kolonları): 🏢 SABİT & MAJÖR GİDERLER (Kira, Fatura, Maaş, Vergi)
+ *    - Panel 3 (Q:W Kolonları): 📦 ÜRÜN & MAL ALIMLARI (Toptancı Faturaları & Alımları)
+ *    - H ve P kolonları estetik boşluk bırakır, paneller birbirini kaydırmaz.
+ * 
+ * 3. SATIŞLAR VE GÜN SONU KASA TABLOLARI:
+ *    - Satışlar sekmesinde her işlem gün ve saat damgasıyla net bir şekilde tutulur.
+ *    - Gün Sonu Kasa mutabakatı gün gün listelenir.
  */
 
 function doPost(e) {
@@ -72,11 +75,13 @@ function doPost(e) {
 }
 
 function doGet(e) {
-  return ContentService.createTextOutput("Petshop Kasa & Vergi Motoru Aktif — v2.3.0")
+  return ContentService.createTextOutput("Petshop Kasa & Vergi Motoru v3.0.0 Aktif")
     .setMimeType(ContentService.MimeType.TEXT);
 }
 
-// ── 1. SATIŞLAR TABLOSU ──
+// ══════════════════════════════════════════════════════════════════
+// 1. SATIŞLAR TABLOSU
+// ══════════════════════════════════════════════════════════════════
 function handleSaveSale(ss, data) {
   var sheetName = "Satışlar";
   var sheet = ss.getSheetByName(sheetName);
@@ -112,149 +117,478 @@ function handleSaveSale(ss, data) {
   sheet.appendRow(row);
   var lastRow = sheet.getLastRow();
   sheet.getRange(lastRow, 7, 1, 2).setNumberFormat("₺#,##0.00");
+  sheet.getRange(lastRow, 1, 1, 2).setHorizontalAlignment("center");
+  sheet.getRange(lastRow, 6).setHorizontalAlignment("center");
+  sheet.getRange(lastRow, 9).setHorizontalAlignment("center");
+
+  // Satış yapıldığı anda günün Mali Rapor & Vergi satırını güncelle
+  updateDailyTaxRowFromSheets(ss, data.date || getTodayFormatted(), data);
 }
 
-// ── 2. GİDERLER TABLOSU (KESİN KOLON A-G VE ARDIŞIK SATIR HİZALAMASI) ──
+// ══════════════════════════════════════════════════════════════════
+// 2. GİDERLER TABLOSU (ESKİSİ GİBİ 3 AYRI PANEL)
+//    Panel 1: A-G (☕ Küçük Giderler / Günlük Masraflar)
+//    Panel 2: I-O (🏢 Sabit & Majör Giderler - Kira, Fatura, Maaş)
+//    Panel 3: Q-W (📦 Ürün & Mal Alımları - Toptancı Faturaları)
+// ══════════════════════════════════════════════════════════════════
 function handleSaveExpense(ss, data) {
   var sheetName = "Giderler";
   var sheet = ss.getSheetByName(sheetName);
-  var standardHeaders = [
-    "Tarih", "Saat", "Kategori", "Ödeme Kaynağı", "Açıklama", "Tutar (TL)", "Fatura Durumu"
-  ];
 
   if (!sheet) {
     sheet = ss.insertSheet(sheetName);
   }
 
-  // Başlık satırını (A1:G1) tam 7 kolon olarak sabitle
-  sheet.getRange(1, 1, 1, 7).setValues([standardHeaders])
+  // Panel Başlıklarını Kur
+  setupExpensesPanels(sheet);
+
+  var expType = String(data.expenseType || "").toLowerCase();
+  var isProc = (expType.indexOf("procurement") !== -1 || expType.indexOf("mal") !== -1 || expType.indexOf("toptancı") !== -1 || expType.indexOf("borç") !== -1);
+  var isMajor = (expType.indexOf("major") !== -1 || expType.indexOf("sabit") !== -1 || expType.indexOf("kira") !== -1 || expType.indexOf("maaş") !== -1 || expType.indexOf("fatura") !== -1);
+
+  var hasInv = (data.hasInvoice === true || data.hasInvoice === "true" || data.isInvoice === true || data.isInvoice === "true" || String(data.invoiceStatus || "").indexOf("Faturalı") !== -1);
+  var invText = hasInv ? "🧾 Faturalı" : "⚠️ Faturasız";
+  var amt = Number(data.amount || 0);
+  var dateStr = data.date || getTodayFormatted();
+  var timeStr = data.time || getTimeFormatted();
+
+  if (isProc) {
+    // 📦 Panel 3: Q-W (Mal Alımları / Toptancı)
+    insertExpenseIntoPanel(sheet, 17, 7, [
+      dateStr,
+      timeStr,
+      data.category || data.supplierName || "Toptancı",
+      data.description || data.desc || "Mal Alımı",
+      data.status || "Ödendi",
+      amt,
+      invText
+    ], hasInv);
+  } else if (isMajor) {
+    // 🏢 Panel 2: I-O (Sabit & Majör Giderler)
+    insertExpenseIntoPanel(sheet, 9, 7, [
+      dateStr,
+      timeStr,
+      data.category || "İşletme Gideri",
+      data.paymentSource || data.source || "Banka / Kasa",
+      data.description || data.desc || "-",
+      amt,
+      invText
+    ], hasInv);
+  } else {
+    // ☕ Panel 1: A-G (Günlük Küçük Giderler)
+    insertExpenseIntoPanel(sheet, 1, 7, [
+      dateStr,
+      timeStr,
+      data.category || "Günlük Masraf",
+      data.paymentSource || data.source || "Kasa (Nakit)",
+      data.description || data.desc || "-",
+      amt,
+      invText
+    ], hasInv);
+  }
+
+  // Gider eklendiğinde günün Mali Rapor & Vergi satırını güncelle
+  updateDailyTaxRowFromSheets(ss, dateStr, data);
+}
+
+// Giderler sayfasındaki 3 paneli hazırlar
+function setupExpensesPanels(sheet) {
+  var a1Val = sheet.getRange(1, 1).getValue();
+  if (a1Val && String(a1Val).indexOf("KÜÇÜK GİDERLER") !== -1) {
+    return; // Zaten kurulmuş
+  }
+
+  // 1. Üst Başlık Bannerları (Row 1)
+  // Panel 1 (A1:G1)
+  sheet.getRange("A1:G1").merge()
+    .setValue("☕ GÜNLÜK KÜÇÜK GİDERLER (KASA MASRAFLARI)")
     .setBackground("#1e293b")
     .setFontColor("#ffffff")
     .setFontWeight("bold")
     .setFontSize(10.5)
     .setHorizontalAlignment("center")
     .setVerticalAlignment("middle");
-  sheet.setRowHeight(1, 32);
-  sheet.setFrozenRows(1);
 
-  // 1. Buglu 12.312.312 değerlerini ve H:Z arası taşan kolonları temizle
-  cleanGiderlerSheet(sheet);
-
-  // 2. Ardışık olarak son dolu satırın hemen altını tespit et (Örn: satır 7'den sonra satır 8)
-  var targetRow = getNextSequentialExpenseRow(sheet);
-
-  // 3. Veri hazırlığı
-  var hasInv = (data.hasInvoice === true || data.hasInvoice === "true" || data.isInvoice === true || data.isInvoice === "true" || String(data.invoiceStatus || "").indexOf("Faturalı") !== -1);
-  var invText = hasInv ? "🧾 Faturalı" : "⚠️ Faturasız";
-  var cat = data.category || data.expenseType || "Genel Gider";
-  var src = data.paymentSource || data.source || "Kasa (Nakit)";
-  var desc = data.description || data.desc || "-";
-  var amt = Number(data.amount || 0);
-
-  var rowData = [
-    data.date || getTodayFormatted(),
-    data.time || getTimeFormatted(),
-    cat,
-    src,
-    desc,
-    amt,
-    invText
-  ];
-
-  // 4. Veriyi tam A-G (1-7) aralığına yaz (Kolon taşması kesin olarak imkansızdır)
-  var rowRange = sheet.getRange(targetRow, 1, 1, 7);
-  rowRange.setValues([rowData])
-    .setFontSize(10)
-    .setVerticalAlignment("middle")
-    .setBackground("#ffffff");
-  
-  sheet.setRowHeight(targetRow, 26);
-  sheet.getRange(targetRow, 1, 1, 2).setHorizontalAlignment("center");
-  sheet.getRange(targetRow, 4).setHorizontalAlignment("center");
-  sheet.getRange(targetRow, 6).setNumberFormat("₺#,##0.00").setFontWeight("bold").setHorizontalAlignment("right");
-  sheet.getRange(targetRow, 7).setHorizontalAlignment("center");
-
-  if (hasInv) {
-    sheet.getRange(targetRow, 7).setBackground("#dcfce7").setFontColor("#166534").setFontWeight("bold");
-  } else {
-    sheet.getRange(targetRow, 7).setBackground("#fee2e2").setFontColor("#991b1b").setFontWeight("bold");
-  }
-
-  // 5. Bir sonraki satıra TOPLAM formülünü düzgün yerleştir
-  var summaryRow = targetRow + 1;
-  sheet.getRange(summaryRow, 1, 1, 7).clearContent().clearFormat();
-  
-  sheet.getRange(summaryRow, 5).setValue("TOPLAM GENEL GİDER:")
-    .setFontWeight("bold")
-    .setFontSize(10)
-    .setHorizontalAlignment("right")
-    .setBackground("#f1f5f9");
-
-  sheet.getRange(summaryRow, 6).setFormula("=SUM(F2:F" + targetRow + ")")
+  // Panel 2 (I1:O1)
+  sheet.getRange("I1:O1").merge()
+    .setValue("🏢 SABİT & MAJÖR İŞLETME GİDERLERİ (KİRA, FATURA, MAAŞ)")
+    .setBackground("#1e1b4b")
+    .setFontColor("#ffffff")
     .setFontWeight("bold")
     .setFontSize(10.5)
-    .setNumberFormat("₺#,##0.00")
-    .setHorizontalAlignment("right")
-    .setBackground("#f1f5f9");
+    .setHorizontalAlignment("center")
+    .setVerticalAlignment("middle");
 
-  sheet.setRowHeight(summaryRow, 28);
+  // Panel 3 (Q1:W1)
+  sheet.getRange("Q1:W1").merge()
+    .setValue("📦 ÜRÜN & MAL ALIMLARI (TOPTANCI FATURALARI)")
+    .setBackground("#064e3b")
+    .setFontColor("#ffffff")
+    .setFontWeight("bold")
+    .setFontSize(10.5)
+    .setHorizontalAlignment("center")
+    .setVerticalAlignment("middle");
 
-  // 6. Kolon genişliklerini otomatik ayarla ve sabitle
-  sheet.setColumnWidth(1, 105); // Tarih
-  sheet.setColumnWidth(2, 75);  // Saat
-  sheet.setColumnWidth(3, 160); // Kategori
-  sheet.setColumnWidth(4, 150); // Ödeme Kaynağı
-  sheet.setColumnWidth(5, 260); // Açıklama
-  sheet.setColumnWidth(6, 140); // Tutar
-  sheet.setColumnWidth(7, 130); // Fatura Durumu
+  sheet.setRowHeight(1, 30);
+
+  // 2. Alt Kolon Başlıkları (Row 2)
+  var headersPanel1 = ["Tarih", "Saat", "Kategori", "Ödeme Kaynağı", "Açıklama", "Tutar (TL)", "Fatura Durumu"];
+  var headersPanel2 = ["Tarih", "Saat", "Gider Türü", "Ödeme Kaynağı", "Açıklama", "Tutar (TL)", "Fatura Durumu"];
+  var headersPanel3 = ["Tarih", "Saat", "Toptancı Firma", "Alınan Kalemler", "Ödeme Durumu", "Tutar (TL)", "Fatura Durumu"];
+
+  sheet.getRange("A2:G2").setValues([headersPanel1])
+    .setBackground("#334155").setFontColor("#f8fafc").setFontWeight("bold").setFontSize(9.5).setHorizontalAlignment("center");
+
+  sheet.getRange("I2:O2").setValues([headersPanel2])
+    .setBackground("#312e81").setFontColor("#f8fafc").setFontWeight("bold").setFontSize(9.5).setHorizontalAlignment("center");
+
+  sheet.getRange("Q2:W2").setValues([headersPanel3])
+    .setBackground("#065f46").setFontColor("#f8fafc").setFontWeight("bold").setFontSize(9.5).setHorizontalAlignment("center");
+
+  sheet.setRowHeight(2, 26);
+  sheet.setFrozenRows(2);
+
+  // Ayırıcı boş kolonlar (H ve P)
+  sheet.setColumnWidth(8, 20);  // H (Boşluk)
+  sheet.setColumnWidth(16, 20); // P (Boşluk)
+
+  // Panel 1 Kolon Genişlikleri
+  sheet.setColumnWidth(1, 95);  // Tarih
+  sheet.setColumnWidth(2, 65);  // Saat
+  sheet.setColumnWidth(3, 130); // Kategori
+  sheet.setColumnWidth(4, 120); // Kaynak
+  sheet.setColumnWidth(5, 180); // Açıklama
+  sheet.setColumnWidth(6, 110); // Tutar
+  sheet.setColumnWidth(7, 105); // Fatura
+
+  // Panel 2 Kolon Genişlikleri
+  sheet.setColumnWidth(9, 95);  // Tarih
+  sheet.setColumnWidth(10, 65); // Saat
+  sheet.setColumnWidth(11, 140); // Gider Türü
+  sheet.setColumnWidth(12, 120); // Kaynak
+  sheet.setColumnWidth(13, 180); // Açıklama
+  sheet.setColumnWidth(14, 110); // Tutar
+  sheet.setColumnWidth(15, 105); // Fatura
+
+  // Panel 3 Kolon Genişlikleri
+  sheet.setColumnWidth(17, 95); // Tarih
+  sheet.setColumnWidth(18, 65); // Saat
+  sheet.setColumnWidth(19, 140); // Toptancı
+  sheet.setColumnWidth(20, 180); // Açıklama
+  sheet.setColumnWidth(21, 110); // Durum
+  sheet.setColumnWidth(22, 110); // Tutar
+  sheet.setColumnWidth(23, 105); // Fatura
 }
 
-// Giderler tablosundaki gereksiz M sütununa taşan hücreleri ve buglı değerleri temizler
-function cleanGiderlerSheet(sheet) {
-  var maxRows = Math.min(sheet.getMaxRows(), 100);
-  var maxCols = sheet.getMaxColumns();
+// İlgili panele satır ekler
+function insertExpenseIntoPanel(sheet, startCol, numCols, rowData, hasInvoice) {
+  var maxScan = Math.min(sheet.getMaxRows(), 300);
+  var colData = sheet.getRange(3, startCol, maxScan - 2, 1).getValues();
+  var targetRow = 3;
 
-  // 1. H sütunundan (8. kolon) son sütuna kadar olan gereksiz verileri sil (M kolonuna taşmayı önler)
-  if (maxCols > 7) {
-    sheet.getRange(1, 8, maxRows, maxCols - 7).clearContent().clearFormat();
+  for (var i = 0; i < colData.length; i++) {
+    var val = String(colData[i][0] || "").trim();
+    if (val === "" || val.indexOf("TOPLAM") !== -1) {
+      targetRow = 3 + i;
+      break;
+    }
+    if (i === colData.length - 1) {
+      targetRow = 3 + colData.length;
+    }
   }
 
-  // 2. Tablodaki "12.312.312" gibi buglı dummy metinleri temizle
-  var checkRange = sheet.getRange(1, 1, maxRows, Math.min(maxCols, 15));
-  var values = checkRange.getValues();
-  for (var r = 0; r < values.length; r++) {
-    for (var c = 0; c < values[r].length; c++) {
-      var s = String(values[r][c] || "");
-      if (s.indexOf("12.312.312") !== -1 || s.indexOf("12312312") !== -1 || s.indexOf("12,312,312") !== -1) {
-        sheet.getRange(r + 1, c + 1).clearContent().clearFormat();
+  // Veriyi yaz
+  var rowRange = sheet.getRange(targetRow, startCol, 1, numCols);
+  rowRange.setValues([rowData])
+    .setFontSize(9.5)
+    .setVerticalAlignment("middle")
+    .setBackground("#ffffff");
+
+  sheet.setRowHeight(targetRow, 24);
+
+  // Tarih ve saat ortala
+  sheet.getRange(targetRow, startCol, 1, 2).setHorizontalAlignment("center");
+  // Tutar sütunu
+  var amtCol = startCol + numCols - 2;
+  sheet.getRange(targetRow, amtCol).setNumberFormat("₺#,##0.00").setFontWeight("bold").setHorizontalAlignment("right");
+  // Fatura durumu
+  var invCol = startCol + numCols - 1;
+  var invCell = sheet.getRange(targetRow, invCol);
+  invCell.setHorizontalAlignment("center");
+  if (hasInvoice) {
+    invCell.setBackground("#dcfce7").setFontColor("#166534").setFontWeight("bold");
+  } else {
+    invCell.setBackground("#fee2e2").setFontColor("#991b1b").setFontWeight("bold");
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// 3. MALİ RAPOR & VERGİ YÜKÜ ANALİZİ (GÜN GÜN DAY-BY-DAY TABLOSU)
+// ══════════════════════════════════════════════════════════════════
+function handleSyncTaxReport(ss, data) {
+  var dateStr = data.date || getTodayFormatted();
+  updateDailyTaxRowDirect(ss, dateStr, data);
+}
+
+function updateDailyTaxRowDirect(ss, dateStr, data) {
+  var sheetName = "Mali Rapor & Vergi";
+  var sheet = ss.getSheetByName(sheetName);
+
+  if (!sheet) {
+    sheet = ss.insertSheet(sheetName);
+  }
+
+  setupTaxReportSheetHeaders(sheet);
+
+  // Ekrandaki 11 Kolon:
+  // 1: Rapor Tarihi (A)
+  // 2: Saat (B)
+  // 3: Resmi Satışlar (C)
+  // 4: Faturalı Alışlar (D)
+  // 5: Giderler (E)
+  // 6: Resmi Vergi Matrahı (F)
+  // 7: Ödenecek KDV (G)
+  // 8: Tahmini Gelir Vergisi (H)
+  // 9: Net Kasa Kârı (I)
+  // 10: Vergi Riski Hacmi (J)
+  // 11: Risk Durumu (K)
+
+  var offSales = Number(data.officialSales || 0);
+  var invPurchases = Number(data.invoicedPurchases || 0);
+  var expensesTot = Number(data.expensesTotal !== undefined ? data.expensesTotal : (data.totalInvoicedDeductions || 0));
+  var taxBase = Number(data.taxBase !== undefined ? data.taxBase : (offSales - expensesTot));
+  var payVat = Number(data.payableVat || 0);
+  var estIncTax = Number(data.estimatedIncomeTax !== undefined ? data.estimatedIncomeTax : Math.max(0, taxBase * 0.20));
+  var netCashProfit = Number(data.netCashProfit !== undefined ? data.netCashProfit : (data.realProfit || 0));
+  var riskAmt = Number(data.riskAmount || 0);
+  var riskStatus = data.riskStatus || (riskAmt > 0 ? "Yüksek Risk" : "Güvenli");
+
+  var rowData = [
+    dateStr,
+    data.time || getTimeFormatted(),
+    offSales,
+    invPurchases,
+    expensesTot,
+    taxBase,
+    payVat,
+    estIncTax,
+    netCashProfit,
+    riskAmt,
+    riskStatus
+  ];
+
+  // Günün satırını bul (A kolonunda dateStr ara)
+  var targetRow = findOrCreateDailyTaxRow(sheet, dateStr);
+
+  var range = sheet.getRange(targetRow, 1, 1, 11);
+  range.setValues([rowData])
+    .setFontSize(9.5)
+    .setVerticalAlignment("middle")
+    .setBackground("#ffffff");
+
+  sheet.setRowHeight(targetRow, 25);
+  sheet.getRange(targetRow, 1, 1, 2).setHorizontalAlignment("center");
+  sheet.getRange(targetRow, 3, 1, 8).setNumberFormat("₺#,##0.00").setHorizontalAlignment("right");
+  sheet.getRange(targetRow, 9).setFontWeight("bold").setFontColor("#059669"); // Net Kasa Kârı yeşil
+
+  var statusCell = sheet.getRange(targetRow, 11);
+  statusCell.setHorizontalAlignment("center").setFontWeight("bold");
+  if (riskStatus === "Güvenli" || riskAmt <= 0) {
+    statusCell.setBackground("#dcfce7").setFontColor("#166534");
+  } else {
+    statusCell.setBackground("#fee2e2").setFontColor("#991b1b");
+  }
+}
+
+// Mali Rapor sayfasında günün satırını bulur veya yeni gün satırı açar
+function findOrCreateDailyTaxRow(sheet, dateStr) {
+  var maxScan = Math.min(sheet.getMaxRows(), 300);
+  var colA = sheet.getRange(4, 1, Math.max(1, maxScan - 3), 1).getValues();
+
+  for (var i = 0; i < colA.length; i++) {
+    var cellVal = String(colA[i][0] || "").trim();
+    if (cellVal === dateStr) {
+      return 4 + i; // Bugünün var olan satırını güncelle
+    }
+    if (cellVal === "" || cellVal.indexOf("TOPLAM") !== -1) {
+      return 4 + i; // İlk boş satır
+    }
+  }
+  return 4 + colA.length;
+}
+
+// Mali Rapor başlık bannerını kurar (Ekran görüntüsündeki tasarım)
+function setupTaxReportSheetHeaders(sheet) {
+  var a1Val = sheet.getRange(1, 1).getValue();
+  if (a1Val && String(a1Val).indexOf("AYBARS PETSHOP") !== -1) {
+    return; // Başlık zaten kurulu
+  }
+
+  // 1. Ana Başlık Banner
+  sheet.getRange("A1:K1").merge()
+    .setValue("🐾 AYBARS PETSHOP — MALİ RAPOR & VERGİ YÜKÜ ANALİZİ (DUAL-LAYER)")
+    .setBackground("#0a192f")
+    .setFontColor("#f8fafc")
+    .setFontSize(13)
+    .setFontWeight("bold")
+    .setHorizontalAlignment("center")
+    .setVerticalAlignment("middle");
+  sheet.setRowHeight(1, 36);
+
+  // 2. Alt Başlık
+  sheet.getRange("A2:K2").merge()
+    .setValue("Gerçek Fiili Kasa Kârı (Cebe Giren) vs. Resmi Vergi Matrahı & GİB Denetim Riski Takip Tablosu")
+    .setBackground("#1e293b")
+    .setFontColor("#94a3b8")
+    .setFontSize(9)
+    .setFontStyle("italic")
+    .setHorizontalAlignment("center")
+    .setVerticalAlignment("middle");
+  sheet.setRowHeight(2, 22);
+
+  // 3. Tablo Kolon Başlıkları (11 Kolon)
+  var headers = [
+    "Rapor Tarihi", "Saat", "Resmi Satışlar", "Faturalı Alışlar",
+    "Giderler", "Resmi Vergi Matrahı", "Ödenecek KDV",
+    "Tahmini Gelir Vergisi", "Net Kasa Kârı", "Vergi Riski Hacmi", "Risk Durumu"
+  ];
+
+  sheet.getRange("A3:K3").setValues([headers])
+    .setBackground("#1e293b")
+    .setFontColor("#ffffff")
+    .setFontWeight("bold")
+    .setFontSize(9.5)
+    .setHorizontalAlignment("center")
+    .setVerticalAlignment("middle");
+  sheet.setRowHeight(3, 28);
+  sheet.setFrozenRows(3);
+
+  // Kolon Genişlikleri
+  sheet.setColumnWidth(1, 100); // Rapor Tarihi
+  sheet.setColumnWidth(2, 70);  // Saat
+  sheet.setColumnWidth(3, 125); // Resmi Satışlar
+  sheet.setColumnWidth(4, 125); // Faturalı Alışlar
+  sheet.setColumnWidth(5, 115); // Giderler
+  sheet.setColumnWidth(6, 135); // Resmi Vergi Matrahı
+  sheet.setColumnWidth(7, 115); // Ödenecek KDV
+  sheet.setColumnWidth(8, 140); // Tahmini Gelir Vergisi
+  sheet.setColumnWidth(9, 125); // Net Kasa Kârı
+  sheet.setColumnWidth(10, 130); // Vergi Riski Hacmi
+  sheet.setColumnWidth(11, 105); // Risk Durumu
+}
+
+// Satış veya Gider geldiğinde Google Sheets üzerinden günün rakamlarını hesaplayıp günceller
+function updateDailyTaxRowFromSheets(ss, targetDate, liveData) {
+  try {
+    // Eğer liveData içinde frontend'den tam hesaplanmış mali veriler gelmişse direkt kullan
+    if (liveData && liveData.officialSales !== undefined) {
+      updateDailyTaxRowDirect(ss, targetDate, liveData);
+      return;
+    }
+
+    // Aksi halde Satışlar ve Giderler sayfalarından bugünün satırlarını topla
+    var salesSheet = ss.getSheetByName("Satışlar");
+    var offSales = 0;
+    var vatTotal = 0;
+    var totalSales = 0;
+
+    if (salesSheet && salesSheet.getLastRow() > 1) {
+      var salesData = salesSheet.getRange(2, 1, salesSheet.getLastRow() - 1, 9).getValues();
+      for (var i = 0; i < salesData.length; i++) {
+        var sDate = String(salesData[i][0] || "").trim();
+        if (sDate === targetDate) {
+          var tot = Number(salesData[i][6]) || 0;
+          var vat = Number(salesData[i][7]) || 0;
+          var status = String(salesData[i][8] || "");
+          totalSales += tot;
+          if (status.indexOf("Resmi") !== -1) {
+            offSales += tot;
+            vatTotal += vat;
+          }
+        }
       }
     }
-  }
-}
 
-// Kolon A'da satır 2'den itibaren ilk boş veya TOPLAM olan ardışık satırı bulur
-function getNextSequentialExpenseRow(sheet) {
-  var maxScan = Math.min(sheet.getMaxRows(), 100);
-  var colA = sheet.getRange(1, 1, maxScan, 1).getValues();
-  var colE = sheet.getRange(1, 5, maxScan, 1).getValues();
+    // Giderler sayfasından bugünün giderlerini topla
+    var expSheet = ss.getSheetByName("Giderler");
+    var totalExpenses = 0;
+    var invPurchases = 0;
+    var deductibleVat = 0;
 
-  for (var r = 1; r < colA.length; r++) {
-    var valA = String(colA[r][0] || "").trim();
-    var valE = String(colE[r][0] || "").trim().toUpperCase();
+    if (expSheet && expSheet.getLastRow() > 2) {
+      var expRows = expSheet.getLastRow() - 2;
+      // Panel 1: Küçük Giderler (A-G)
+      var p1Data = expSheet.getRange(3, 1, expRows, 7).getValues();
+      for (var j = 0; j < p1Data.length; j++) {
+        if (String(p1Data[j][0] || "").trim() === targetDate) {
+          var amt = Number(p1Data[j][5]) || 0;
+          totalExpenses += amt;
+          if (String(p1Data[j][6] || "").indexOf("Faturalı") !== -1) {
+            deductibleVat += (amt - (amt / 1.20));
+          }
+        }
+      }
 
-    // Eğer A kolonu boşsa veya E kolonunda TOPLAM formülü varsa bu satıra yaz
-    if (valA === "" || valE.indexOf("TOPLAM") !== -1) {
-      return r + 1;
+      // Panel 2: Majör Giderler (I-O)
+      var p2Data = expSheet.getRange(3, 9, expRows, 7).getValues();
+      for (var k = 0; k < p2Data.length; k++) {
+        if (String(p2Data[k][0] || "").trim() === targetDate) {
+          var amt2 = Number(p2Data[k][5]) || 0;
+          totalExpenses += amt2;
+          if (String(p2Data[k][6] || "").indexOf("Faturalı") !== -1) {
+            deductibleVat += (amt2 - (amt2 / 1.20));
+          }
+        }
+      }
+
+      // Panel 3: Mal Alımları (Q-W)
+      var p3Data = expSheet.getRange(3, 17, expRows, 7).getValues();
+      for (var m = 0; m < p3Data.length; m++) {
+        if (String(p3Data[m][0] || "").trim() === targetDate) {
+          var amt3 = Number(p3Data[m][5]) || 0;
+          if (String(p3Data[m][6] || "").indexOf("Faturalı") !== -1) {
+            invPurchases += amt3;
+            deductibleVat += (amt3 - (amt3 / 1.20));
+          }
+        }
+      }
     }
+
+    var taxBase = offSales - (invPurchases + totalExpenses);
+    var payableVat = Math.max(0, vatTotal - deductibleVat);
+    var estIncomeTax = Math.max(0, taxBase * 0.20);
+    var netCashProfit = totalSales - totalExpenses; // Fiili kâr
+    var riskAmt = Math.max(0, offSales - invPurchases);
+    var riskStatus = riskAmt > 0 ? "Yüksek Risk" : "Güvenli";
+
+    updateDailyTaxRowDirect(ss, targetDate, {
+      date: targetDate,
+      time: getTimeFormatted(),
+      officialSales: offSales,
+      invoicedPurchases: invPurchases,
+      expensesTotal: totalExpenses,
+      taxBase: taxBase,
+      payableVat: payableVat,
+      estimatedIncomeTax: estIncomeTax,
+      netCashProfit: netCashProfit,
+      riskAmount: riskAmt,
+      riskStatus: riskStatus
+    });
+
+  } catch (err) {
+    // Silent fallback
   }
-  return colA.length + 1;
 }
 
-// ── 3. GÜN SONU KASA MUTABAKATI ──
+// ══════════════════════════════════════════════════════════════════
+// 4. GÜN SONU KASA MUTABAKATI
+// ══════════════════════════════════════════════════════════════════
 function handleDailyClose(ss, data) {
   var sheetName = "Gün Sonu Kasa";
   var sheet = ss.getSheetByName(sheetName);
-  var headers = ["Tarih", "Saat", "Sayılan Nakit", "Kasa Farkı (Açık/Fazla)"];
+  var headers = [
+    "Tarih", "Kapanış Saati", "Sayılan Nakit (TL)", "Beklenen Kasa (TL)", "Kasa Farkı (TL)", "Kasa Durumu"
+  ];
 
   if (!sheet) {
     sheet = ss.insertSheet(sheetName);
@@ -265,240 +599,23 @@ function handleDailyClose(ss, data) {
     formatHeaderRow(sheet, headers.length);
   }
 
-  sheet.appendRow([
+  var diffStr = String(data.difference || "0.00 ₺").replace("₺", "").trim();
+  var diffNum = parseFloat(diffStr.replace(/\./g, "").replace(",", ".")) || 0;
+  var statusText = diffNum === 0 ? "✅ Tam Mutabakat" : (diffNum > 0 ? "📈 Kasa Fazlası" : "⚠️ Kasa Açığı");
+
+  var row = [
     data.date || getTodayFormatted(),
     data.time || getTimeFormatted(),
     data.actualCash || "0.00 ₺",
-    data.difference || "0.00 ₺"
-  ]);
-}
-
-// ── 4. MALİ RAPOR & VERGİ YÜKÜ (KPI DASHBOARD CARD LAYOUT) ──
-function handleSyncTaxReport(ss, data) {
-  var sheetName = "Mali Rapor & Vergi";
-  var sheet = ss.getSheetByName(sheetName);
-
-  if (!sheet) {
-    sheet = ss.insertSheet(sheetName);
-  }
-
-  // Dashboard Kartlarını oluştur ve güncelle
-  renderTaxDashboardCards(sheet, data);
-
-  // Tarihsel log satırını kartların altına ekle
-  appendTaxHistoricalLogRow(sheet, data);
-}
-
-function renderTaxDashboardCards(sheet, data) {
-  // Sayfa başlık bannerı
-  sheet.getRange("B2:H2").merge()
-    .setValue("🐾 AYBARS PETSHOP — MALİ RAPOR & VERGİ YÖNETİM PANELİ")
-    .setBackground("#0f172a")
-    .setFontColor("#f8fafc")
-    .setFontSize(13.5)
-    .setFontWeight("bold")
-    .setHorizontalAlignment("center")
-    .setVerticalAlignment("middle");
-  sheet.setRowHeight(2, 38);
-
-  sheet.getRange("B3:H3").merge()
-    .setValue("Dual-Layer Finansal Takip: KDV Mutabakatı (Devlet) vs. Resmi Kâr & Vergi Kalkanı (Cebe Giren)")
-    .setBackground("#1e293b")
-    .setFontColor("#94a3b8")
-    .setFontSize(9.5)
-    .setFontStyle("italic")
-    .setHorizontalAlignment("center")
-    .setVerticalAlignment("middle");
-  sheet.setRowHeight(3, 22);
-
-  sheet.getRange("B4:H4").merge()
-    .setValue("🕒 Son Güncelleme: " + (data.date || getTodayFormatted()) + " " + (data.time || getTimeFormatted()) + "  •  Durum: Canlı Kasa Senkronize")
-    .setBackground("#f8fafc")
-    .setFontColor("#475569")
-    .setFontSize(9)
-    .setFontWeight("bold")
-    .setHorizontalAlignment("center")
-    .setVerticalAlignment("middle");
-  sheet.setRowHeight(4, 22);
-
-  sheet.setRowHeight(5, 14); // Boşluk
-
-  // ════════════════════════════════════════════════════════════════
-  // KART 1: 🏛️ KDV MUTABAKATI (B6:D11)
-  // ════════════════════════════════════════════════════════════════
-  sheet.getRange("B6:D6").merge()
-    .setValue("🏛️ KART 1: KDV MUTABAKATI (AY SONU DEVLET DENGESİ)")
-    .setBackground("#1e293b")
-    .setFontColor("#ffffff")
-    .setFontWeight("bold")
-    .setFontSize(10.5)
-    .setHorizontalAlignment("center")
-    .setVerticalAlignment("middle");
-  sheet.setRowHeight(6, 30);
-
-  sheet.getRange("B7:D7").setValues([["Mali Gösterge", "Tutar (TL)", "Açıklama / Durum"]])
-    .setBackground("#334155")
-    .setFontColor("#f8fafc")
-    .setFontWeight("bold")
-    .setFontSize(9.5)
-    .setHorizontalAlignment("center")
-    .setVerticalAlignment("middle");
-  sheet.setRowHeight(7, 24);
-
-  var collectedVat = Number(data.collectedVat !== undefined ? data.collectedVat : (data.officialSales ? data.officialSales * 0.20 : 0));
-  var deductibleVat = Number(data.deductibleVat !== undefined ? data.deductibleVat : (data.payableVat ? Math.max(0, collectedVat - data.payableVat) : 0));
-  var payableVat = Number(data.payableVat || 0);
-  var isVatPayable = payableVat > 0;
-
-  var card1Rows = [
-    ["📈 Tahsil Edilen KDV", collectedVat, "Resmi satışlardan müşteriden alınan KDV"],
-    ["📥 İndirilecek KDV", deductibleVat, "Faturalı mal alımı ve giderlerden düşülen KDV"],
-    ["⚖️ Net Ödenecek KDV", payableVat, isVatPayable ? "⚠️ Devlete bu ay ödenecek KDV borcu" : "✅ Ödenecek KDV çıkmıyor (Devir)"],
-    ["🏷️ KDV Beyan Özeti", isVatPayable ? "ÖDENECEK KDV VAR" : "DEVREDEN KDV", isVatPayable ? "Beyannamede vergi ödemesi tahakkuk eder" : "Gelecek aya devreden KDV alacağı oluştu"]
+    data.expectedCash || "-",
+    data.difference || "0.00 ₺",
+    statusText
   ];
 
-  sheet.getRange("B8:D11").setValues(card1Rows)
-    .setFontSize(9.5)
-    .setVerticalAlignment("middle");
-  
-  sheet.getRange("C8:C10").setNumberFormat("₺#,##0.00").setFontWeight("bold").setHorizontalAlignment("right");
-  sheet.getRange("C11").setHorizontalAlignment("center").setFontWeight("bold");
-
-  if (isVatPayable) {
-    sheet.getRange("C10").setFontColor("#dc2626");
-    sheet.getRange("C11").setBackground("#fee2e2").setFontColor("#991b1b");
-  } else {
-    sheet.getRange("C10").setFontColor("#059669");
-    sheet.getRange("C11").setBackground("#dcfce7").setFontColor("#166534");
-  }
-
-  // ════════════════════════════════════════════════════════════════
-  // KART 2: 🛡️ RESMİ KÂR & VERGİ KALKANI (F6:H12)
-  // ════════════════════════════════════════════════════════════════
-  sheet.getRange("F6:H6").merge()
-    .setValue("🛡️ KART 2: RESMİ KÂR & VERGİ KALKANI (GİB / MATRAH)")
-    .setBackground("#0f172a")
-    .setFontColor("#ffffff")
-    .setFontWeight("bold")
-    .setFontSize(10.5)
-    .setHorizontalAlignment("center")
-    .setVerticalAlignment("middle");
-
-  sheet.getRange("F7:H7").setValues([["Mali Gösterge", "Tutar (TL)", "Açıklama / Analiz"]])
-    .setBackground("#334155")
-    .setFontColor("#f8fafc")
-    .setFontWeight("bold")
-    .setFontSize(9.5)
-    .setHorizontalAlignment("center")
-    .setVerticalAlignment("middle");
-
-  var offSales = Number(data.officialSales || 0);
-  var invExpenses = Number(data.expensesTotal || data.invoicedPurchases || 0);
-  var taxBase = Number(data.taxBase || data.officialTaxBase || 0);
-  var incTax = Number(data.estimatedIncomeTax || 0);
-  var netCashProfit = Number(data.netCashProfit || 0);
-  var riskAmt = Number(data.riskAmount || 0);
-  var riskStatus = data.riskStatus || (riskAmt > 0 ? "Yüksek Risk" : "Güvenli");
-
-  var card2Rows = [
-    ["💳 Resmi Satışlar (Ciro)", offSales, "Banka POS ve faturalı resmi satışlar"],
-    ["🧾 Faturalı Gider & Alış", invExpenses, "Vergi kalkanı sağlayan faturalı harcamalar"],
-    ["🏛️ Resmi Vergi Matrahı", taxBase, taxBase > 0 ? "Vergiye tabi net yasal ticari kâr" : "Mali zarar (Vergi çıkmaz)"],
-    ["💸 %20 Gelir Vergisi Yükü", incTax, "Yasal matrah üzerinden hesaplanan %20 vergi"],
-    ["💰 Fiili Net Kasa Kârı", netCashProfit, "Gerçek cebe giren brüt kâr (Ciro − Maliyet)"],
-    ["🚨 Vergi Riski Hacmi", riskAmt, riskAmt > 0 ? "⚠️ Kartlı satış faturalı stoğu aşıyor!" : "✅ Kartlı satışlar faturalı alımla güvende"]
-  ];
-
-  sheet.getRange("F8:H13").setValues(card2Rows)
-    .setFontSize(9.5)
-    .setVerticalAlignment("middle");
-
-  sheet.getRange("G8:G13").setNumberFormat("₺#,##0.00").setFontWeight("bold").setHorizontalAlignment("right");
-  sheet.getRange("G12").setFontColor("#059669").setFontSize(10.5); // Fiili kâr yeşil
-
-  if (riskAmt > 0) {
-    sheet.getRange("G13").setFontColor("#dc2626");
-    sheet.getRange("H13").setFontColor("#dc2626").setFontWeight("bold");
-  } else {
-    sheet.getRange("G13").setFontColor("#059669");
-    sheet.getRange("H13").setFontColor("#166534");
-  }
-
-  // Kart Kenarlıkları
-  sheet.getRange("B6:D11").setBorder(true, true, true, true, true, true, "#cbd5e1", SpreadsheetApp.BorderStyle.SOLID);
-  sheet.getRange("F6:H13").setBorder(true, true, true, true, true, true, "#cbd5e1", SpreadsheetApp.BorderStyle.SOLID);
-
-  // Kolon Genişlikleri (Asla Metin Kırpılmayacak Şekilde Sabit ve Cömert)
-  sheet.setColumnWidth(1, 25);  // A (Boşluk)
-  sheet.setColumnWidth(2, 230); // B (Kart 1 Gösterge)
-  sheet.setColumnWidth(3, 140); // C (Kart 1 Tutar)
-  sheet.setColumnWidth(4, 240); // D (Kart 1 Açıklama)
-  sheet.setColumnWidth(5, 30);  // E (Kartlar Arası Boşluk)
-  sheet.setColumnWidth(6, 250); // F (Kart 2 Gösterge)
-  sheet.setColumnWidth(7, 150); // G (Kart 2 Tutar)
-  sheet.setColumnWidth(8, 250); // H (Kart 2 Açıklama)
-}
-
-function appendTaxHistoricalLogRow(sheet, data) {
-  var startRow = 16;
-  
-  // Başlık satırı
-  sheet.getRange("B15:H15").merge()
-    .setValue("📜 SENKRONİZASYON GEÇMİŞİ (TARİHSEL MALİ RAPOR LOGLARI)")
-    .setBackground("#1e293b")
-    .setFontColor("#ffffff")
-    .setFontWeight("bold")
-    .setFontSize(10)
-    .setHorizontalAlignment("center")
-    .setVerticalAlignment("middle");
-  sheet.setRowHeight(15, 26);
-
-  var logHeaders = [
-    "Tarih", "Saat", "Resmi Satışlar", "Faturalı Alış & Gider",
-    "Vergi Matrahı", "Ödenecek KDV", "Net Kasa Kârı"
-  ];
-  sheet.getRange("B16:H16").setValues([logHeaders])
-    .setBackground("#334155")
-    .setFontColor("#f8fafc")
-    .setFontWeight("bold")
-    .setFontSize(9)
-    .setHorizontalAlignment("center")
-    .setVerticalAlignment("middle");
-  sheet.setRowHeight(16, 24);
-
-  // Tarihsel log için ilk boş satırı bul (satır 17'den sonra)
-  var maxScan = Math.min(sheet.getMaxRows(), 150);
-  var colB = sheet.getRange(17, 2, Math.max(1, maxScan - 16), 1).getValues();
-  var targetRow = 17;
-
-  for (var i = 0; i < colB.length; i++) {
-    if (String(colB[i][0] || "").trim() === "") {
-      targetRow = 17 + i;
-      break;
-    }
-    if (i === colB.length - 1) {
-      targetRow = 17 + colB.length;
-    }
-  }
-
-  var logRow = [
-    data.date || getTodayFormatted(),
-    data.time || getTimeFormatted(),
-    Number(data.officialSales || 0),
-    Number(data.expensesTotal || data.invoicedPurchases || 0),
-    Number(data.taxBase || data.officialTaxBase || 0),
-    Number(data.payableVat || 0),
-    Number(data.netCashProfit || 0)
-  ];
-
-  sheet.getRange(targetRow, 2, 1, 7).setValues([logRow])
-    .setFontSize(9)
-    .setVerticalAlignment("middle")
-    .setBackground("#ffffff");
-  
-  sheet.setRowHeight(targetRow, 24);
-  sheet.getRange(targetRow, 2, 1, 2).setHorizontalAlignment("center");
-  sheet.getRange(targetRow, 4, 1, 5).setNumberFormat("₺#,##0.00").setHorizontalAlignment("right");
+  sheet.appendRow(row);
+  var lastRow = sheet.getLastRow();
+  sheet.getRange(lastRow, 1, 1, 2).setHorizontalAlignment("center");
+  sheet.getRange(lastRow, 6).setHorizontalAlignment("center");
 }
 
 function formatHeaderRow(sheet, numCols) {
@@ -506,10 +623,10 @@ function formatHeaderRow(sheet, numCols) {
   range.setBackground("#1e293b")
     .setFontColor("#ffffff")
     .setFontWeight("bold")
-    .setFontSize(10.5)
+    .setFontSize(10)
     .setHorizontalAlignment("center")
     .setVerticalAlignment("middle");
-  sheet.setRowHeight(1, 30);
+  sheet.setRowHeight(1, 28);
   sheet.setFrozenRows(1);
 }
 

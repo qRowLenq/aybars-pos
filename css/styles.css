@@ -968,14 +968,45 @@ textarea.fc { resize: vertical; min-height: 60px; }
 
 /* ─── EXPENSE SECTIONS ─── */
 .expense-section {
-  border-radius: var(--radius);
-  padding: 16px;
-  margin-bottom: 16px;
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
-.expense-section.procurement { background: #064e3b; color: white; }
-.expense-section.major { background: #0f172a; color: white; }
-.expense-section h3 { font-size: 15px; margin-bottom: 4px; }
-.expense-section p { font-size: 12px; opacity: 0.8; }
+.expense-section.procurement {
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+  color: white;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+.expense-section.major {
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+  color: white;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+.expense-section h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.expense-section p {
+  font-size: 12px;
+  opacity: 0.85;
+}
+.expense-section .data-table {
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.expense-section.procurement .data-table thead th {
+  background: #042f2e;
+  color: #a7f3d0;
+  border-bottom: 1px solid #115e59;
+}
+.expense-section.major .data-table thead th {
+  background: #1e1b4b;
+  color: #c7d2fe;
+  border-bottom: 1px solid #3730a3;
+}
 
 /* ─── SEARCH INPUT ─── */
 .search-input {

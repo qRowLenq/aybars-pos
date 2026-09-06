@@ -336,6 +336,10 @@ function saveSupplierIntake() {
       vatAmount: Number(vatTotal.toFixed(2)),
       status: statusLabel
     });
+
+    if (typeof syncTaxReportToSheets === "function") {
+      setTimeout(syncTaxReportToSheets, 600);
+    }
   }
 
   closeModal("supplierIntakeModal");
@@ -435,6 +439,10 @@ function confirmSupplierPayment() {
     vatAmount: 0,
     status: "Ödendi"
   });
+
+  if (typeof syncTaxReportToSheets === "function") {
+    setTimeout(syncTaxReportToSheets, 600);
+  }
 
   closeModal("paySupplierModal"); saveData(); renderSuppliersTable(); renderExpensesTable(); renderAllPurchasesTable();
   if (document.getElementById("supplierHistoryModal").classList.contains("show")) openSupplierHistoryModal(s.id);
