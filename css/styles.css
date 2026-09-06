@@ -1392,3 +1392,432 @@ textarea.fc { resize: vertical; min-height: 60px; }
   transform: scale(1.03);
 }
 
+/* ===================================================================
+   RESPONSIVE DESIGN SYSTEM (Mobile, Tablet, Desktop)
+   Breakpoints: 1024px (Tablets / Laptops), 768px (Tablets / Phablets), 480px (Phones)
+   =================================================================== */
+
+/* ─── BASE TABLE SCROLLING & RESPONSIVE CONTAINERS ─── */
+.table-responsive,
+.subtab-view > table,
+.subtabs-container table,
+.tab-pane table,
+.expense-section table,
+.recent-sales-box table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 16px;
+  border-radius: var(--radius);
+}
+
+.data-table {
+  min-width: 620px;
+}
+
+/* ─── TABLETS & SMALL LAPTOPS (<= 992px) ─── */
+@media (max-width: 992px) {
+  html, body {
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+  }
+  body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .app-main {
+    height: auto;
+    min-height: calc(100vh - 105px);
+    overflow: visible;
+  }
+  .tab-pane {
+    height: auto;
+    min-height: calc(100vh - 105px);
+    overflow: visible;
+  }
+
+  /* Header 2-Tier Flex Layout */
+  .app-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  .header-brand {
+    order: 1;
+    font-size: 15px;
+  }
+  .header-actions {
+    order: 2;
+    gap: 4px;
+  }
+  .header-actions .btn {
+    padding: 5px 9px;
+    font-size: 11.5px;
+  }
+  .nav-tabs {
+    order: 3;
+    width: 100%;
+    margin-top: 4px;
+    justify-content: flex-start;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+    gap: 6px;
+  }
+  .nav-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .nav-tab {
+    flex-shrink: 0;
+    padding: 7px 11px;
+    font-size: 12px;
+  }
+
+  /* POS Layout Stacking */
+  .pos-container {
+    flex-direction: column;
+    overflow-y: auto;
+    height: auto;
+    width: 100%;
+  }
+  .catalog-area {
+    padding: 12px 10px;
+    overflow: visible;
+    flex: none;
+    width: 100%;
+  }
+  .cart-area {
+    width: 100% !important;
+    max-width: 100%;
+    border-left: none;
+    border-top: 2px solid var(--border);
+    height: auto;
+    box-shadow: var(--shadow-sm);
+  }
+  .cart-items {
+    max-height: 320px;
+    min-height: 100px;
+  }
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-auto-rows: minmax(130px, auto);
+    max-height: 520px;
+    overflow-y: auto;
+  }
+
+  /* Financial Grids */
+  .expense-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .weekly-drawer-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .df-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}
+
+/* ─── MOBILE PHONES & TABLETS PORTRAIT (<= 768px) ─── */
+@media (max-width: 768px) {
+  .data-table {
+    min-width: 580px;
+  }
+  .data-table th,
+  .data-table td {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .subtabs-container {
+    padding: 12px 10px;
+  }
+  .subtabs-header {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 6px;
+    gap: 4px;
+    border-bottom-width: 1px;
+  }
+  .subtabs-header::-webkit-scrollbar {
+    display: none;
+  }
+  .subtab-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 6px 11px;
+    font-size: 12px;
+  }
+
+  /* Form Rows */
+  .form-row-3 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .form-row-4 {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* SKT Radar */
+  .skt-radar-container {
+    padding: 14px;
+  }
+  .skt-radar-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .skt-radar-counters {
+    width: 100%;
+    gap: 6px;
+  }
+  .skt-counter-pill {
+    flex: 1 1 auto;
+    font-size: 11px;
+    padding: 4px 8px;
+    justify-content: center;
+  }
+  .skt-batch-list {
+    grid-template-columns: 1fr;
+  }
+  .skt-batch-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .skt-batch-actions {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* Dual Financial Header */
+  .df-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+/* ─── NARROW PHONES (<= 576px) ─── */
+@media (max-width: 576px) {
+  .app-header {
+    padding: 6px 10px;
+    gap: 6px;
+  }
+  .header-brand {
+    font-size: 14px;
+  }
+  .header-brand span {
+    font-size: 18px;
+  }
+  .header-actions {
+    gap: 3px;
+  }
+  .header-actions .btn {
+    padding: 4px 6px;
+    font-size: 10.5px;
+  }
+  .nav-tab {
+    padding: 6px 9px;
+    font-size: 11.5px;
+  }
+
+  /* Full Width Form Rows on Phones */
+  .form-row-2,
+  .form-row-3,
+  .form-row-4 {
+    grid-template-columns: 1fr !important;
+    gap: 8px;
+  }
+  .fc, .search-input {
+    font-size: 14px; /* Eliminates auto-zoom on mobile safari/chrome */
+    min-height: 40px;
+  }
+
+  /* Expand Fixed Width Filter Elements on Mobile */
+  #invCatFilter,
+  #expenseCategoryFilter {
+    width: 100% !important;
+  }
+
+  /* Catalog Toolbar */
+  .catalog-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+  .category-bar {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+  .category-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 2-Column Product Grid on Phones */
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: minmax(125px, auto);
+    gap: 8px;
+  }
+  .product-card {
+    padding: 9px 10px;
+  }
+  .product-card .p-name {
+    font-size: 11.5px;
+    -webkit-line-clamp: 2;
+  }
+  .product-card .p-price {
+    font-size: 13.5px;
+  }
+
+  /* Cart Area Adjustments */
+  .cart-footer {
+    padding: 10px 12px;
+  }
+  .cart-total-row {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+  .pay-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .pay-grid .btn {
+    min-height: 42px;
+    font-size: 12px;
+  }
+
+  /* Modals as Mobile Bottom-Sheets */
+  .modal-overlay {
+    padding: 8px;
+    align-items: flex-end;
+  }
+  .modal-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 16px 12px;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    max-height: 94vh;
+  }
+  .modal-title {
+    font-size: 14.5px;
+    margin-bottom: 10px;
+  }
+  .modal-actions {
+    flex-direction: column-reverse;
+    gap: 6px;
+  }
+  .modal-actions .btn {
+    width: 100%;
+    min-height: 40px;
+  }
+
+  /* Single Column Expense KPI Grid */
+  .expense-kpi-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .weekly-drawer-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .df-grid {
+    grid-template-columns: 1fr;
+  }
+  .kdv-reconcile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Flexible Toolbars */
+  .subtabs-container .flex.gap-2.mb-3 {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .subtabs-container .flex.gap-2.mb-3 .search-input,
+  .subtabs-container .flex.gap-2.mb-3 .fc,
+  .subtabs-container .flex.gap-2.mb-3 .btn {
+    width: 100% !important;
+  }
+  .subtabs-container .flex.justify-between {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .subtabs-container .flex.justify-between .btn {
+    width: 100%;
+  }
+
+  /* Banknote Grid */
+  .banknote-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .banknote-grid .fg[style*="span 3"] {
+    grid-column: span 2 !important;
+  }
+
+  /* Recent Sales list wrapping */
+  #posRecentSalesList .flex {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  #posRecentSalesList .flex .btn {
+    align-self: flex-end;
+  }
+}
+
+/* ─── MOBILE QUICK CART FLOATING ACTION BUTTON ─── */
+.mobile-cart-fab {
+  display: none;
+}
+@media (max-width: 992px) {
+  .mobile-cart-fab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: fixed;
+    bottom: 18px;
+    right: 18px;
+    z-index: 999;
+    background: linear-gradient(135deg, #059669, #10b981);
+    color: white;
+    padding: 11px 18px;
+    border-radius: var(--radius-full);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+    font-size: 13.5px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: transform var(--duration) var(--ease);
+    animation: bounceIn 0.3s var(--ease);
+  }
+  .mobile-cart-fab:hover {
+    transform: scale(1.04);
+  }
+  .mobile-cart-fab:active {
+    transform: scale(0.96);
+  }
+}
+@keyframes bounceIn {
+  from { opacity: 0; transform: scale(0.8) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+

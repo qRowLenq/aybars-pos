@@ -125,7 +125,23 @@ function renderCart() {
   const vatEl = document.getElementById("cartVatDisplay");
   if (vatEl) vatEl.innerText = vatTotal.toFixed(2) + " ₺";
 
+  const fab = document.getElementById("mobileCartFab");
+  if (fab) {
+    if (cart.length > 0) {
+      fab.style.display = "inline-flex";
+      const fabTotal = document.getElementById("mobileFabTotal");
+      if (fabTotal) fabTotal.innerText = total.toFixed(2) + " ₺";
+    } else {
+      fab.style.display = "none";
+    }
+  }
+
   updateCustomerDropdown();
+}
+
+function scrollToCart() {
+  const cartEl = document.querySelector(".cart-area");
+  if (cartEl) cartEl.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 // ── Complete Sale ──

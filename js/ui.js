@@ -11,8 +11,16 @@ function switchTab(tabId) {
   if (target) target.classList.add("active");
 
   document.querySelectorAll(".nav-tab").forEach(t => {
-    if (t.dataset.tab === tabId) t.classList.add("active");
+    if (t.dataset.tab === tabId) {
+      t.classList.add("active");
+      try { t.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" }); } catch(e) {}
+    }
   });
+
+  const fab = document.getElementById("mobileCartFab");
+  if (fab) {
+    fab.style.display = (tabId === "pos" && window.cart && window.cart.length > 0) ? "inline-flex" : "none";
+  }
 
   if (tabId === "pos") { renderCatalog(); renderPosSalesHistory(); }
   if (tabId === "orders") renderOrdersTab();
