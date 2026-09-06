@@ -1,0 +1,161 @@
+/* ===================================================================
+   UI UTILITIES — Tabs, Modals, Toast, Helpers
+   =================================================================== */
+
+// ── Tab Switching ──
+function switchTab(tabId) {
+  document.querySelectorAll(".tab-pane").forEach(el => el.classList.remove("active"));
+  document.querySelectorAll(".nav-tab").forEach(el => el.classList.remove("active"));
+
+  const target = document.getElementById("tab-" + tabId);
+  if (target) target.classList.add("active");
+
+  document.querySelectorAll(".nav-tab").forEach(t => {
+    if (t.dataset.tab === tabId) t.classList.add("active");
+  });
+
+  if (tabId === "pos") { renderCatalog(); renderPosSalesHistory(); }
+  if (tabId === "orders") renderOrdersTab();
+  if (tabId === "inventory") {
+    const activeSub = document.querySelector("#tab-inventory .subtab-view.active");
+    if (!activeSub) {
+      switchInvSubtab("stock");
+    } else {
+      renderInventoryTable();
+      renderBundlesTable();
+      renderWasteTable();
+    }
+  }
+  if (tabId === "crm") renderCRM();
+  if (tabId === "procurement") renderSuppliersTable();
+  if (tabId === "expenses") renderExpensesTable();
+}
+
+function switchSubtab(container, prefix, subId, renderFn) {
+  document.querySelectorAll(`#${container} .subtab-view`).forEach(el => el.classList.remove("active"));
+  document.querySelectorAll(`#${container} .subtab-btn`).forEach(el => el.classList.remove("active"));
+
+  const target = document.getElementById(prefix + subId);
+  if (target) target.classList.add("active");
+
+  document.querySelectorAll(`#${container} .subtab-btn`).forEach(b => {
+    if (b.dataset.sub === subId) b.classList.add("active");
+  });
+
+  if (renderFn) renderFn();
+}
+
+// Convenience wrappers for each section's subtabs
+function switchInvSubtab(subId) {
+  const fns = { stock: renderInventoryTable, bundles: renderBundlesTable, waste: renderWasteTable };
+  switchSubtab("tab-inventory", "subtab-inv-", subId, fns[subId]);
+}
+function switchOrdersSubtab(subId) {
+  const fns = { pending: renderSingleOrdersList, platform: renderPlatformOrdersGrouped, delivered: renderDeliveredOrdersList };
+  switchSubtab("tab-orders", "subtab-orders-", subId, fns[subId]);
+}
+function switchCrmSubtab(subId) {
+  const fns = { customers: renderCRM, credit: renderCreditBook };
+  switchSubtab("tab-crm", "subtab-", subId, fns[subId]);
+}
+function switchProcSubtab(subId) {
+  const fns = { suppliers: renderSuppliersTable, "all-purchases": renderAllPurchasesTable, deficits: renderDeficitsTable };
+  switchSubtab("tab-procurement", "subtab-", subId, fns[subId]);
+}
+
+// ── Modals ──
+function openModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.add("show");
+}
+function closeModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove("show");
+}
+
+// ── Toast Notifications ──
+function toast(msg, type = "success", duration = 3000) {
+  const container = document.getElementById("toastContainer");
+  if (!container) return;
+
+  const t = document.createElement("div");
+  t.className = `toast ${type}`;
+  t.style.animationDuration = `0.3s, 0.3s`;
+  t.style.animationDelay = `0s, ${(duration - 300) / 1000}s`;
+  t.innerHTML = `<span>${msg}</span>`;
+  container.appendChild(t);
+
+  setTimeout(() => t.remove(), duration);
+}
+
+// ── Badge Updates ──
+function updateAllBadges() {
+  const el = (id, val) => { const e = document.getElementById(id); if (e) e.innerText = val; };
+
+  el("pendingOrdersCount", orders.length);
+  el("ordersPendingBadge", orders.length);
+  el("platformPendingBadge", platformPendingOrders.length);
+  el("holdCountBadge", heldCarts.length);
+
+  const creditTotal = customers.reduce((s, c) => s + (c.balance || 0), 0);
+  el("creditTotalBadge", creditTotal.toFixed(2) + " TL");
+
+  const supplierDebt = suppliers.reduce((s, sup) => s + (sup.balance || 0), 0);
+  el("supplierDebtBadge", supplierDebt.toFixed(2) + " TL");
+
+  if (typeof renderDualFinancialOverviewCard === "function") {
+    renderDualFinancialOverviewCard();
+  } else if (typeof updateVatReconciliationWidget === "function") {
+    updateVatReconciliationWidget();
+  }
+}
+
+// ── Populate Datalists ──
+function populateAllProductDatalists() {
+  const rawProds = products.filter(p => !p.isBundle);
+  const opts = rawProds.map(p => `<option value="${p.name}">`).join("");
+
+  ["existingProductsSearchList", "bundleProductsSearchList", "wasteProductsSearchList", "existingProductsForDeficitList", "existingProductsList"]
+    .forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = opts; });
+}
+
+function populateCategoryDropdowns() {
+  const invSel = document.getElementById("invCatFilter");
+  if (invSel) {
+    const prev = invSel.value || "TÜMÜ";
+    invSel.innerHTML = `<option value="TÜMÜ">Tüm Kategoriler</option>` + categories.map(c => `<option value="${c}">${c}</option>`).join("");
+    if ([...invSel.options].some(o => o.value === prev)) {
+      invSel.value = prev;
+    }
+  }
+
+  const npSel = document.getElementById("npCategory");
+  if (npSel) {
+    const prevNp = npSel.value;
+    npSel.innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join("");
+    if (prevNp && [...npSel.options].some(o => o.value === prevNp)) {
+      npSel.value = prevNp;
+    }
+  }
+}
+
+function populateSupplierDropdowns() {
+  const opts = `<option value="-">Seçilmedi</option>` + suppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join("");
+  const pSel = document.getElementById("npSupplierSelect");
+  if (pSel) pSel.innerHTML = opts;
+
+  const iSel = document.getElementById("intakeSupSelect");
+  if (iSel) iSel.innerHTML = suppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join("");
+}
+
+function updateCustomerDropdown() {
+  const sel = document.getElementById("cartCustomerSelect");
+  if (sel) sel.innerHTML = '<option value="">👤 Tezgâh Satışı (Anonim)</option>' + customers.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+
+  const dl = document.getElementById("dispatchCustomerList");
+  if (dl) dl.innerHTML = customers.map(c => `<option value="${c.name} - ${c.phone || ''}">`).join("");
+}
+
+// ── Date/Time Helpers ──
+function nowDate() { return new Date().toLocaleDateString("tr-TR"); }
+function nowTime() { return new Date().toLocaleTimeString("tr-TR", { hour: '2-digit', minute: '2-digit' }); }

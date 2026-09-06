@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Petshop Kasa & Envanter Yönetim Sistemi - Modern POS, stok takibi, cari hesap, tedarik ve gider yönetimi.">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <title>🐾 Petshop Kasa Sistemi</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ── HEADER ── -->
+  <header class="app-header">
+    <div class="header-brand">
+      <span>🐾</span> Petshop Kasa
+    </div>
+    
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-tab="pos" onclick="switchTab('pos')">🛒 Kasa</button>
+      <button class="nav-tab" data-tab="orders" onclick="switchTab('orders')">
+        🛵 Gidecek Sipariş <span class="badge bg-danger" id="ordersPendingBadge">0</span>
+      </button>
+      <button class="nav-tab" data-tab="inventory" onclick="switchTab('inventory')">📦 Ürünler & Stok</button>
+      <button class="nav-tab" data-tab="crm" onclick="switchTab('crm')">👥 Müşteri & Veresiye</button>
+      <button class="nav-tab" data-tab="procurement" onclick="switchTab('procurement')">🏢 Tedarik & Toptancı</button>
+      <button class="nav-tab" data-tab="expenses" onclick="switchTab('expenses')">💸 Giderler & Alımlar</button>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn btn-warning btn-sm" onclick="openDailyCloseModal()">🏁 Gün Sonu</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportData()">💾 Yedek Al</button>
+      <label class="btn btn-ghost btn-sm" style="cursor:pointer; margin:0;">
+        📥 Yükle <input type="file" style="display:none;" accept=".json" onchange="importData(event)">
+      </label>
+    </div>
+  </header>
+
+  <!-- ── MAIN CONTENT ── -->
+  <main class="app-main">
+    
+    <!-- 1. KASA (POS) -->
+    <section id="tab-pos" class="tab-pane active pos-container">
+      <div class="catalog-area">
+        <div class="catalog-toolbar">
+          <input type="text" id="catalogSearch" class="search-input" placeholder="🔍 Barkod okut veya ürün ara..." oninput="renderCatalog()">
+          <div id="categoryFilterBar" class="category-bar flex-1"></div>
+        </div>
+        <div id="productGrid" class="product-grid"></div>
+
+        <div class="recent-sales-box mt-2">
+          <div class="rs-header">
+            <b>📜 Son Satışlar (Bugün)</b>
+            <button class="btn btn-ghost btn-xs" onclick="switchTab('orders')">Siparişlere Git ➔</button>
+          </div>
+          <div id="posRecentSalesList" class="flex-col gap-2"></div>
+        </div>
+      </div>
+
+      <div class="cart-area">
+        <div class="cart-header">
+          <h3>Sepetim</h3>
+          <div class="flex gap-1">
+            <button class="btn btn-ghost btn-xs" onclick="openHoldCartModal()">⏸️ Bekleyenler <span class="badge" id="holdCountBadge">0</span></button>
+            <button class="btn btn-warning btn-xs" onclick="holdCurrentCart()">⏸️ Askıya Al</button>
+          </div>
+        </div>
+        <div style="padding:10px 14px 0 14px;">
+          <select id="cartCustomerSelect" class="cart-customer-select"></select>
+        </div>
+        <div id="cartItems" class="cart-items"></div>
+        
+        <div class="cart-footer">
+          <div class="cart-total-row">
+            <span>Toplam:</span>
+            <span id="cartTotalDisplay" class="text-primary font-black">0.00 ₺</span>
+          </div>
+          <div class="flex justify-between text-xs text-muted mb-2 px-1">
+            <span>Dahil KDV:</span>
+            <b id="cartVatDisplay" style="color:var(--warning-dark);">0.00 ₺</b>
+          </div>
+          
+          <!-- Nakit Satış Fiş/Fatura Hızlı Toggle -->
+          <div class="pos-official-toggle-box mb-2">
+            <label class="pos-official-label" title="Nakit satışlarda fiş veya fatura kesildiğini işaretler. İşaret kaldırılırsa iç kasa takibinde kalır.">
+              <input type="checkbox" id="posCashIsOfficial" checked>
+              <span class="pos-toggle-text">🧾 Fiş / Fatura Kesildi (Nakit Satış)</span>
+            </label>
+            <span class="text-xs text-muted" style="font-size:10.5px; opacity:0.8;">(Kartlı satışlar her zaman resmidir)</span>
+          </div>
+
+          <div class="pay-grid">
+            <button class="btn btn-success" onclick="completeSale('Nakit')">💵 Nakit</button>
+            <button class="btn btn-primary" onclick="completeSale('Kredi Kartı')">💳 Kredi Kartı</button>
+            <button class="btn btn-purple" onclick="openSplitPaymentModal()">✂️ Parçalı Ödeme</button>
+            <button class="btn btn-danger" onclick="chargeToCredit()">📝 Veresiye Yaz</button>
+            <button class="btn btn-warning btn-wide" onclick="openDispatchModal()">🛵 Gidecek Siparişe Ekle</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. SİPARİŞLER -->
+    <section id="tab-orders" class="tab-pane subtabs-container">
+      <div class="subtabs-header">
+        <button class="subtab-btn active" data-sub="pending" onclick="switchOrdersSubtab('pending')">🛵 Yoldaki Siparişler <span class="badge" id="pendingOrdersCount">0</span></button>
+        <button class="subtab-btn" data-sub="platform" onclick="switchOrdersSubtab('platform')">📱 Platform Tahsilat <span class="badge" id="platformPendingBadge">0</span></button>
+        <button class="subtab-btn" data-sub="delivered" onclick="switchOrdersSubtab('delivered')">✅ Teslim Edilenler</button>
+      </div>
+
+      <div id="subtab-orders-pending" class="subtab-view active">
+        <div id="singleOrdersList" class="form-row form-row-3"></div>
+      </div>
+      <div id="subtab-orders-platform" class="subtab-view">
+        <div class="hint-box dark mb-3 text-sm">
+          💡 Platform (Getir/Yemeksepeti) siparişlerinin parası gün sonunda veya haftalık toplu yattığında buradan "Parası Yattı" işaretlenir ve E-Tablo'ya kasaya giriş olarak yansır.
+        </div>
+        <div id="platformOrdersGroupedList" class="form-row form-row-2"></div>
+      </div>
+      <div id="subtab-orders-delivered" class="subtab-view">
+        <div class="flex justify-between mb-3">
+          <b>Geçmiş Teslimatlar</b>
+          <button class="btn btn-danger btn-sm" onclick="clearDeliveredOrders()">🗑️ Listeyi Temizle</button>
+        </div>
+        <div id="deliveredOrdersList" class="flex-col gap-2"></div>
+      </div>
+    </section>
+
+    <!-- 3. ENVANTER -->
+    <section id="tab-inventory" class="tab-pane subtabs-container">
+      <div class="subtabs-header">
+        <button class="subtab-btn active" data-sub="stock" onclick="switchInvSubtab('stock')">📦 Stok & Fiyat Listesi</button>
+        <button class="subtab-btn" data-sub="bundles" onclick="switchInvSubtab('bundles')">🎁 Kampanya / Paket</button>
+        <button class="subtab-btn" data-sub="waste" onclick="switchInvSubtab('waste')">🗑️ Fire / Zayi</button>
+      </div>
+
+      <div id="subtab-inv-stock" class="subtab-view active">
+        <div class="flex gap-2 mb-3 items-center">
+          <input type="text" id="invSearchInput" class="search-input" placeholder="🔍 Ürün Ara..." oninput="renderInventoryTable()">
+          <select id="invCatFilter" class="fc" style="width:200px;" onchange="renderInventoryTable()"></select>
+          <button class="btn btn-primary" onclick="openAddProductModal()">+ Yeni Ürün Ekle</button>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Ürün Adı</th><th>Kategori</th><th>Tedarikçi</th><th>Maliyet</th><th>Fiyat</th><th>KDV</th><th>Kâr Marjı</th><th>Stok</th><th>İşlemler</th></tr></thead>
+          <tbody id="inventoryTableBody"></tbody>
+        </table>
+      </div>
+
+      <div id="subtab-inv-bundles" class="subtab-view">
+        <div class="flex justify-between mb-3">
+          <div class="hint-box mb-0 text-sm flex-1 mr-3">
+            💡 "Kampanya" ürünleri aslında ayrı stok tutmaz. Satıldığında, içindeki alt ürünlerin stoğundan otomatik düşer.
+          </div>
+          <button class="btn btn-purple" onclick="openAddBundleModal()">🎁 Yeni Kampanya Paketi</button>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Kampanya Adı</th><th>İçeriği (Otomatik Düşer)</th><th>Paket Satış Fiyatı</th><th>İşlem</th></tr></thead>
+          <tbody id="bundlesTableBody"></tbody>
+        </table>
+      </div>
+
+      <div id="subtab-inv-waste" class="subtab-view">
+        <div class="flex justify-between mb-3">
+          <div class="hint-box mb-0 text-sm flex-1 mr-3">
+            💡 Patlak kum, tarihi geçen mama gibi satılamayacak ürünleri buradan stoktan düşebilirsin. Zarar tutarı maliyet üzerinden hesaplanır.
+          </div>
+          <button class="btn btn-danger" onclick="openAddWasteModal()">🗑️ Zayi Bildir (Stok Düş)</button>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Tarih</th><th>Ürün Adı</th><th>Miktar</th><th>B. Maliyeti</th><th>Toplam Zarar</th><th>Gerekçe / Not</th></tr></thead>
+          <tbody id="wasteTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 4. CRM -->
+    <section id="tab-crm" class="tab-pane subtabs-container">
+      <div class="subtabs-header">
+        <button class="subtab-btn active" data-sub="customers" onclick="switchCrmSubtab('customers')">👥 Müşteri Listesi</button>
+        <button class="subtab-btn" data-sub="credit" onclick="switchCrmSubtab('credit')">📖 Veresiye Defteri (Açık Hesaplar)</button>
+      </div>
+      
+      <div id="subtab-customers" class="subtab-view active">
+        <div class="flex gap-2 mb-3">
+          <input type="text" id="crmSearchInput" class="search-input" placeholder="🔍 İsim veya Telefon Ara..." oninput="renderCRM()">
+          <button class="btn btn-primary" onclick="openAddCustomerModal()">+ Yeni Müşteri</button>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Müşteri Adı</th><th>İletişim & Adres</th><th>Evcil Hayvan / Not</th><th>Açık Borç</th><th>İşlemler</th></tr></thead>
+          <tbody id="crmTableBody"></tbody>
+        </table>
+      </div>
+
+      <div id="subtab-credit" class="subtab-view">
+        <div class="flex justify-between items-center mb-3">
+          <div class="flex items-center gap-3">
+            <b>Toplam Veresiye Alacağı:</b>
+            <span id="creditTotalBadge" class="text-danger font-black text-lg">0.00 ₺</span>
+          </div>
+          <button class="btn btn-warning" onclick="openManualDebtModal()">📝 Elle Borç Yaz</button>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Müşteri (Borçlu)</th><th>Telefon</th><th>Toplam Borç Tutarı</th><th>Son İşlem</th><th>Tahsilat İşlemi</th></tr></thead>
+          <tbody id="creditTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 5. TEDARİK -->
+    <section id="tab-procurement" class="tab-pane subtabs-container">
+      <div class="subtabs-header">
+        <button class="subtab-btn active" data-sub="suppliers" onclick="switchProcSubtab('suppliers')">🏢 Toptancılar & Cariler</button>
+        <button class="subtab-btn" data-sub="all-purchases" onclick="switchProcSubtab('all-purchases')">📥 Mal Kabul Geçmişi</button>
+        <button class="subtab-btn" data-sub="deficits" onclick="switchProcSubtab('deficits')">📝 Eksikler & Akıllı Sipariş</button>
+      </div>
+
+      <div id="subtab-suppliers" class="subtab-view active">
+        <div class="flex justify-between items-center mb-3">
+          <div class="flex items-center gap-3">
+            <b>Toptancılara Toplam Borç:</b>
+            <span id="supplierDebtBadge" class="text-danger font-black text-lg">0.00 ₺</span>
+          </div>
+          <div class="flex gap-2">
+            <button class="btn btn-primary" onclick="openAddSupplierModal()">+ Yeni Toptancı Ekle</button>
+            <button class="btn btn-success" onclick="openSupplierIntakeModal()">📥 Toptancıdan Mal Girişi (Fatura İşle)</button>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Firma Adı</th><th>İletişim</th><th>Çalışma Şartları / Not</th><th>Bakiye (Borcumuz)</th><th>İşlemler</th></tr></thead>
+          <tbody id="suppliersTableBody"></tbody>
+        </table>
+      </div>
+
+      <div id="subtab-all-purchases" class="subtab-view">
+        <div class="flex gap-2 mb-3">
+          <input type="text" id="purchasesSearchInput" class="search-input" placeholder="🔍 Toptancı veya Ürün Ara..." oninput="renderAllPurchasesTable()">
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Tarih</th><th>Toptancı</th><th>Alınan Mal (Kalem/Tutar)</th><th>Ödeme Durumu</th><th>Fatura Tutarı</th><th>Fatura Görseli</th></tr></thead>
+          <tbody id="allPurchasesTableBody"></tbody>
+        </table>
+      </div>
+
+      <div id="subtab-deficits" class="subtab-view">
+        <div class="form-row form-row-2">
+          <!-- Eksik Listesi -->
+          <div style="background:white; padding:16px; border-radius:var(--radius); border:1px solid var(--border);">
+            <div class="flex justify-between mb-3 items-center">
+              <b class="text-primary text-lg">📝 Eksikler Listesi (Toptancıya Atılacak)</b>
+              <div>
+                <button class="btn btn-ghost btn-sm" onclick="copyDeficits('all')">Panoya Kopyala</button>
+              </div>
+            </div>
+            <div class="flex gap-2 mb-3">
+              <input type="text" id="searchProductForDeficit" class="fc" list="existingProductsForDeficitList" placeholder="🔍 Mevcut ürünü aratıp ekle..." onchange="handleSelectExistingProductForDeficit(this.value)">
+              <datalist id="existingProductsForDeficitList"></datalist>
+            </div>
+            <div class="flex gap-2 mb-3">
+              <input type="text" id="manualDeficitInput" class="fc" placeholder="✍️ Veya manuel yeni kalem yaz...">
+              <button class="btn btn-primary" onclick="addManualDeficit()">Ekle</button>
+            </div>
+            <table class="data-table">
+              <thead><tr><th>Ürün Adı</th><th>Tedarikçi</th><th>Durum</th><th>İşlem</th></tr></thead>
+              <tbody id="deficitsTableBody"></tbody>
+            </table>
+          </div>
+          
+          <!-- Sistem Önerileri -->
+          <div style="background:white; padding:16px; border-radius:var(--radius); border:1px solid var(--border);">
+            <b class="text-danger text-lg mb-3 block">🤖 Sistem Önerileri (Kritik Stoklar)</b>
+            <div class="hint-box mb-3 text-sm">💡 Stoku 2 ve altına düşen ürünler otomatik buraya düşer. Listeye ekleyerek toptancıya sipariş geçebilirsiniz.</div>
+            <table class="data-table">
+              <thead><tr><th>Ürün Adı</th><th>Kalan Stok</th><th>İşlem</th></tr></thead>
+              <tbody id="suggestionsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. GİDERLER -->
+    <section id="tab-expenses" class="tab-pane subtabs-container">
+      <div class="flex justify-between mb-4">
+        <h2>💸 Giderler & Alımlar Tablosu</h2>
+        <div class="flex gap-2">
+          <button class="btn btn-primary" onclick="openAddExpenseModal(false)">☕ Günlük Masraf (Çay/Yemek)</button>
+          <button class="btn btn-purple" onclick="openAddExpenseModal(true)">🏢 Sabit Gider (Kira/Fatura)</button>
+        </div>
+      </div>
+
+      <!-- 🏛️ DUAL FINANCIAL OVERVIEW CARD: FİİLİ KÂR VS. VERGİ YÜKÜ -->
+      <div class="dual-financial-card mb-4" id="dualFinancialOverviewCard">
+        <div class="df-header">
+          <div class="df-title-box">
+            <span class="df-icon">📊</span>
+            <div>
+              <div class="df-title">Mali Tablo: Fiili Kasa Kârı vs. Resmi Vergi Yükü</div>
+              <div class="df-subtitle">Gerçek Ticari Kâr (İç Kasa) ile Resmi Vergi Matrahı ve Denetim Riski Karşılaştırması</div>
+            </div>
+          </div>
+          <div class="df-actions">
+            <button class="btn btn-warning btn-sm" onclick="syncTaxReportToSheets()" id="btnSyncTaxReport">
+              ☁️ Mali Raporu E-Tablo'ya Gönder
+            </button>
+          </div>
+        </div>
+
+        <!-- Segmented 4-Column Grid -->
+        <div class="df-grid">
+          <!-- 1. Fiili Kasa Kârı -->
+          <div class="df-item-card real-profit-card">
+            <div class="df-tag">Cebe Giren</div>
+            <div class="df-label">💰 Fiili Kasa Kârı</div>
+            <div class="df-value text-success" id="dualRealProfit">0.00 ₺</div>
+            <div class="df-sub">Toplam Satış − Toplam Alış Maliyeti</div>
+            <div class="df-details">
+              <span>Ciro: <b id="dualTotalSales">0.00 ₺</b></span>
+              <span>Maliyet: <b id="dualTotalCost">0.00 ₺</b></span>
+            </div>
+          </div>
+
+          <!-- 2. Resmi Vergi Matrahı -->
+          <div class="df-item-card tax-base-card">
+            <div class="df-tag">Resmi Matrah</div>
+            <div class="df-label">🏛️ Resmi Vergi Matrahı</div>
+            <div class="df-value text-primary-light" id="dualTaxBase">0.00 ₺</div>
+            <div class="df-sub">Resmi Satışlar − (Faturalı Alış & Gider)</div>
+            <div class="df-details">
+              <span>Resmi Satış: <b id="dualOfficialSales">0.00 ₺</b></span>
+              <span>Faturalı İndirim: <b id="dualInvoicedDeductions">0.00 ₺</b></span>
+            </div>
+          </div>
+
+          <!-- 3. Tahmini Vergi Yükü -->
+          <div class="df-item-card tax-burden-card">
+            <div class="df-tag">Vergi Yükü</div>
+            <div class="df-label">⚖️ Tahmini Vergi Yükü</div>
+            <div class="df-value text-warning" id="dualTaxBurden">0.00 ₺</div>
+            <div class="df-sub">KDV Farkı + %20 Gelir Vergisi</div>
+            <div class="df-details">
+              <span>KDV Farkı: <b id="dualPayableVat">0.00 ₺</b></span>
+              <span>G. Vergisi: <b id="dualIncomeTax">0.00 ₺</b></span>
+            </div>
+          </div>
+
+          <!-- 4. Vergi Riski / Uyarısı -->
+          <div class="df-item-card tax-risk-card" id="dualRiskCard">
+            <div class="df-tag" id="dualRiskTag">GİB Uyarısı</div>
+            <div class="df-label">⚠️ Vergi Riski Hacmi</div>
+            <div class="df-value" id="dualRiskAmount">0.00 ₺</div>
+            <div class="df-sub" id="dualRiskSub">Kartsız giriş yapılıp kartla satılan tutar hacmi</div>
+            <div class="df-details">
+              <span>Kartlı Satış: <b id="dualCardSales">0.00 ₺</b></span>
+              <span>Faturalı Alış: <b id="dualInvoicedPurchases">0.00 ₺</b></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Risk Banner -->
+        <div id="dualRiskAlertBanner" class="df-risk-banner" style="display:none;"></div>
+
+        <!-- KDV Detay Barı -->
+        <div class="df-kdv-summary">
+          <div class="df-kdv-pill"><span>📈 Tahsil Edilen KDV:</span> <b id="kdvCollectedTotal">0.00 ₺</b></div>
+          <div class="df-kdv-pill"><span>📥 İndirilecek KDV:</span> <b id="kdvDeductibleTotal">0.00 ₺</b></div>
+          <div class="df-kdv-pill"><span>⚖️ Net KDV:</span> <b id="kdvNetBalance">0.00 ₺</b></div>
+          <div class="df-kdv-pill" id="vatStatusBadgeContainer"><span class="chip chip-ok" id="vatStatusBadge">Hesaplanıyor...</span></div>
+        </div>
+      </div>
+
+      <div class="expense-section procurement">
+        <h3>📦 Ürün Alımları (Toptancı Faturaları)</h3>
+        <p>Tedarik sekmesinden girilen "Mal Kabulleri" otomatik buraya yansır.</p>
+        <table class="data-table mt-3" style="background:rgba(255,255,255,0.9);">
+          <thead><tr><th>Tarih</th><th>Toptancı</th><th>Kalemler</th><th>Ödeme Durumu</th><th>Tutar</th></tr></thead>
+          <tbody id="procurementExpenseTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="form-row form-row-2">
+        <div class="expense-section major">
+          <h3>🏢 Sabit Giderler</h3>
+          <p>Kira, Fatura, Maaş vb.</p>
+          <table class="data-table mt-3" style="background:rgba(255,255,255,0.9);">
+            <thead><tr><th>Tarih</th><th>Gider Kalemi</th><th>Ödenen Kaynak</th><th>Açıklama</th><th>Tutar</th></tr></thead>
+            <tbody id="majorExpenseTableBody"></tbody>
+          </table>
+        </div>
+        <div class="expense-section" style="background:#f8fafc; border:1px solid var(--border);">
+          <h3 class="text-text">☕ Günlük Masraflar</h3>
+          <p class="text-muted">Kasa içi çıkışlar (Yemek, su vb.)</p>
+          <table class="data-table mt-3">
+            <thead><tr><th>Tarih</th><th>Saat</th><th>Kategori</th><th>Kaynak</th><th>Açıklama</th><th>Tutar</th></tr></thead>
+            <tbody id="dailyExpenseTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer style="text-align:center; padding:6px; font-size:10px; color:var(--text-muted); border-top:1px solid var(--border); background:var(--bg);">
+    <span id="appVersion"></span> &bull; Petshop Kasa & Envanter Sistemi
+  </footer>
+
+  <!-- ── MODALS (INCLUDE ALL NECESSARY HTML HERE) ── -->
+  <!-- Modals are kept minimal for brevity, but all IDs match the JS logic -->
+
+  <!-- Split Payment -->
+  <div class="modal-overlay" id="splitModal">
+    <div class="modal-box" style="max-width:400px;">
+      <div class="modal-title">✂️ Parçalı Ödeme <span id="splitCartTotal" class="text-primary font-black">0.00 ₺</span></div>
+      <div class="fg"><label>Nakit Alınan Tutar (₺)</label><input type="number" id="splitCashInput" class="fc" oninput="calculateSplitRemaining()"></div>
+      <div class="fg"><label>Kredi Kartı Çekilecek Tutar (₺)</label><input type="number" id="splitCardInput" class="fc" readonly></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('splitModal')">İptal</button>
+        <button class="btn btn-purple" onclick="completeSplitSale()">Onayla ve Kapat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dispatch -->
+  <div class="modal-overlay" id="dispatchModal">
+    <div class="modal-box">
+      <div class="modal-title">🛵 Gidecek Sipariş Oluştur</div>
+      <div class="fg">
+        <label>Müşteri Seç Veya Ara</label>
+        <input type="text" id="dispCustomerSearchInput" class="fc" list="dispatchCustomerList" placeholder="🔍 İsim veya Telefon yazın..." onchange="handleSelectDispatchCustomer(this.value)">
+        <datalist id="dispatchCustomerList"></datalist>
+      </div>
+      <hr style="margin:15px 0; border:0; border-top:1px dashed var(--border);">
+      <div class="form-row form-row-2">
+        <div class="fg"><label>İsim Soyisim</label><input type="text" id="dispCustomerName" class="fc"></div>
+        <div class="fg"><label>Telefon</label><input type="text" id="dispPhone" class="fc"></div>
+      </div>
+      <div class="fg"><label>Açık Adres</label><textarea id="dispAddress" class="fc" rows="2"></textarea></div>
+      <div class="form-row form-row-2">
+        <div class="fg"><label>Kanal</label>
+          <select id="dispChannel" class="fc">
+            <option>Telefon / WhatsApp</option>
+            <option>Getir</option>
+            <option>Yemeksepeti</option>
+          </select>
+        </div>
+        <div class="fg"><label>Ödeme Tercihi</label>
+          <select id="dispPaymentType" class="fc">
+            <option>Nakit</option><option>Kredi Kartı</option><option>Online / Platform</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label>Kurye İçin Not / Evcil Hayvan Bilgisi</label><input type="text" id="dispNote" class="fc"></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('dispatchModal')">Vazgeç</button>
+        <button class="btn btn-warning" onclick="saveDispatchOrder()">Siparişi Yola Çıkar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hold Carts -->
+  <div class="modal-overlay" id="holdCartsModal">
+    <div class="modal-box" style="max-width:400px;">
+      <div class="modal-title">⏸️ Askıdaki Sepetler</div>
+      <div id="holdCartsList" class="flex-col gap-2"></div>
+      <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('holdCartsModal')">Kapat</button></div>
+    </div>
+  </div>
+
+  <!-- Add Product -->
+  <div class="modal-overlay" id="addProductModal">
+    <div class="modal-box">
+      <div class="modal-title" id="addProductModalTitle">+ Yeni Ürün Tanımla</div>
+      <div class="fg">
+        <label>Hızlı Doldur (Var olan ürünü güncelle)</label>
+        <input type="text" id="quickProductSearch" class="fc" list="existingProductsSearchList" placeholder="🔍 Ürün ara..." onchange="handleAutoFillExistingProduct(this.value)">
+        <datalist id="existingProductsSearchList"></datalist>
+      </div>
+      <hr style="margin:15px 0; border:0; border-top:1px dashed var(--border);">
+      <div class="fg"><label>Ürün Adı</label><input type="text" id="npName" class="fc"></div>
+      <div class="form-row form-row-2">
+        <div class="fg"><label>Kategori</label><select id="npCategory" class="fc"></select></div>
+        <div class="fg"><label>Varsayılan Tedarikçi</label><select id="npSupplierSelect" class="fc"></select></div>
+      </div>
+      <div class="form-row form-row-4">
+        <div class="fg"><label>Satış Fiyatı (₺)</label><input type="number" id="npPrice" class="fc"></div>
+        <div class="fg"><label>Alış Maliyeti (₺)</label><input type="number" id="npCost" class="fc"></div>
+        <div class="fg"><label>Mevcut Stok</label><input type="number" id="npStock" class="fc"></div>
+        <div class="fg">
+          <label>KDV Oranı</label>
+          <select id="npVatRate" class="fc">
+            <option value="20" selected>%20</option>
+            <option value="10">%10</option>
+            <option value="1">%1</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('addProductModal')">Vazgeç</button>
+        <button class="btn btn-primary" onclick="saveNewProduct()">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Purchase History -->
+  <div class="modal-overlay" id="productPurchaseHistoryModal">
+    <div class="modal-box">
+      <div class="modal-title">📜 <span id="pphProdName"></span> Alım Geçmişi</div>
+      <div id="pphProdDetails" class="text-sm text-muted mb-3 pb-3" style="border-bottom:1px solid var(--border);"></div>
+      <div id="productPurchaseHistoryList" class="flex-col gap-2 max-h-60 overflow-y-auto"></div>
+      <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('productPurchaseHistoryModal')">Kapat</button></div>
+    </div>
+  </div>
+
+  <!-- Add Bundle -->
+  <div class="modal-overlay" id="addBundleModal">
+    <div class="modal-box">
+      <div class="modal-title">🎁 Yeni Kampanya Paketi (Bundle)</div>
+      <div class="fg"><label>Paket Adı</label><input type="text" id="bundleName" class="fc" placeholder="Örn: Eko Kedi Paketi"></div>
+      <div class="fg"><label>Paket Toplam Satış Fiyatı (₺)</label><input type="number" id="bundlePrice" class="fc"></div>
+      <hr style="margin:15px 0; border:0; border-top:1px solid var(--border);">
+      <div class="fg mb-1"><label>Paket İçeriğini Oluştur</label></div>
+      <div class="flex gap-2 mb-3">
+        <input type="text" id="bundleProductSearch" class="fc" list="bundleProductsSearchList" placeholder="🔍 Ürün ara...">
+        <datalist id="bundleProductsSearchList"></datalist>
+        <input type="number" id="bundleProductQty" class="fc" style="width:80px;" value="1" title="Adet">
+        <button class="btn btn-success" onclick="addProductToBundle()">Ekle</button>
+      </div>
+      <div id="bundleItemsList" class="flex-col gap-1 bg-bg p-2 rounded-sm border border-border min-h-[80px]"></div>
+      <div class="modal-actions mt-3">
+        <button class="btn btn-ghost" onclick="closeModal('addBundleModal')">İptal</button>
+        <button class="btn btn-purple" onclick="saveBundle()">Paketi Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Waste -->
+  <div class="modal-overlay" id="addWasteModal">
+    <div class="modal-box" style="max-width:450px;">
+      <div class="modal-title">🗑️ Fire / Zayi Kaydı (Stoktan Düş)</div>
+      <div class="fg">
+        <label>Zayi Olan Ürünü Ara</label>
+        <input type="text" id="wasteProductSearch" class="fc" list="wasteProductsSearchList" placeholder="🔍 Ürün adı..." onchange="handleAutoFillWasteProduct(this.value)">
+        <datalist id="wasteProductsSearchList"></datalist>
+      </div>
+      <div class="fg">
+        <input type="text" id="wasteProductNameDisplay" class="fc font-bold" readonly placeholder="Seçilen ürün burada görünecek">
+        <input type="hidden" id="wasteSelectedProductId">
+        <input type="hidden" id="wasteCostDisplay">
+      </div>
+      <div class="form-row form-row-2">
+        <div class="fg"><label>Düşülecek Adet</label><input type="number" id="wasteQty" class="fc" value="1"></div>
+        <div class="fg"><label>Zayi Nedeni</label>
+          <select id="wasteReason" class="fc">
+            <option>Ambalaj Yırtıldı / Patladı</option>
+            <option>Son Kullanma Tarihi Geçti</option>
+            <option>Kayıp / Çalıntı</option>
+            <option>Bozuk / Defolu Çıktı</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label>Ek Not (İsteğe bağlı)</label><input type="text" id="wasteNote" class="fc"></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('addWasteModal')">İptal</button>
+        <button class="btn btn-danger" onclick="saveWasteRecord()">Stoktan Düş & Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Customer -->
+  <div class="modal-overlay" id="addCustomerModal">
+    <div class="modal-box" style="max-width:400px;">
+      <div class="modal-title">👥 Yeni Müşteri Ekle</div>
+      <div class="fg"><label>Müşteri Adı Soyadı</label><input type="text" id="custNameInput" class="fc"></div>
+      <div class="fg"><label>Telefon</label><input type="text" id="custPhoneInput" class="fc"></div>
+      <div class="fg"><label>Açık Adres</label><textarea id="custAddressInput" class="fc" rows="2"></textarea></div>
+      <div class="fg"><label>Evcil Hayvan / Notlar</label><input type="text" id="custPetInput" class="fc" placeholder="Örn: Tekir Kedi (Mişa)"></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('addCustomerModal')">İptal</button>
+        <button class="btn btn-primary" onclick="saveNewCustomer()">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customer History -->
+  <div class="modal-overlay" id="customerHistoryModal">
+    <div class="modal-box">
+      <div class="modal-title">📜 <span id="chCustName"></span> — Alışveriş Geçmişi</div>
+      <div id="chCustContact" class="text-sm text-muted mb-3 pb-3 border-b border-border"></div>
+      <div id="customerHistoryList" class="flex-col gap-2 max-h-60 overflow-y-auto"></div>
+      <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('customerHistoryModal')">Kapat</button></div>
+    </div>
+  </div>
+
+  <!-- Collect Debt -->
+  <div class="modal-overlay" id="collectDebtModal">
+    <div class="modal-box" style="max-width:400px;">
+      <div class="modal-title">💰 Veresiye Tahsilatı Al</div>
+      <div class="hint-box mb-3">Müşteri: <b id="cdCustName"></b><br>Kalan Toplam Borç: <b id="cdTotalDebt" class="text-danger"></b></div>
+      <div class="fg"><label>Tahsil Edilecek Tutar (₺)</label><input type="number" id="cdAmount" class="fc"></div>
+      <div class="fg"><label>Tahsilat Yöntemi</label>
+        <select id="cdMethod" class="fc"><option>Nakit</option><option>Kredi Kartı / Havale</option></select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('collectDebtModal')">İptal</button>
+        <button class="btn btn-success" onclick="confirmDebtCollection()">Tahsilatı Onayla</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manual Debt -->
+  <div class="modal-overlay" id="manualDebtModal">
+    <div class="modal-box" style="max-width:400px;">
+      <div class="modal-title">📝 Elle Borç Yaz</div>
+      <div class="fg"><label>Müşteri Seç</label><select id="mdCustSelect" class="fc"></select></div>
+      <div class="fg"><label>Eklenecek Borç Tutarı (₺)</label><input type="number" id="mdAmount" class="fc"></div>
+      <div class="fg"><label>Açıklama (Örn: Geçen aydan kalan)</label><input type="text" id="mdDesc" class="fc" value="Manuel Borç Eklemesi"></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('manualDebtModal')">İptal</button>
+        <button class="btn btn-danger" onclick="saveManualDebt()">Borç Yaz</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Supplier -->
+  <div class="modal-overlay" id="addSupplierModal">
+    <div class="modal-box" style="max-width:400px;">
+      <div class="modal-title">🏢 Yeni Toptancı Firma Ekle</div>
+      <div class="fg"><label>Firma / Plasiyer Adı</label><input type="text" id="supName" class="fc"></div>
+      <div class="fg"><label>Telefon</label><input type="text" id="supPhone" class="fc"></div>
+      <div class="fg"><label>Çalışma Şartları / Vadeler / Notlar</label><textarea id="supNotes" class="fc" rows="2"></textarea></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('addSupplierModal')">İptal</button>
+        <button class="btn btn-primary" onclick="saveSupplier()">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supplier Intake -->
+  <div class="modal-overlay" id="supplierIntakeModal">
+    <div class="modal-box" style="max-width:560px;">
+      <div class="modal-title">📥 Toptancıdan Mal Girişi & Akıllı Fatura İşleme</div>
+      <div class="form-row form-row-2">
+        <div class="fg"><label>Toptancı Seç</label><select id="intakeSupSelect" class="fc"></select></div>
+        <div class="fg"><label>Mevcut Ürünü Ara (İsteğe Bağlı)</label>
+          <input type="text" class="fc" list="existingProductsList" placeholder="🔍 Kayıtlı ürün ara..." onchange="handleSelectExistingProductForIntake(this.value)">
+          <datalist id="existingProductsList"></datalist>
+        </div>
+      </div>
+      <hr style="margin:10px 0; border-top:1px dashed var(--border);">
+      <div class="fg"><label>Faturadaki Ürün Adı</label><input type="text" id="intakeProdName" class="fc" placeholder="Örn: Reflex Somonlu Mama 15kg"></div>
+
+      <!-- Fatura Durumu & Vergi Uyarısı -->
+      <div class="fg mb-2" style="background:var(--bg); padding:10px 14px; border:1px solid var(--border); border-radius:var(--radius-sm);">
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600; margin-bottom:0;">
+          <input type="checkbox" id="intakeHasInvoice" checked onchange="toggleIntakeInvoice()" style="width:16px; height:16px; cursor:pointer;">
+          <span>🧾 Faturalı Alım (Resmi Giriş)</span>
+        </label>
+        <div id="intakeNoInvoiceAlert" class="intake-warning-alert" style="display:none; margin-top:8px; padding:10px 12px; background:#fff1f2; border:1px solid #fecdd3; border-radius:var(--radius-sm); color:#be123c; font-size:12px; line-height:1.45; font-weight:600;">
+          ⚠️ Uyarı: Faturasız alımlar kartlı (POS) satışlarda vergi matrahından düşülemez.
+        </div>
+      </div>
+
+      <!-- KDV & Miktar Satırı -->
+      <div class="form-row form-row-3">
+        <div class="fg"><label>Gelen Adet</label><input type="number" id="intakeQty" class="fc" value="1" min="1" oninput="calculateIntakeLive('qty')"></div>
+        <div class="fg"><label>KDV Oranı</label>
+          <select id="intakeVatRate" class="fc" onchange="calculateIntakeLive('vat')">
+            <option value="20" selected>%20 (Mama / Kum / Aksesuar)</option>
+            <option value="10">%10 (Gıda / Takviye)</option>
+            <option value="1">%1 (Tohum / Yem Ham)</option>
+            <option value="0">%0 (KDV Muaf)</option>
+          </select>
+        </div>
+        <div class="fg"><label>Girdiğim Tutar</label>
+          <select id="intakeVatType" class="fc" onchange="calculateIntakeLive('vatType')">
+            <option value="included" selected>KDV Dahil</option>
+            <option value="excluded">KDV Hariç</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Fatura Tutarları (İki Yönlü Hesaplama) -->
+      <div class="form-row form-row-2">
+        <div class="fg">
+          <label>Toplam Fatura Tutarı (₺) <span class="text-xs text-muted">(Faturadaki Tutar)</span></label>
+          <input type="number" id="intakeTotalCost" class="fc" placeholder="Örn: 1200" step="any" oninput="calculateIntakeLive('total')">
+        </div>
+        <div class="fg">
+          <label>Birim Geliş Fiyatı (₺) <span class="text-xs text-muted">(Oto Hesaplanır)</span></label>
+          <input type="number" id="intakeCost" class="fc" placeholder="Örn: 120" step="any" oninput="calculateIntakeLive('unit')">
+        </div>
+      </div>
+
+      <!-- Canlı KDV & Maliyet Hesap Özeti Kartı -->
+      <div id="intakeCalcCard" style="background:linear-gradient(135deg, #f8fafc, #f1f5f9); border:1px solid var(--border); border-radius:var(--radius); padding:10px 14px; margin-bottom:12px; font-size:12.5px;">
+        <div class="flex justify-between mb-1 text-muted">
+          <span>KDV Hariç Net Matrah:</span>
+          <b id="intakeNetTotalDisplay">0.00 ₺</b>
+        </div>
+        <div class="flex justify-between mb-1" style="color:var(--warning-dark);">
+          <span>Hesaplanan KDV (<span id="intakeVatPctLabel">%20</span>):</span>
+          <b id="intakeVatTotalDisplay">0.00 ₺</b>
+        </div>
+        <div class="flex justify-between mb-1 text-primary font-bold">
+          <span>Toplam Fatura Tutarı:</span>
+          <b id="intakeGrossTotalDisplay">0.00 ₺</b>
+        </div>
+        <hr style="margin:6px 0; border:0; border-top:1px dashed var(--border);">
+        <div class="flex justify-between items-center">
+          <span style="font-weight:600;">📦 KDV Dahil Birim Maliyet:</span>
+          <span class="badge bg-primary" id="intakeUnitCostBadge" style="font-size:13px; font-weight:700;">0.00 ₺</span>
+        </div>
+      </div>
+
+      <!-- Satış Fiyatı & Ödeme Satırı -->
+      <div class="form-row form-row-2">
+        <div class="fg">
+          <div class="flex justify-between items-center">
+            <label>Rafta Satış Fiyatı (₺)</label>
+            <button type="button" class="btn btn-ghost btn-xs" style="padding:1px 6px; font-size:11px;" onclick="applySuggestedMargin(40)">%40 Kâr Uygula</button>
+          </div>
+          <input type="number" id="intakePrice" class="fc" placeholder="Boş = %40 kâr ile oto">
+        </div>
+        <div class="fg"><label>Ödeme Durumu</label>
+          <select id="intakePaymentStatus" class="fc">
+            <option value="debt">Açık Hesap (Cariye Yaz)</option>
+            <option value="paid">Peşin Ödendi (Kasa/Banka'dan Çık)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="fg mt-2">
+        <label>Fatura Görseli Ekle (İsteğe Bağlı)</label>
+        <input type="file" id="intakeInvoiceImg" class="fc" style="padding:6px;" accept="image/*" onchange="previewInvoiceFile(event)">
+      </div>
+
+      <div id="invoiceImgPreviewContainer" style="display:none; text-align:center; margin-top:10px;">
+        <img id="invoicePreviewImg" style="max-height:100px; border-radius:var(--radius-sm); border:1px solid var(--border);">
+      </div>
+
+      <div class="modal-actions mt-3">
+        <button class="btn btn-ghost" onclick="closeModal('supplierIntakeModal')">İptal</button>
+        <button class="btn btn-success" onclick="saveSupplierIntake()">Faturayı İşle & Stoka Ekle</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supplier History -->
+  <div class="modal-overlay" id="supplierHistoryModal">
+    <div class="modal-box">
+      <div class="modal-title">📜 <span id="shSupName"></span> Cari Ekstresi</div>
+      <div class="flex justify-between items-center mb-3 pb-3 border-b border-border">
+        <div class="text-sm">Güncel Bakiye (Borcumuz):</div>
+        <div id="shTotalDebt" class="text-danger font-black text-lg">0.00 ₺</div>
+        <button class="btn btn-success btn-sm" onclick="openPaySupplierModal()">💸 Ödeme Yap</button>
+      </div>
+      <div id="supplierHistoryList" class="flex-col gap-2 max-h-60 overflow-y-auto"></div>
+      <div class="modal-actions mt-3"><button class="btn btn-ghost" onclick="closeModal('supplierHistoryModal')">Kapat</button></div>
+    </div>
+  </div>
+
+  <!-- Pay Supplier -->
+  <div class="modal-overlay" id="paySupplierModal">
+    <div class="modal-box" style="max-width:400px;">
+      <div class="modal-title">💸 Toptancıya Ödeme Yap</div>
+      <div class="hint-box mb-3">Toptancı: <b id="psSupName"></b><br>Toplam Borç: <b id="psTotalDebt" class="text-danger"></b></div>
+      <div class="fg"><label>Ödenecek Tutar (₺)</label><input type="number" id="psAmount" class="fc"></div>
+      <div class="fg"><label>Ödeme Kaynağı</label>
+        <select id="psSource" class="fc"><option>Banka / Havale</option><option>Kasa (Nakit)</option><option>Şahsi Hesap</option></select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('paySupplierModal')">İptal</button>
+        <button class="btn btn-success" onclick="confirmSupplierPayment()">Ödemeyi Onayla</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Expense -->
+  <div class="modal-overlay" id="addExpenseModal">
+    <div class="modal-box" style="max-width:440px;">
+      <div class="modal-title" id="expModalTitle">Gider Ekle</div>
+      <input type="hidden" id="expIsMajor">
+      <div class="fg"><label>Kategori</label><select id="expCategory" class="fc"></select></div>
+      <div class="fg"><label>Tutar (₺ - KDV Dahil)</label><input type="number" id="expAmount" class="fc" oninput="calculateExpenseVatLive()"></div>
+      <div class="fg"><label>Ödeme Kaynağı</label>
+        <select id="expSource" class="fc"><option>Kasa (Nakit)</option><option>Banka Hesabı</option><option>Şahsi Hesap</option></select>
+      </div>
+      <div class="fg"><label>Kısa Açıklama</label><input type="text" id="expDesc" class="fc" placeholder="Örn: Elektrik faturası, temizlik malzemeleri"></div>
+      
+      <!-- Faturalı Harcama (KDV Dahil) Toggle & Rate -->
+      <div class="fg mb-2" style="background:var(--bg); padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius-sm);">
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600; margin-bottom:0;">
+          <input type="checkbox" id="expHasVat" onchange="toggleExpenseVatInputs()" style="width:16px; height:16px; cursor:pointer;">
+          🧾 Faturalı Harcama (KDV Dahil)
+        </label>
+        <div id="expVatInputsContainer" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--border);">
+          <div class="form-row form-row-2">
+            <div class="fg mb-0">
+              <label class="text-xs">KDV Oranı</label>
+              <select id="expVatRate" class="fc text-sm" onchange="calculateExpenseVatLive()">
+                <option value="20" selected>%20</option>
+                <option value="10">%10</option>
+                <option value="1">%1</option>
+                <option value="0">%0 (Muaf)</option>
+              </select>
+            </div>
+            <div class="fg mb-0">
+              <label class="text-xs">Hesaplanan KDV (₺)</label>
+              <input type="number" id="expVatAmount" class="fc text-sm" readonly style="background:#f1f5f9; font-weight:600; color:var(--primary);">
+            </div>
+          </div>
+          <div class="text-xs text-muted mt-1">İndirilecek KDV olarak ay sonu mutabakatına dahil edilir.</div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('addExpenseModal')">İptal</button>
+        <button class="btn btn-primary" onclick="saveExpense()">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Image -->
+  <div class="modal-overlay" id="viewImageModal" onclick="closeModal('viewImageModal')">
+    <div class="modal-box" style="background:transparent; box-shadow:none; padding:0; text-align:center;">
+      <img id="fullImageView" style="max-width:100%; max-height:85vh; border-radius:var(--radius-lg);">
+    </div>
+  </div>
+
+  <!-- Daily Close -->
+  <div class="modal-overlay" id="dailyCloseModal">
+    <div class="modal-box" style="max-width:450px;">
+      <div class="modal-title">🏁 Gün Sonu Kasa Sayımı</div>
+      <div class="hint-box mb-3 text-sm">
+        Gün sonu yaparken çekmecedeki tüm nakit parayı sayıp girin. Sistem olması gereken rakamla karşılaştırıp açığı/fazlayı söyler.
+      </div>
+      <div class="banknote-grid mb-3">
+        <div class="fg mb-0"><label>200 ₺ Adet</label><input type="number" id="b200" class="fc" oninput="calculateDailyClose()"></div>
+        <div class="fg mb-0"><label>100 ₺ Adet</label><input type="number" id="b100" class="fc" oninput="calculateDailyClose()"></div>
+        <div class="fg mb-0"><label>50 ₺ Adet</label><input type="number" id="b50" class="fc" oninput="calculateDailyClose()"></div>
+        <div class="fg mb-0"><label>20 ₺ Adet</label><input type="number" id="b20" class="fc" oninput="calculateDailyClose()"></div>
+        <div class="fg mb-0"><label>10 ₺ Adet</label><input type="number" id="b10" class="fc" oninput="calculateDailyClose()"></div>
+        <div class="fg mb-0"><label>5 ₺ Adet</label><input type="number" id="b5" class="fc" oninput="calculateDailyClose()"></div>
+        <div class="fg mb-0" style="grid-column:span 3;"><label>Madeni Para Toplamı (₺)</label><input type="number" id="bCoin" class="fc" oninput="calculateDailyClose()"></div>
+      </div>
+      
+      <div style="background:#f8fafc; border:1px solid var(--border); border-radius:var(--radius); padding:14px;">
+        <div class="flex justify-between mb-2"><span>Sayılan Kasa (Gerçek):</span> <b id="dcTotalCash">0.00 ₺</b></div>
+        <div class="flex justify-between mb-2"><span>Sistem Beklentisi (Nakit):</span> <b id="dcExpectedCash">0.00 ₺</b></div>
+        <hr style="margin:10px 0; border:0; border-top:1px dashed var(--border);">
+        <div class="flex justify-between items-center text-lg">
+          <b>Fark (Açık/Fazla):</b> 
+          <b id="dcDifference">-</b>
+        </div>
+      </div>
+      
+      <div class="modal-actions mt-3">
+        <button class="btn btn-ghost" onclick="closeModal('dailyCloseModal')">Vazgeç</button>
+        <button class="btn btn-warning" onclick="completeDailyClose()">Gün Sonunu Kapat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/state.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/pos.js"></script>
+  <script src="js/orders.js"></script>
+  <script src="js/inventory.js"></script>
+  <script src="js/crm.js"></script>
+  <script src="js/procurement.js"></script>
+  <script src="js/expenses.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
