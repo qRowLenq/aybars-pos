@@ -1,61 +1,53 @@
 /**
  * ===================================================================
  * AYBARS PETSHOP YÖNETİM SİSTEMİ — GOOGLE APPS SCRIPT BACKEND
- * Enterprise Financial Architecture & Weekly Calendar Engine
- * Sürüm: 5.0.0 (Weekly Calendar Block Layout & Executive Dashboard)
+ * Enterprise Financial Architecture (v5.1.0)
  * ===================================================================
  * 
- * 1. DİNAMİK AYLIK GELİR VE HAFTALIK TAKVİM DÜZENİ (GELİR - AY YIL):
- *    - Tek satır ardışık liste yerine yatay haftalık bloklar:
- *      [Pazartesi | Salı | Çarşamba | Perşembe | Cuma | Cumartesi | Pazar]
- *    - 1. Hafta, 2. Hafta, 3. Hafta, 4. Hafta ve 5. Hafta sütun blokları.
- *    - Satış geldiğinde satış gününün sütununa doğrudan alt alta eklenir.
- *    - Gün ve hafta alt/üst toplamları otomatik formüllerle canlı hesaplanır.
+ * BU SÜRÜMDEKİ GELİŞTİRMELER:
+ * 1. GİDER - [AY YIL] SAYFASINDA #ERROR! FORMÜLLERİ GİDERİLDİ:
+ *    - Yerel ayar (nokta/virgül, Türkçe/İngilizce) uyuşmazlığına yol açan karmaşık
+ *      SUMIFS/TEXT formülleri kaldırıldı.
+ *    - KPI toplamları doğrudan backend tarafından canlı hesaplanıp damgalanır (zero-error).
  * 
- * 2. KONSOLİDE TEK TABLO GİDER DÜZENİ (GİDER - AY YIL):
- *    - Parçalı 3 panelli karmaşa ve satır 36'ya kayma sorunu tamamen giderildi.
- *    - Üstte (Satır 1-5) sabit KPI Özet Kartları:
- *      [Bugünkü Gider] | [1. Hafta] | [2. Hafta] | [3. Hafta] | [4. Hafta] | [Aylık Sabit] | [Aylık Toplam]
- *    - Satır 6: "Önceki Aydan Devreden Toptancı Borçları" devir satırı.
- *    - Satır 7: 8 Kolonlu standart defter başlıkları:
- *      Tarih | Saat | Kategori | Ödeme Kaynağı | Açıklama | Tutar | KDV | Fatura Durumu
- *    - Satır 8+: Tüm giderler tek bir düzenli tabloda ardışık akar.
+ * 2. İKİ AYRI BÖLÜMLÜ DÜZEN (MAJOR GİDERLER VS. GÜNLÜK & TOPTANCI):
+ *    - BÖLÜM A (A:F Kolonları): 🏢 MAJOR / SABİT GİDERLER (Kira, Stopaj, Elektrik, Su, Aidat, Personel)
+ *    - G Kolonu: Görsel Boşluk
+ *    - BÖLÜM B (H:M Kolonları): 📦 GÜNLÜK İŞLETME & TOPTANCI AKIŞI (Mal Alımları, Sarf, Yemek, Kargo)
+ *    - sync_expense gelen kaydın tipine göre ilgili bölüme bağımsız olarak akar.
  * 
- * 3. YÖNETİCİ MALİ RAPOR & VERGİ DASHBOARD'U (TEKİL YERİNDE GÜNCELLEME):
- *    - Sürekli alt alta satır ekleme (append spamming) sonlandırıldı.
- *    - Sabit hücreli kalıcı yönetici paneli yerinde (in-place) güncellenir:
- *      * Kart 1: KDV Dengesi (Tahsil Edilen, İndirilecek, Net Ödenecek / Devreden KDV)
- *      * Kart 2: Resmi Matrah vs. Fiili Kasa (Resmi Satış, Faturalı Gider, %20 Vergi, Net Kâr)
- *      * Kart 3: Vergi Riski Uyarısı (Faturasız alınıp kartla satılan hacim)
+ * 3. DEVREDEN BORÇ MOTORU (ROLLOVER SLOT):
+ *    - Satır 6'da "Önceki Aydan Devreden Toptancı Borçları" kalıcı slotu korunur.
  * 
- * 4. GÜN SONU KASA MUTABAKATI (BEKLENEN KASA HESABI):
- *    - Beklenen Kasa formülü: (Günün Nakit Satışları - Günün Kasadan Çıkan Nakit Giderleri).
- *    - Sayılan Nakit ile karşılaştırılarak Tam Mutabakat, Kasa Fazlası veya Kasa Açığı üretilir.
+ * 4. GELİR TAKVİMİ & YÖNETİCİ MALİ RAPOR DASHBOARD'U:
+ *    - Haftalık bloklu satış takvimi korunur.
+ *    - Mali Rapor & Vergi dashboard'u sabit hücrelerde yerinde güncellenir (no append spam).
+ *    - Gün Sonu Kasa mutabakatı dinamik (Nakit Satış - Nakit Gider) formülüyle çalışır.
  */
 
 var TURKISH_MONTHS = ["OCAK", "ŞUBAT", "MART", "NİSAN", "MAYIS", "HAZİRAN", "TEMMUZ", "AĞUSTOS", "EYLÜL", "EKİM", "KASIM", "ARALIK"];
 
 // ===================================================================
-// 1. WEB APP GİRİŞ NOKTALARI (doGet & doPost)
+// 1. WEB APP ENDPOINT'LERİ (doGet & doPost)
 // ===================================================================
 
 function doGet(e) {
   return HtmlService.createHtmlOutput(
     '<div style="font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;padding:36px;line-height:1.6;color:#0f172a;max-width:760px;margin:auto;">' +
-    '<h2 style="color:#059669;margin-bottom:8px;">🚀 Aybars Petshop Backend API v5.0.0 Aktif</h2>' +
-    '<p style="color:#64748b;font-size:14px;margin-top:0;">Weekly Calendar & Executive Financial Architecture</p>' +
+    '<h2 style="color:#059669;margin-bottom:8px;">🚀 Aybars Petshop Backend API v5.1.0 Aktif</h2>' +
+    '<p style="color:#64748b;font-size:14px;margin-top:0;">Dual-Section Expense & Weekly Calendar Architecture</p>' +
     '<hr style="border:none;border-top:1px solid #e2e8f0;margin:20px 0;"/>' +
     '<div style="background:#f8fafc;border-left:4px solid #10b981;padding:14px 18px;border-radius:6px;margin-bottom:16px;">' +
       '<b>📅 Dinamik Aylık Satış Takvimi:</b> <code>GELİR - [AY YIL]</code> sayfalarında haftalık ve günlük sütun blokları.' +
     '</div>' +
     '<div style="background:#f8fafc;border-left:4px solid #ef4444;padding:14px 18px;border-radius:6px;margin-bottom:16px;">' +
-      '<b>🧾 Konsolide Tek Defter:</b> <code>GİDER - [AY YIL]</code> sayfasında 8 kolonlu standart tablo, üst KPI ve devreden toptancı borcu.' +
+      '<b>🏢 İki Bölümlü Gider Defteri:</b> <code>GİDER - [AY YIL]</code> sayfasında Bölüm A (Major/Sabit) ve Bölüm B (Günlük & Toptancı).' +
     '</div>' +
     '<div style="background:#f8fafc;border-left:4px solid #3b82f6;padding:14px 18px;border-radius:6px;margin-bottom:16px;">' +
-      '<b>🏛️ Mali Rapor Dashboard\'u:</b> <code>Mali Rapor & Vergi</code> sayfasında satır biriktirmeden yerinde güncellenen 3 yönetici kartı.' +
+      '<b>🏛️ Mali Rapor Dashboard\'u:</b> <code>Mali Rapor & Vergi</code> sayfasında yerinde güncellenen tekil yönetici paneli.' +
     '</div>' +
     '<div style="background:#f8fafc;border-left:4px solid #6366f1;padding:14px 18px;border-radius:6px;">' +
-      '<b>🏁 Gün Sonu Kasa:</b> <code>Gün Sonu Kasa</code> sayfasında dinamik <i>(Nakit Satış - Nakit Gider)</i> mutabakat formülü.' +
+      '<b>🏁 Gün Sonu Kasa:</b> <code>Gün Sonu Kasa</code> sayfasında dinamik <i>(Nakit Satış - Nakit Gider)</i> mutabakatı.' +
     '</div>' +
     '</div>'
   );
@@ -133,7 +125,7 @@ function createJsonResponse(dataObj) {
 }
 
 // ===================================================================
-// 2. YARDIMCI VE TARİH DÖNÜŞTÜRÜCÜ METOTLAR
+// 2. YARDIMCI VE TARİH METOTLARI
 // ===================================================================
 
 function parseDateHelper(dateStr) {
@@ -141,12 +133,10 @@ function parseDateHelper(dateStr) {
   if (dateStr instanceof Date) return dateStr;
   
   var str = String(dateStr).trim();
-  // YYYY-MM-DD
   if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
     var parts = str.split("T")[0].split("-");
     return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
   }
-  // DD.MM.YYYY
   if (/^\d{2}\.\d{2}\.\d{4}/.test(str)) {
     var p2 = str.split(".");
     return new Date(parseInt(p2[2], 10), parseInt(p2[1], 10) - 1, parseInt(p2[0], 10));
@@ -180,26 +170,14 @@ function getTimeFormatted() {
 // 3. GELİR SAYFASI & HAFTALIK TAKVİM DÜZENİ (GELİR - AY YIL)
 // ===================================================================
 
-/**
- * Dinamik GELİR - AY YIL sayfasını haftalık takvim sütun bloklarıyla kurar
- */
 function getOrCreateMonthlySalesSheet(ss, monthYearStr) {
   var sheetName = "GELİR - " + monthYearStr;
   var sheet = ss.getSheetByName(sheetName);
   
   if (!sheet) {
     sheet = ss.insertSheet(sheetName);
-    sheet.setTabColor("#10b981"); // Canlı Zümrüt Yeşili
-    
-    // Toplam 5 Hafta Blokları:
-    // Hafta 1: Sütun 2-8 (B..H) | Sütun 9 (I): Boşluk
-    // Hafta 2: Sütun 10-16 (J..P) | Sütun 17 (Q): Boşluk
-    // Hafta 3: Sütun 18-24 (R..X) | Sütun 25 (Y): Boşluk
-    // Hafta 4: Sütun 26-32 (Z..AF) | Sütun 33 (AG): Boşluk
-    // Hafta 5: Sütun 34-40 (AH..AN) | Sütun 41 (AO): Boşluk
-    // Genel Toplam Kartı: Sütun 42-43 (AP..AQ)
+    sheet.setTabColor("#10b981");
 
-    // 1. Satır: Ana Başlık Banner'ı
     sheet.getRange("A1:AQ1").merge()
       .setValue("AYBARS PETSHOP — " + monthYearStr + " GELİR TAKVİMİ (HAFTALIK / GÜNLÜK BLOK DÜZENİ)")
       .setBackground("#064e3b")
@@ -210,7 +188,6 @@ function getOrCreateMonthlySalesSheet(ss, monthYearStr) {
       .setVerticalAlignment("middle");
     sheet.setRowHeight(1, 35);
 
-    // 2. Satır: Hafta Başlıkları
     sheet.getRange("B2:H2").merge().setValue("📅 1. HAFTA (GÜN 01 - 07)").setBackground("#047857").setFontColor("#ffffff").setFontWeight("bold").setHorizontalAlignment("center");
     sheet.getRange("J2:P2").merge().setValue("📅 2. HAFTA (GÜN 08 - 14)").setBackground("#047857").setFontColor("#ffffff").setFontWeight("bold").setHorizontalAlignment("center");
     sheet.getRange("R2:X2").merge().setValue("📅 3. HAFTA (GÜN 15 - 21)").setBackground("#047857").setFontColor("#ffffff").setFontWeight("bold").setHorizontalAlignment("center");
@@ -219,7 +196,6 @@ function getOrCreateMonthlySalesSheet(ss, monthYearStr) {
     sheet.getRange("AP2:AQ2").merge().setValue("🏆 AYLIK GELİR TOPLAMI").setBackground("#0f172a").setFontColor("#38bdf8").setFontWeight("bold").setHorizontalAlignment("center");
     sheet.setRowHeight(2, 24);
 
-    // 3. Satır: Hafta Toplamı Formülleri
     sheet.getRange("B3:H3").merge().setFormula("=SUM(B5:H5)").setNumberFormat("₺#,##0.00").setBackground("#0f172a").setFontColor("#34d399").setFontWeight("bold").setFontSize(11).setHorizontalAlignment("center");
     sheet.getRange("J3:P3").merge().setFormula("=SUM(J5:P5)").setNumberFormat("₺#,##0.00").setBackground("#0f172a").setFontColor("#34d399").setFontWeight("bold").setFontSize(11).setHorizontalAlignment("center");
     sheet.getRange("R3:X3").merge().setFormula("=SUM(R5:X5)").setNumberFormat("₺#,##0.00").setBackground("#0f172a").setFontColor("#34d399").setFontWeight("bold").setFontSize(11).setHorizontalAlignment("center");
@@ -228,7 +204,6 @@ function getOrCreateMonthlySalesSheet(ss, monthYearStr) {
     sheet.getRange("AP3:AQ3").merge().setFormula("=SUM(B3, J3, R3, Z3, AH3)").setNumberFormat("₺#,##0.00").setBackground("#064e3b").setFontColor("#fef08a").setFontWeight("bold").setFontSize(13).setHorizontalAlignment("center");
     sheet.setRowHeight(3, 28);
 
-    // 4. Satır: Gün Başlıkları (Pazartesi .. Pazar)
     var daysW1 = ["Pzt (01)", "Sal (02)", "Çar (03)", "Per (04)", "Cum (05)", "Cmt (06)", "Paz (07)"];
     var daysW2 = ["Pzt (08)", "Sal (09)", "Çar (10)", "Per (11)", "Cum (12)", "Cmt (13)", "Paz (14)"];
     var daysW3 = ["Pzt (15)", "Sal (16)", "Çar (17)", "Per (18)", "Cum (19)", "Cmt (20)", "Paz (21)"];
@@ -242,7 +217,6 @@ function getOrCreateMonthlySalesSheet(ss, monthYearStr) {
     sheet.getRange(4, 34, 1, 7).setValues([daysW5]).setBackground("#1e293b").setFontColor("#ffffff").setFontWeight("bold").setFontSize(9).setHorizontalAlignment("center");
     sheet.setRowHeight(4, 24);
 
-    // 5. Satır: Günlük Subtotal Formülleri (=SUM(kolon6:kolon))
     function setDailySumFormulas(startCol, count) {
       for (var c = 0; c < count; c++) {
         var colIdx = startCol + c;
@@ -258,21 +232,19 @@ function getOrCreateMonthlySalesSheet(ss, monthYearStr) {
       }
     }
 
-    setDailySumFormulas(2, 7);  // Hafta 1
-    setDailySumFormulas(10, 7); // Hafta 2
-    setDailySumFormulas(18, 7); // Hafta 3
-    setDailySumFormulas(26, 7); // Hafta 4
-    setDailySumFormulas(34, 7); // Hafta 5
+    setDailySumFormulas(2, 7);
+    setDailySumFormulas(10, 7);
+    setDailySumFormulas(18, 7);
+    setDailySumFormulas(26, 7);
+    setDailySumFormulas(34, 7);
     sheet.setRowHeight(5, 24);
 
-    // Sütun A etiketleri ve genişlikleri
     sheet.getRange("A2").setValue("Haftalar").setFontSize(8).setHorizontalAlignment("center").setFontColor("#94a3b8");
     sheet.getRange("A3").setValue("HAFTA TOPLAMI").setFontSize(8).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#0f172a").setFontColor("#94a3b8");
     sheet.getRange("A4").setValue("Günler").setFontSize(8).setHorizontalAlignment("center").setBackground("#1e293b").setFontColor("#94a3b8");
     sheet.getRange("A5").setValue("GÜN TOPLAMI").setFontSize(8).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#065f46").setFontColor("#a7f3d0");
     sheet.setColumnWidth(1, 95);
 
-    // Günlük veri sütunları (105px) ve aralık sütunları (15px)
     for (var i = 2; i <= 40; i++) {
       if (i === 9 || i === 17 || i === 25 || i === 33) {
         sheet.setColumnWidth(i, 15);
@@ -285,7 +257,6 @@ function getOrCreateMonthlySalesSheet(ss, monthYearStr) {
     sheet.setColumnWidth(42, 110);
     sheet.setColumnWidth(43, 110);
 
-    // Üst 5 satırı dondur
     sheet.setFrozenRows(5);
     sheet.setFrozenColumns(1);
   }
@@ -293,27 +264,13 @@ function getOrCreateMonthlySalesSheet(ss, monthYearStr) {
   return sheet;
 }
 
-/**
- * Satış gününe karşılık gelen sütunu bulur:
- * Gün 1-7: Hafta 1 (Sütun 2..8)
- * Gün 8-14: Hafta 2 (Sütun 10..16)
- * Gün 15-21: Hafta 3 (Sütun 18..24)
- * Gün 22-28: Hafta 4 (Sütun 26..32)
- * Gün 29-31: Hafta 5 (Sütun 34..36)
- */
 function getSalesColumnForDay(dayNum) {
   var d = Math.max(1, Math.min(31, parseInt(dayNum, 10) || 1));
-  if (d <= 7) {
-    return 2 + (d - 1); // 2..8 (B..H)
-  } else if (d <= 14) {
-    return 10 + (d - 8); // 10..16 (J..P)
-  } else if (d <= 21) {
-    return 18 + (d - 15); // 18..24 (R..X)
-  } else if (d <= 28) {
-    return 26 + (d - 22); // 26..32 (Z..AF)
-  } else {
-    return 34 + (d - 29); // 34..36 (AH..AJ)
-  }
+  if (d <= 7) return 2 + (d - 1);
+  if (d <= 14) return 10 + (d - 8);
+  if (d <= 21) return 18 + (d - 15);
+  if (d <= 28) return 26 + (d - 22);
+  return 34 + (d - 29);
 }
 
 function handleSaveSale(ss, data) {
@@ -324,7 +281,6 @@ function handleSaveSale(ss, data) {
   var dayNum = dateObj.getDate();
   var targetCol = getSalesColumnForDay(dayNum);
 
-  // O günün sütunundaki ilk boş satırı bul (satır 6'dan itibaren)
   var maxRows = Math.min(sheet.getMaxRows(), 500);
   var targetRow = 6;
   var colRange = sheet.getRange(6, targetCol, maxRows - 5, 1).getValues();
@@ -352,12 +308,11 @@ function handleSaveSale(ss, data) {
     .setVerticalAlignment("middle");
 
   if (isOfficial) {
-    targetCell.setBackground("#ecfdf5"); // Fişli satış yeşil tonu
+    targetCell.setBackground("#ecfdf5");
   } else {
     targetCell.setBackground("#ffffff");
   }
 
-  // Hücre Notu (Açıklama / Kalemler / Ödeme / Müşteri)
   var noteText = "🕒 Saat: " + (data.time || getTimeFormatted()) + "\n" +
     "🛍️ Kalemler: " + (data.itemsSummary || "Muhtelif Satış") + "\n" +
     "💳 Ödeme: " + (data.paymentType || "Nakit") + "\n" +
@@ -365,18 +320,17 @@ function handleSaveSale(ss, data) {
     "🧾 Fiş Durumu: " + (isOfficial ? "Resmi (Fişli)" : "İç Kayıt (Fişsiz)");
   targetCell.setNote(noteText);
 
-  // Mali Rapor hücrelerini anında yerinde güncelle
   if (data.officialSales !== undefined || data.taxBase !== undefined) {
     handleSyncTaxReport(ss, data);
   }
 }
 
 // ===================================================================
-// 4. KONSOLİDE TEK TABLO GİDER DÜZENİ (GİDER - AY YIL)
+// 4. İKİ BÖLÜMLÜ GİDER DEFTERİ (GİDER - AY YIL)
 // ===================================================================
 
 /**
- * Dinamik GİDER - AY YIL sayfasını tek ana tablo ve üst KPI kartlarıyla kurar
+ * Dinamik GİDER - AY YIL sayfasını Bölüm A (Major) ve Bölüm B (Günlük) sütunlarıyla kurar
  */
 function getOrCreateMonthlyExpenseSheet(ss, monthYearStr, supplierDebts) {
   var sheetName = "GİDER - " + monthYearStr;
@@ -384,12 +338,12 @@ function getOrCreateMonthlyExpenseSheet(ss, monthYearStr, supplierDebts) {
 
   if (!sheet) {
     sheet = ss.insertSheet(sheetName);
-    sheet.setTabColor("#ef4444"); // Canlı Kırmızı
+    sheet.setTabColor("#ef4444");
 
-    // 1. Satır: Ana Başlık Banner'ı
-    sheet.getRange("A1:H1").merge()
-      .setValue("AYBARS PETSHOP — " + monthYearStr + " KONSOLİDE GİDER VE VERGİ DEFTERİ")
-      .setBackground("#7f1d1d")
+    // 1. Satır: Ana Başlık
+    sheet.getRange("A1:M1").merge()
+      .setValue("AYBARS PETSHOP — " + monthYearStr + " KONSOLİDE GİDER DEFTERİ (MAJOR & GÜNLÜK AKIŞ)")
+      .setBackground("#0f172a")
       .setFontColor("#ffffff")
       .setFontWeight("bold")
       .setFontSize(12)
@@ -397,63 +351,43 @@ function getOrCreateMonthlyExpenseSheet(ss, monthYearStr, supplierDebts) {
       .setVerticalAlignment("middle");
     sheet.setRowHeight(1, 35);
 
-    // 2. Satır: Üst KPI Kart Başlıkları (7 Adet)
-    var kpiTitles = [
-      "📅 BUGÜNKÜ GİDER", "1. HAFTA (1-7)", "2. HAFTA (8-14)",
-      "3. HAFTA (15-21)", "4.+ HAFTA (22+)", "🏢 SABİT MASRAFLAR",
-      "📦 TOPTANCI / MAL", "🏆 TOPLAM GİDER"
-    ];
-    sheet.getRange("A2:H2").setValues([kpiTitles])
-      .setBackground("#1e293b")
-      .setFontColor("#cbd5e1")
-      .setFontWeight("bold")
-      .setFontSize(8.5)
-      .setHorizontalAlignment("center")
-      .setVerticalAlignment("middle");
+    // 2. Satır: 4 Temel KPI Kart Başlıkları
+    sheet.getRange("A2:C2").merge().setValue("📅 BU AYKİ TOPLAM GİDER").setBackground("#1e293b").setFontColor("#cbd5e1").setFontWeight("bold").setFontSize(8.5).setHorizontalAlignment("center");
+    sheet.getRange("D2:F2").merge().setValue("🏢 SABİT / MAJOR GİDERLER").setBackground("#1e293b").setFontColor("#cbd5e1").setFontWeight("bold").setFontSize(8.5).setHorizontalAlignment("center");
+    sheet.getRange("H2:J2").merge().setValue("📦 GÜNLÜK & TOPTANCI AKIŞI").setBackground("#1e293b").setFontColor("#cbd5e1").setFontWeight("bold").setFontSize(8.5).setHorizontalAlignment("center");
+    sheet.getRange("K2:L2").merge().setValue("💰 TAHMİNİ VERGİ TASARRUFU (%20)").setBackground("#1e293b").setFontColor("#cbd5e1").setFontWeight("bold").setFontSize(8.5).setHorizontalAlignment("center");
+    sheet.getRange("M2").setValue("🔄 DEVREDEN BORÇ").setBackground("#1e293b").setFontColor("#cbd5e1").setFontWeight("bold").setFontSize(8.5).setHorizontalAlignment("center");
     sheet.setRowHeight(2, 22);
 
-    // 3. Satır: Üst KPI Kart Formülleri
-    sheet.getRange("A3").setFormula('=SUMIFS(F8:F, A8:A, TEXT(TODAY(),"dd.mm.yyyy"))');
-    sheet.getRange("B3").setFormula('=SUMIFS(F8:F, A8:A, "01.*") + SUMIFS(F8:F, A8:A, "02.*") + SUMIFS(F8:F, A8:A, "03.*") + SUMIFS(F8:F, A8:A, "04.*") + SUMIFS(F8:F, A8:A, "05.*") + SUMIFS(F8:F, A8:A, "06.*") + SUMIFS(F8:F, A8:A, "07.*")');
-    sheet.getRange("C3").setFormula('=SUMIFS(F8:F, A8:A, "08.*") + SUMIFS(F8:F, A8:A, "09.*") + SUMIFS(F8:F, A8:A, "10.*") + SUMIFS(F8:F, A8:A, "11.*") + SUMIFS(F8:F, A8:A, "12.*") + SUMIFS(F8:F, A8:A, "13.*") + SUMIFS(F8:F, A8:A, "14.*")');
-    sheet.getRange("D3").setFormula('=SUMIFS(F8:F, A8:A, "15.*") + SUMIFS(F8:F, A8:A, "16.*") + SUMIFS(F8:F, A8:A, "17.*") + SUMIFS(F8:F, A8:A, "18.*") + SUMIFS(F8:F, A8:A, "19.*") + SUMIFS(F8:F, A8:A, "20.*") + SUMIFS(F8:F, A8:A, "21.*")');
-    sheet.getRange("E3").setFormula('=SUM(F8:F) - SUM(B3:D3)');
-    sheet.getRange("F3").setFormula('=SUMIF(C8:C, "*Kira*", F8:F) + SUMIF(C8:C, "*Sabit*", F8:F) + SUMIF(C8:C, "*Fatura*", F8:F) + SUMIF(C8:C, "*Stopaj*", F8:F)');
-    sheet.getRange("G3").setFormula('=SUMIF(C8:C, "*Toptancı*", F8:F) + SUMIF(C8:C, "*Mal Alımı*", F8:F) + SUMIF(C8:C, "*Tedarikçi*", F8:F)');
-    sheet.getRange("H3").setFormula('=SUM(F8:F)');
-
-    sheet.getRange("A3:H3")
-      .setNumberFormat("₺#,##0.00")
-      .setBackground("#0f172a")
-      .setFontColor("#38bdf8")
-      .setFontWeight("bold")
-      .setFontSize(10.5)
-      .setHorizontalAlignment("center")
-      .setVerticalAlignment("middle");
-    sheet.getRange("H3").setFontColor("#f87171").setFontSize(12); // Toplam gider kırmızı vurgu
+    // 3. Satır: KPI Değerleri (Backend tarafından doğrudan sıfır hata ile damgalanır)
+    sheet.getRange("A3:C3").merge().setValue(0).setNumberFormat("₺#,##0.00").setBackground("#0f172a").setFontColor("#f87171").setFontWeight("bold").setFontSize(12).setHorizontalAlignment("center");
+    sheet.getRange("D3:F3").merge().setValue(0).setNumberFormat("₺#,##0.00").setBackground("#0f172a").setFontColor("#60a5fa").setFontWeight("bold").setFontSize(11).setHorizontalAlignment("center");
+    sheet.getRange("H3:J3").merge().setValue(0).setNumberFormat("₺#,##0.00").setBackground("#0f172a").setFontColor("#34d399").setFontWeight("bold").setFontSize(11).setHorizontalAlignment("center");
+    sheet.getRange("K3:L3").merge().setValue(0).setNumberFormat("₺#,##0.00").setBackground("#0f172a").setFontColor("#4ade80").setFontWeight("bold").setFontSize(11).setHorizontalAlignment("center");
+    sheet.getRange("M3").setValue(0).setNumberFormat("₺#,##0.00").setBackground("#0f172a").setFontColor("#fbbf24").setFontWeight("bold").setFontSize(10).setHorizontalAlignment("center");
     sheet.setRowHeight(3, 28);
 
-    // 4. Satır: Alt Vergi Kalkanı & KDV Bilgi Çubuğu
-    sheet.getRange("A4:D4").merge()
-      .setValue("🛡️ Vergi Kalkanı: Faturalı giderler gelir vergisi matrahından indirilir.")
-      .setBackground("#f1f5f9")
-      .setFontColor("#475569")
+    // 4. Satır: Alt Açıklama Bilgi Çubuğu
+    sheet.getRange("A4:F4").merge()
+      .setValue("🏢 Bölüm A: Kira, Stopaj, Elektrik, Su, Doğalgaz, Aidat ve Personel giderleri")
+      .setBackground("#f8fafc")
+      .setFontColor("#64748b")
       .setFontStyle("italic")
       .setFontSize(8.5);
-    sheet.getRange("E4:H4").merge()
-      .setFormula('="🏛️ Toplam İndirilecek KDV: " & TEXT(SUM(G8:G), "₺#,##0.00")')
-      .setBackground("#f1f5f9")
-      .setFontColor("#047857")
-      .setFontWeight("bold")
-      .setFontSize(9)
-      .setHorizontalAlignment("right");
+    sheet.getRange("G4").setBackground("#f1f5f9");
+    sheet.getRange("H4:M4").merge()
+      .setValue("📦 Bölüm B: Toptancı mal alımları, mutfak, sarf, mazot, kargo ve işletme giderleri")
+      .setBackground("#f8fafc")
+      .setFontColor("#64748b")
+      .setFontStyle("italic")
+      .setFontSize(8.5);
     sheet.setRowHeight(4, 20);
 
     // 5. Satır: Ayrım Çizgisi
-    sheet.getRange("A5:H5").setBackground("#ffffff");
+    sheet.getRange("A5:M5").setBackground("#ffffff");
     sheet.setRowHeight(5, 6);
 
-    // 6. Satır: DEVREDEN BORÇ MOTORU (ROLLOVER ROW)
+    // 6. Satır: DEVREDEN BORÇ MOTORU (ROLLOVER SLOT)
     var rolloverText = "Önceki Aydan Devreden Toptancı Borçları: ";
     var totalRollover = 0;
 
@@ -471,7 +405,7 @@ function getOrCreateMonthlyExpenseSheet(ss, monthYearStr, supplierDebts) {
       rolloverText += "0,00 TL (Bakiye Bulunmuyor)";
     }
 
-    sheet.getRange("A6:E6").merge()
+    sheet.getRange("A6:K6").merge()
       .setValue("🔄 " + rolloverText)
       .setBackground("#fef3c7")
       .setFontColor("#92400e")
@@ -480,110 +414,252 @@ function getOrCreateMonthlyExpenseSheet(ss, monthYearStr, supplierDebts) {
       .setHorizontalAlignment("left")
       .setVerticalAlignment("middle");
 
-    sheet.getRange("F6").setValue(totalRollover)
+    sheet.getRange("L6:M6").merge()
+      .setValue(totalRollover)
       .setNumberFormat("₺#,##0.00")
       .setBackground("#fef3c7")
       .setFontColor("#b45309")
       .setFontWeight("bold")
       .setHorizontalAlignment("right")
       .setVerticalAlignment("middle");
-
-    sheet.getRange("G6:H6").merge()
-      .setValue("Önceki Ay Devri (Gider Toplamına Dahil Edilmez)")
-      .setBackground("#fef3c7")
-      .setFontColor("#78350f")
-      .setFontStyle("italic")
-      .setFontSize(8.5)
-      .setHorizontalAlignment("center")
-      .setVerticalAlignment("middle");
     sheet.setRowHeight(6, 26);
 
-    // 7. Satır: 8 Kolonlu Standart Gider Tablosu Başlıkları
-    var expenseHeaders = [
-      "Tarih", "Saat", "Kategori", "Ödeme Kaynağı",
-      "Açıklama", "Tutar", "KDV", "Fatura Durumu"
-    ];
-    sheet.getRange(7, 1, 1, expenseHeaders.length).setValues([expenseHeaders])
-      .setBackground("#991b1b")
+    // 7. Satır: İki Bölümlü Bölüm Başlıkları
+    sheet.getRange("A7:F7").merge()
+      .setValue("🏢 BÖLÜM A — MAJOR / SABİT GİDERLER (Kira, Stopaj, Elektrik, Su, Aidat, Personel)")
+      .setBackground("#1e3a8a")
       .setFontColor("#ffffff")
       .setFontWeight("bold")
-      .setFontSize(9.5)
+      .setFontSize(10)
       .setHorizontalAlignment("center")
       .setVerticalAlignment("middle");
-    sheet.setRowHeight(7, 28);
 
-    // Kolon Genişlikleri
-    sheet.setColumnWidth(1, 100); // Tarih
-    sheet.setColumnWidth(2, 70);  // Saat
-    sheet.setColumnWidth(3, 175); // Kategori
-    sheet.setColumnWidth(4, 130); // Ödeme Kaynağı
-    sheet.setColumnWidth(5, 290); // Açıklama
-    sheet.setColumnWidth(6, 125); // Tutar
-    sheet.setColumnWidth(7, 105); // KDV
-    sheet.setColumnWidth(8, 115); // Fatura Durumu
+    sheet.getRange("G7").setBackground("#f1f5f9");
 
-    // Üst 7 satırı dondur (KPI'lar, Devreden Borç ve Başlıklar sabit kalır)
-    sheet.setFrozenRows(7);
+    sheet.getRange("H7:M7").merge()
+      .setValue("📦 BÖLÜM B — GÜNLÜK İŞLETME & TOPTANCI AKIŞI (Mal Alımları, Sarf, Yemek, Kargo)")
+      .setBackground("#065f46")
+      .setFontColor("#ffffff")
+      .setFontWeight("bold")
+      .setFontSize(10)
+      .setHorizontalAlignment("center")
+      .setVerticalAlignment("middle");
+    sheet.setRowHeight(7, 26);
+
+    // 8. Satır: Tablo Sütun Başlıkları
+    var headersA = ["Tarih", "Kategori / Alt Tür", "Açıklama", "Tutar (TL)", "Ödeme Kaynağı", "Fatura Durumu"];
+    var headersB = ["Tarih", "Tür / Tedarikçi", "Açıklama", "Tutar (TL)", "Ödeme Kaynağı", "Fatura Durumu"];
+
+    sheet.getRange(8, 1, 1, 6).setValues([headersA])
+      .setBackground("#334155")
+      .setFontColor("#ffffff")
+      .setFontWeight("bold")
+      .setFontSize(9)
+      .setHorizontalAlignment("center")
+      .setVerticalAlignment("middle");
+
+    sheet.getRange(8, 7).setBackground("#f1f5f9");
+
+    sheet.getRange(8, 8, 1, 6).setValues([headersB])
+      .setBackground("#334155")
+      .setFontColor("#ffffff")
+      .setFontWeight("bold")
+      .setFontSize(9)
+      .setHorizontalAlignment("center")
+      .setVerticalAlignment("middle");
+    sheet.setRowHeight(8, 26);
+
+    // Sütun Genişlikleri
+    sheet.setColumnWidth(1, 95);  // Tarih A
+    sheet.setColumnWidth(2, 160); // Kategori A
+    sheet.setColumnWidth(3, 210); // Açıklama A
+    sheet.setColumnWidth(4, 115); // Tutar A
+    sheet.setColumnWidth(5, 120); // Ödeme A
+    sheet.setColumnWidth(6, 110); // Fatura A
+
+    sheet.setColumnWidth(7, 24);  // Boşluk G
+    sheet.getRange(1, 7, sheet.getMaxRows(), 1).setBackground("#f1f5f9");
+
+    sheet.setColumnWidth(8, 95);  // Tarih B
+    sheet.setColumnWidth(9, 160); // Tedarikçi B
+    sheet.setColumnWidth(10, 210);// Açıklama B
+    sheet.setColumnWidth(11, 115);// Tutar B
+    sheet.setColumnWidth(12, 120);// Ödeme B
+    sheet.setColumnWidth(13, 110);// Fatura B
+
+    sheet.setFrozenRows(8);
   }
 
   return sheet;
 }
 
+/**
+ * Gideri sınıflandırır: Major/Sabit ise Bölüm A'ya, Günlük/Toptancı ise Bölüm B'ye yönlendirir.
+ */
 function handleSaveExpense(ss, data) {
   var dateObj = parseDateHelper(data.date);
   var monthYearStr = getMonthYearTitle(dateObj);
   var sheet = getOrCreateMonthlyExpenseSheet(ss, monthYearStr, data.supplierDebts);
 
   var rawAmount = Number(data.amount || 0);
-  var vatAmount = Number(data.vatAmount !== undefined ? data.vatAmount : (data.vatRate ? rawAmount - (rawAmount / (1 + data.vatRate / 100)) : 0));
+  var cat = String(data.category || data.mainCategory || "").toLowerCase();
+  var sub = String(data.subType || "").toLowerCase();
+  var desc = String(data.description || data.desc || "").toLowerCase();
+  var expType = String(data.expenseType || "").toLowerCase();
+
+  var isMajor = (
+    data.isMajor === true ||
+    data.isMajor === "true" ||
+    expType === "major" ||
+    cat.includes("sabit") ||
+    cat.includes("kira") ||
+    cat.includes("personel") ||
+    cat.includes("demirbaş") ||
+    sub.includes("kira") ||
+    sub.includes("stopaj") ||
+    sub.includes("elektrik") ||
+    sub.includes("su") ||
+    sub.includes("doğalgaz") ||
+    sub.includes("internet") ||
+    sub.includes("aidat") ||
+    sub.includes("muhasebe") ||
+    sub.includes("maaş") ||
+    desc.includes("kira") ||
+    desc.includes("elektrik") ||
+    desc.includes("fatura")
+  );
+
   var paymentSrc = data.paymentMethod || data.paymentSource || data.source || "Kasa (Nakit)";
-  var categoryText = data.category || data.mainCategory || "Dükkân Sarf";
-  if (data.subType && data.subType !== categoryText) {
-    categoryText = categoryText + " (" + data.subType + ")";
-  }
   var invStatus = data.invoiceStatus || (data.hasInvoice ? "Faturalı" : "Faturasız");
+  var maxScan = Math.min(sheet.getMaxRows(), 500);
 
-  var nextRow = Math.max(sheet.getLastRow() + 1, 8);
-  var rowData = [
-    data.date || getTodayFormatted(),
-    data.time || getTimeFormatted(),
-    categoryText,
-    paymentSrc,
-    data.description || data.desc || "",
-    rawAmount,
-    vatAmount,
-    invStatus
-  ];
+  if (isMajor) {
+    // 🏢 BÖLÜM A (Sütun A..F)
+    var targetRowA = 9;
+    var colARange = sheet.getRange(9, 1, maxScan - 8, 1).getValues();
+    for (var i = 0; i < colARange.length; i++) {
+      if (colARange[i][0] === "" || colARange[i][0] === null || colARange[i][0] === undefined) {
+        targetRowA = 9 + i;
+        break;
+      }
+      if (i === colARange.length - 1) {
+        targetRowA = 9 + colARange.length;
+        sheet.insertRowAfter(targetRowA - 1);
+      }
+    }
 
-  sheet.getRange(nextRow, 1, 1, 8).setValues([rowData])
-    .setFontSize(9)
-    .setVerticalAlignment("middle");
+    var rowAData = [
+      data.date || getTodayFormatted(),
+      data.subType || data.category || "Sabit Masraf",
+      data.description || data.desc || "-",
+      rawAmount,
+      paymentSrc,
+      invStatus
+    ];
 
-  sheet.getRange(nextRow, 1, 1, 2).setHorizontalAlignment("center");
-  sheet.getRange(nextRow, 6, 1, 2).setNumberFormat("₺#,##0.00").setHorizontalAlignment("right").setFontWeight("bold");
-  sheet.getRange(nextRow, 8).setHorizontalAlignment("center");
+    sheet.getRange(targetRowA, 1, 1, 6).setValues([rowAData])
+      .setFontSize(9)
+      .setVerticalAlignment("middle");
+    sheet.getRange(targetRowA, 1).setHorizontalAlignment("center");
+    sheet.getRange(targetRowA, 4).setNumberFormat("₺#,##0.00").setFontWeight("bold").setHorizontalAlignment("right");
+    sheet.getRange(targetRowA, 6).setHorizontalAlignment("center");
+    if (invStatus.indexOf("Faturalı") !== -1 || invStatus.indexOf("Stopaj") !== -1) {
+      sheet.getRange(targetRowA, 6).setFontColor("#047857").setFontWeight("bold");
+    } else {
+      sheet.getRange(targetRowA, 6).setFontColor("#dc2626");
+    }
+    sheet.setRowHeight(targetRowA, 24);
 
-  if (invStatus.indexOf("Faturalı") !== -1) {
-    sheet.getRange(nextRow, 8).setFontColor("#047857").setFontWeight("bold");
   } else {
-    sheet.getRange(nextRow, 8).setFontColor("#dc2626");
+    // 📦 BÖLÜM B (Sütun H..M)
+    var targetRowB = 9;
+    var colHRange = sheet.getRange(9, 8, maxScan - 8, 1).getValues();
+    for (var j = 0; j < colHRange.length; j++) {
+      if (colHRange[j][0] === "" || colHRange[j][0] === null || colHRange[j][0] === undefined) {
+        targetRowB = 9 + j;
+        break;
+      }
+      if (j === colHRange.length - 1) {
+        targetRowB = 9 + colHRange.length;
+        sheet.insertRowAfter(targetRowB - 1);
+      }
+    }
+
+    var rowBData = [
+      data.date || getTodayFormatted(),
+      data.supplierName || data.subType || data.category || "Günlük Sarf",
+      data.description || data.desc || "-",
+      rawAmount,
+      paymentSrc,
+      invStatus
+    ];
+
+    sheet.getRange(targetRowB, 8, 1, 6).setValues([rowBData])
+      .setFontSize(9)
+      .setVerticalAlignment("middle");
+    sheet.getRange(targetRowB, 8).setHorizontalAlignment("center");
+    sheet.getRange(targetRowB, 11).setNumberFormat("₺#,##0.00").setFontWeight("bold").setHorizontalAlignment("right");
+    sheet.getRange(targetRowB, 13).setHorizontalAlignment("center");
+    if (invStatus.indexOf("Faturalı") !== -1) {
+      sheet.getRange(targetRowB, 13).setFontColor("#047857").setFontWeight("bold");
+    } else {
+      sheet.getRange(targetRowB, 13).setFontColor("#dc2626");
+    }
+    sheet.setRowHeight(targetRowB, 24);
   }
 
-  sheet.setRowHeight(nextRow, 24);
+  // 4 Temel Üst KPI Kartını backend tarafında canlı hesaplayıp damgala (Zero-Error)
+  recalculateExpenseSheetKPIs(sheet);
 
-  // Mali Rapor hücrelerini anında güncelle
   if (data.officialSales !== undefined || data.taxBase !== undefined) {
     handleSyncTaxReport(ss, data);
   }
+}
+
+/**
+ * Gider sayfasındaki tüm kayıtları tarayıp Row 3 KPI kartlarını hatasız günceller.
+ */
+function recalculateExpenseSheetKPIs(sheet) {
+  var lastRow = Math.max(sheet.getLastRow(), 9);
+  var sumMajor = 0;
+  var sumDaily = 0;
+  var invoicedTotal = 0;
+
+  // Bölüm A: Kolon D (4) ve Kolon F (6)
+  var valsA = sheet.getRange(9, 4, lastRow - 8, 3).getValues();
+  for (var r = 0; r < valsA.length; r++) {
+    var amtA = Number(valsA[r][0] || 0);
+    var statusA = String(valsA[r][2] || "");
+    sumMajor += amtA;
+    if (statusA.indexOf("Faturalı") !== -1 || statusA.indexOf("Stopaj") !== -1) {
+      invoicedTotal += amtA;
+    }
+  }
+
+  // Bölüm B: Kolon K (11) ve Kolon M (13)
+  var valsB = sheet.getRange(9, 11, lastRow - 8, 3).getValues();
+  for (var k = 0; k < valsB.length; k++) {
+    var amtB = Number(valsB[k][0] || 0);
+    var statusB = String(valsB[k][2] || "");
+    sumDaily += amtB;
+    if (statusB.indexOf("Faturalı") !== -1) {
+      invoicedTotal += amtB;
+    }
+  }
+
+  var totalExpense = sumMajor + sumDaily;
+  var taxShield = invoicedTotal * 0.20;
+
+  sheet.getRange("A3:C3").setValue(totalExpense);
+  sheet.getRange("D3:F3").setValue(sumMajor);
+  sheet.getRange("H3:J3").setValue(sumDaily);
+  sheet.getRange("K3:L3").setValue(taxShield);
 }
 
 // ===================================================================
 // 5. YÖNETİCİ MALİ RAPOR & VERGİ DASHBOARD'U (TEKİL YERİNDE GÜNCELLEME)
 // ===================================================================
 
-/**
- * Mali Raporu sabit hücrelerde tutar. Asla alt alta satır eklemez (no append spamming).
- */
 function handleSyncTaxReport(ss, data) {
   var sheetName = "Mali Rapor & Vergi";
   var sheet = ss.getSheetByName(sheetName);
@@ -593,7 +669,6 @@ function handleSyncTaxReport(ss, data) {
     sheet.setTabColor("#1e3a8a");
   }
 
-  // 1. Satır: Ana Başlık
   sheet.getRange("B1:L1").merge()
     .setValue("🐾 AYBARS PETSHOP — YÖNETİCİ MALİ RAPOR & VERGİ YÜKÜ DASHBOARD'U")
     .setBackground("#0f172a")
@@ -604,7 +679,6 @@ function handleSyncTaxReport(ss, data) {
     .setVerticalAlignment("middle");
   sheet.setRowHeight(1, 35);
 
-  // 2. Satır: Zaman Damgası
   var dateStr = data.date || getTodayFormatted();
   var timeStr = data.time || getTimeFormatted();
   sheet.getRange("B2:L2").merge()
@@ -617,9 +691,6 @@ function handleSyncTaxReport(ss, data) {
     .setVerticalAlignment("middle");
   sheet.setRowHeight(2, 22);
 
-  // ════════════════════════════════════════════════════════════════
-  // KART 1: 🏛️ KDV DENGESİ & BEYAN RAPORU (B4:D8)
-  // ════════════════════════════════════════════════════════════════
   sheet.getRange("B4:D4").merge()
     .setValue("🏛️ KART 1: KDV DENGESİ & BEYAN RAPORU")
     .setBackground("#065f46")
@@ -657,9 +728,6 @@ function handleSyncTaxReport(ss, data) {
     sheet.getRange("C8").setBackground("#dcfce7").setFontColor("#166534");
   }
 
-  // ════════════════════════════════════════════════════════════════
-  // KART 2: 🛡️ RESMİ MATRAH VS. FİİLİ KASA (F4:H9)
-  // ════════════════════════════════════════════════════════════════
   sheet.getRange("F4:H4").merge()
     .setValue("🛡️ KART 2: RESMİ MATRAH VS. FİİLİ KASA")
     .setBackground("#1e3a8a")
@@ -690,9 +758,6 @@ function handleSyncTaxReport(ss, data) {
   sheet.getRange("G5:G9").setNumberFormat("₺#,##0.00").setFontWeight("bold").setHorizontalAlignment("right");
   sheet.getRange("G9").setFontColor("#059669").setFontSize(11);
 
-  // ════════════════════════════════════════════════════════════════
-  // KART 3: 🚨 VERGİ RİSKİ VE GİB UYARISI (J4:L8)
-  // ════════════════════════════════════════════════════════════════
   sheet.getRange("J4:L4").merge()
     .setValue("🚨 KART 3: VERGİ RİSKİ VE GİB UYARISI")
     .setBackground("#7f1d1d")
@@ -729,25 +794,23 @@ function handleSyncTaxReport(ss, data) {
     sheet.getRange("K8").setBackground("#dcfce7").setFontColor("#166534");
   }
 
-  // Kenarlıklar ve sütun genişlikleri
   sheet.getRange("B4:D8").setBorder(true, true, true, true, true, true, "#cbd5e1", SpreadsheetApp.BorderStyle.SOLID);
   sheet.getRange("F4:H9").setBorder(true, true, true, true, true, true, "#cbd5e1", SpreadsheetApp.BorderStyle.SOLID);
   sheet.getRange("J4:L8").setBorder(true, true, true, true, true, true, "#cbd5e1", SpreadsheetApp.BorderStyle.SOLID);
 
-  sheet.setColumnWidth(1, 20);  // Boşluk
-  sheet.setColumnWidth(2, 190); // Kart 1 Gösterge
-  sheet.setColumnWidth(3, 125); // Kart 1 Değer
-  sheet.setColumnWidth(4, 210); // Kart 1 Açıklama
-  sheet.setColumnWidth(5, 20);  // Boşluk
-  sheet.setColumnWidth(6, 190); // Kart 2 Gösterge
-  sheet.setColumnWidth(7, 125); // Kart 2 Değer
-  sheet.setColumnWidth(8, 210); // Kart 2 Açıklama
-  sheet.setColumnWidth(9, 20);  // Boşluk
-  sheet.setColumnWidth(10, 190);// Kart 3 Gösterge
-  sheet.setColumnWidth(11, 125);// Kart 3 Değer
-  sheet.setColumnWidth(12, 210);// Kart 3 Açıklama
+  sheet.setColumnWidth(1, 20);
+  sheet.setColumnWidth(2, 190);
+  sheet.setColumnWidth(3, 125);
+  sheet.setColumnWidth(4, 210);
+  sheet.setColumnWidth(5, 20);
+  sheet.setColumnWidth(6, 190);
+  sheet.setColumnWidth(7, 125);
+  sheet.setColumnWidth(8, 210);
+  sheet.setColumnWidth(9, 20);
+  sheet.setColumnWidth(10, 190);
+  sheet.setColumnWidth(11, 125);
+  sheet.setColumnWidth(12, 210);
 
-  // Alt kısımdaki eski gereksiz satırları temizle (Panelin her zaman sabit kalması için)
   if (sheet.getLastRow() > 10) {
     try {
       sheet.getRange(11, 1, sheet.getLastRow() - 10, sheet.getLastColumn()).clearContent().clearFormat();
@@ -799,13 +862,6 @@ function handleDailyClose(ss, data) {
 
   var targetRow = Math.max(sheet.getLastRow() + 1, 2);
 
-  // Formül destekli satır:
-  // Kolon C: Nakit Satış
-  // Kolon D: Nakit Gider
-  // Kolon E: Beklenen Kasa = C[row] - D[row]
-  // Kolon F: Sayılan Nakit
-  // Kolon G: Kasa Farkı = F[row] - E[row]
-  // Kolon H: Durum = IF(ROUND(G[row],2)=0,"✅ Tam Mutabakat",IF(G[row]>0,"📈 Kasa Fazlası","⚠️ Kasa Açığı"))
   var row = [
     data.date || getTodayFormatted(),
     data.time || getTimeFormatted(),
@@ -883,10 +939,6 @@ function handleInventorySync(ss, data) {
 
   sheet.getRange(2, 6, rows.length, 2).setNumberFormat("₺#,##0.00");
 }
-
-// ===================================================================
-// 8. GENEL BİÇİMLENDİRME YARDIMCILARI
-// ===================================================================
 
 function formatHeaderRow(sheet, numCols) {
   var range = sheet.getRange(1, 1, 1, numCols);

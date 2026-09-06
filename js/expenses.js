@@ -605,7 +605,29 @@ function deleteExpense(expId) {
   toast("🗑️ Gider kaydı silindi ve E-Tablo güncellendi!");
 }
 
-// ── Dynamic Top-of-Page KPI Summary Cards ──
+// ── UI Toggles for Simplified Expense View ──
+function toggleWeeklyExpenseDrawer() {
+  const drawer = document.getElementById("weeklyExpenseDrawer");
+  const icon = document.getElementById("weeklyDrawerIcon");
+  if (!drawer) return;
+  const isHidden = (drawer.style.display === "none");
+  drawer.style.display = isHidden ? "block" : "none";
+  if (icon) icon.innerText = isHidden ? "▴ Gizle" : "▾ Göster";
+}
+
+function toggleDetailedTaxReport() {
+  const panel = document.getElementById("dualFinancialOverviewCard");
+  const icon = document.getElementById("taxReportToggleIcon");
+  if (!panel) return;
+  const isHidden = (panel.style.display === "none");
+  panel.style.display = isHidden ? "block" : "none";
+  if (icon) icon.innerText = isHidden ? "▴ Kapat" : "▾ Aç";
+  if (isHidden) {
+    renderDualFinancialOverviewCard();
+  }
+}
+
+// ── Dynamic Top-of-Page KPI Summary Cards (4 Essential Cards + Weekly Drawer) ──
 function renderUnifiedExpenseKPIs() {
   const today = nowDate();
   let curMonth = "";
@@ -625,6 +647,7 @@ function renderUnifiedExpenseKPIs() {
   let fixedTotal = 0;
   let procTotal = 0;
   let monthlyTotal = 0;
+  let totalTaxShield = 0;
 
   (expenses || []).forEach(e => {
     const amt = Number(e.amount) || 0;
@@ -655,7 +678,7 @@ function renderUnifiedExpenseKPIs() {
       else if (day >= 15 && day <= 21) w3Total += amt;
       else if (day >= 22) w4Total += amt;
 
-      // Sabit Masraflar (Kira, Stopaj, Elektrik, Su, Doğalgaz, Maaş)
+      // Sabit / Major Masraflar (Kira, Stopaj, Elektrik, Su, Doğalgaz, Aidat, Maaş, Muhasebe)
       const mainCat = String(e.mainCategory || e.category || "");
       const sub = String(e.subType || "").toLowerCase();
       const desc = String(e.desc || "").toLowerCase();
@@ -663,11 +686,15 @@ function renderUnifiedExpenseKPIs() {
         mainCat.includes("Kira") ||
         mainCat.includes("Sabit") ||
         mainCat.includes("Personel") ||
+        mainCat.includes("Demirbaş") ||
         sub.includes("kira") ||
+        sub.includes("stopaj") ||
         sub.includes("elektrik") ||
         sub.includes("su") ||
+        sub.includes("doğalgaz") ||
         sub.includes("internet") ||
         sub.includes("maaş") ||
+        sub.includes("muhasebe") ||
         sub.includes("aidat") ||
         desc.includes("kira") ||
         desc.includes("elektrik") ||
@@ -683,6 +710,19 @@ function renderUnifiedExpenseKPIs() {
         e.supplierName
       );
       if (isProc) procTotal += amt;
+
+      // Tahmini Vergi Tasarrufu (%20 Kalkan)
+      const isInv = e.hasInvoice !== undefined ? Boolean(e.hasInvoice) : Boolean(e.isInvoice);
+      if (isInv) {
+        let taxDed = amt;
+        if (e.taxDeduction !== undefined) {
+          taxDed = Number(e.taxDeduction);
+        } else {
+          const vatAmt = Number(e.vatAmount || 0);
+          taxDed = (amt - vatAmt);
+        }
+        totalTaxShield += (taxDed * 0.20);
+      }
     }
   });
 
@@ -691,14 +731,18 @@ function renderUnifiedExpenseKPIs() {
     if (el) el.innerText = val.toFixed(2) + " ₺";
   };
 
+  // 4 Essential Top Cards
+  setTxt("kpiExpTotal", monthlyTotal);
+  setTxt("kpiExpFixed", fixedTotal);
+  setTxt("kpiExpProc", procTotal);
+  setTxt("kpiExpTaxShield", totalTaxShield);
+
+  // Weekly Drawer Values
   setTxt("kpiExpToday", todayTotal);
   setTxt("kpiExpW1", w1Total);
   setTxt("kpiExpW2", w2Total);
   setTxt("kpiExpW3", w3Total);
   setTxt("kpiExpW4", w4Total);
-  setTxt("kpiExpFixed", fixedTotal);
-  setTxt("kpiExpProc", procTotal);
-  setTxt("kpiExpTotal", monthlyTotal);
 
   const monthLabel = document.getElementById("kpiExpMonthLabel");
   if (monthLabel) {
@@ -736,7 +780,7 @@ function renderExpensesTable() {
   });
 
   if (filtered.length === 0) {
-    unifiedTbody.innerHTML = `<tr><td colspan="12" class="empty-state">Kayıtlı gider bulunamadı.</td></tr>`;
+    unifiedTbody.innerHTML = `<tr><td colspan="6" class="empty-state">Kayıtlı gider bulunamadı.</td></tr>`;
   } else {
     filtered.forEach(e => {
       const amt = Number(e.amount) || 0;
@@ -752,43 +796,53 @@ function renderExpensesTable() {
         taxDed = vatRate > 0 ? (amt - vatAmt) : amt;
       }
 
-      // Invoice status badge
-      let invBadge = "";
+      // Invoice status badge + subtle tax shield subtext
+      let invBadgeHtml = "";
       if (isInv) {
-        invBadge = `<span class="badge" style="background:#f0fdf4; color:#166534; font-weight:600; font-size:11px;">${e.invoiceStatus || '🧾 Faturalı'}</span>`;
+        const shieldVal = (taxDed * 0.20).toFixed(2);
+        if (e.withholdingTax && Number(e.withholdingTax) > 0) {
+          invBadgeHtml = `
+            <span class="badge" style="background:#fef3c7; color:#92400e; font-weight:700; font-size:11px;">🧾 Stopajlı</span>
+            <div style="font-size:11px; color:#b45309; font-weight:600; margin-top:2px;">+${shieldVal} ₺ Stopaj Kalkanı</div>
+          `;
+        } else {
+          invBadgeHtml = `
+            <span class="badge" style="background:#dcfce7; color:#166534; font-weight:700; font-size:11px;">🧾 Faturalı</span>
+            <div style="font-size:11px; color:#059669; font-weight:600; margin-top:2px;">+${shieldVal} ₺ Vergi Kalkanı</div>
+          `;
+        }
       } else {
-        invBadge = `<span class="badge" style="background:#fef2f2; color:#b91c1c; font-weight:600; font-size:11px;">⚠️ Faturasız</span>`;
+        invBadgeHtml = `
+          <span class="badge" style="background:#fee2e2; color:#991b1b; font-weight:600; font-size:11px;">⚠️ Faturasız</span>
+          <div style="font-size:10px; color:#94a3b8; margin-top:2px;">Vergi Kalkanı Yok</div>
+        `;
       }
 
-      // Category color tag
-      const mainCat = e.mainCategory || (e.expenseType === "procurement" ? "Toptancı Alımı" : (e.expenseType === "major" ? "Sabit & Majör Gider" : "Genel Dükkân / Sarf"));
-      let catTagClass = "chip-info";
-      if (mainCat.includes("Toptancı")) catTagClass = "chip-ok";
-      else if (mainCat.includes("Taşıt")) catTagClass = "chip-warn";
-      else if (mainCat.includes("Kira")) catTagClass = "chip-info";
-
-      // Tax shield badges with KKEG and withholding
-      let taxShieldHtml = `<span class="badge-tax-shield">🛡️ ${taxDed.toFixed(2)} ₺</span>`;
-      if (e.kkeg && Number(e.kkeg) > 0) {
-        taxShieldHtml += `<br><span class="badge-kkeg mt-1">KKEG: ${Number(e.kkeg).toFixed(2)} ₺</span>`;
-      }
-      if (e.withholdingTax && Number(e.withholdingTax) > 0) {
-        taxShieldHtml += `<br><span class="badge" style="font-size:10px; background:#fffbeb; color:#b45309; margin-top:2px;">Stopaj: ${Number(e.withholdingTax).toFixed(2)} ₺</span>`;
-      }
+      // Clean category label and details
+      const mainCat = e.mainCategory || (e.expenseType === "procurement" ? "Toptancı Alımı" : (e.expenseType === "major" ? "Sabit & Majör" : "Genel Dükkân"));
+      const titleLabel = e.subType || e.supplierName || mainCat || "Gider";
+      const descText = e.desc ? e.desc : "";
 
       unifiedTbody.innerHTML += `
         <tr>
-          <td><b>${e.date}</b></td>
-          <td><span class="text-xs text-muted">${e.time || '-'}</span></td>
-          <td><span class="chip ${catTagClass}" style="font-size:10.5px;">${mainCat}</span></td>
-          <td><b>${e.subType || e.supplierName || e.category || '-'}</b></td>
-          <td style="max-width:240px; font-size:12px;">${e.desc || '-'}</td>
-          <td><b style="color:var(--danger); font-size:13px;">${amt.toFixed(2)} ₺</b></td>
-          <td><span class="badge" style="background:#f1f5f9; color:#475569;">%${vatRate}</span></td>
-          <td class="text-sm font-bold" style="color:var(--primary);">${vatAmt.toFixed(2)} ₺</td>
-          <td class="text-xs">${e.paymentMethod || e.source || '-'}</td>
-          <td>${invBadge}</td>
-          <td>${taxShieldHtml}</td>
+          <td>
+            <b>${e.date}</b>
+            <div class="text-xs text-muted">${e.time || ''}</div>
+          </td>
+          <td>
+            <div style="font-weight:700; font-size:13px; color:var(--text);">${titleLabel}</div>
+            <div class="text-xs text-muted" style="max-width:300px; line-height:1.3; margin-top:2px;">
+              ${descText ? descText + ' &bull; ' : ''}<span class="badge" style="font-size:10px; background:#f1f5f9; color:#475569;">${mainCat}</span>
+            </div>
+          </td>
+          <td>
+            <div style="font-weight:800; color:var(--danger); font-size:13.5px;">${amt.toFixed(2)} ₺</div>
+            <div class="text-xs text-muted">KDV %${vatRate} (${vatAmt.toFixed(2)} ₺)</div>
+          </td>
+          <td>
+            <span class="badge" style="background:#f8fafc; border:1px solid var(--border); color:#334155; font-size:11px;">${e.paymentMethod || e.source || 'Kasa (Nakit)'}</span>
+          </td>
+          <td>${invBadgeHtml}</td>
           <td>
             <button class="btn btn-danger btn-xs" onclick="deleteExpense(${e.id})" title="Gideri Sil">🗑️</button>
           </td>

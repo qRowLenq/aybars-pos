@@ -323,83 +323,91 @@
         </div>
       </div>
 
-      <!-- 📊 DİNAMİK HAFTALIK & AYLIK KPI ÖZET KARTLARI (TOP-OF-PAGE SUMMARY CARDS) -->
-      <div class="expense-kpi-grid">
-        <div class="expense-kpi-card kpi-today">
-          <div class="expense-kpi-title">
-            <span>📅 Bugün</span>
-            <span class="expense-kpi-tag" style="background:#eff6ff; color:#1d4ed8;">Günlük</span>
-          </div>
-          <div class="expense-kpi-value" id="kpiExpToday">0.00 ₺</div>
-          <div class="expense-kpi-sub">Bugünkü tüm giderler</div>
-        </div>
-
-        <div class="expense-kpi-card kpi-w1">
-          <div class="expense-kpi-title">
-            <span>1. Hafta</span>
-            <span class="expense-kpi-tag" style="background:#eef2ff; color:#4338ca;">1 - 7 Gün</span>
-          </div>
-          <div class="expense-kpi-value" id="kpiExpW1">0.00 ₺</div>
-          <div class="expense-kpi-sub">1. Hafta gider toplamı</div>
-        </div>
-
-        <div class="expense-kpi-card kpi-w2">
-          <div class="expense-kpi-title">
-            <span>2. Hafta</span>
-            <span class="expense-kpi-tag" style="background:#f5f3ff; color:#6d28d9;">8 - 14 Gün</span>
-          </div>
-          <div class="expense-kpi-value" id="kpiExpW2">0.00 ₺</div>
-          <div class="expense-kpi-sub">2. Hafta gider toplamı</div>
-        </div>
-
-        <div class="expense-kpi-card kpi-w3">
-          <div class="expense-kpi-title">
-            <span>3. Hafta</span>
-            <span class="expense-kpi-tag" style="background:#fdf2f8; color:#be185d;">15 - 21 Gün</span>
-          </div>
-          <div class="expense-kpi-value" id="kpiExpW3">0.00 ₺</div>
-          <div class="expense-kpi-sub">3. Hafta gider toplamı</div>
-        </div>
-
-        <div class="expense-kpi-card kpi-w4">
-          <div class="expense-kpi-title">
-            <span>4. Hafta +</span>
-            <span class="expense-kpi-tag" style="background:#fff1f2; color:#be123c;">22 - 31 Gün</span>
-          </div>
-          <div class="expense-kpi-value" id="kpiExpW4">0.00 ₺</div>
-          <div class="expense-kpi-sub">Ay sonu kalan giderler</div>
-        </div>
-
-        <div class="expense-kpi-card kpi-fixed">
-          <div class="expense-kpi-title">
-            <span>🏢 Sabit Masraflar</span>
-            <span class="expense-kpi-tag" style="background:#fef3c7; color:#b45309;">Kira/Fatura</span>
-          </div>
-          <div class="expense-kpi-value" id="kpiExpFixed">0.00 ₺</div>
-          <div class="expense-kpi-sub">Kira, stopaj, fatura, maaş</div>
-        </div>
-
-        <div class="expense-kpi-card kpi-proc">
-          <div class="expense-kpi-title">
-            <span>📦 Mal Maliyeti</span>
-            <span class="expense-kpi-tag" style="background:#ecfdf5; color:#047857;">Toptancı</span>
-          </div>
-          <div class="expense-kpi-value" id="kpiExpProc">0.00 ₺</div>
-          <div class="expense-kpi-sub">Toptancı alımları toplamı</div>
-        </div>
-
+      <!-- 📊 DİNAMİK 4 TEMEL KPI ÖZET KARTI (CLEAN & MINIMAL) -->
+      <div class="expense-kpi-grid mb-3">
+        <!-- 1. Bu Ayki Toplam Gider -->
         <div class="expense-kpi-card kpi-total">
           <div class="expense-kpi-title">
-            <span>💰 Aylık Toplam</span>
+            <span>📅 Bu Ayki Toplam Gider</span>
             <span class="expense-kpi-tag" style="background:#fee2e2; color:#b91c1c;">Tüm Giderler</span>
           </div>
           <div class="expense-kpi-value text-danger" id="kpiExpTotal">0.00 ₺</div>
-          <div class="expense-kpi-sub" id="kpiExpMonthLabel">Bu ayın toplam gideri</div>
+          <div class="expense-kpi-sub" id="kpiExpMonthLabel">Bu ay kaydedilen tüm harcamalar</div>
+        </div>
+
+        <!-- 2. Sabit / Major Masraflar -->
+        <div class="expense-kpi-card kpi-fixed">
+          <div class="expense-kpi-title">
+            <span>🏢 Sabit / Major Masraflar</span>
+            <span class="expense-kpi-tag" style="background:#dbeafe; color:#1e40af;">Kira/Stopaj/Fatura</span>
+          </div>
+          <div class="expense-kpi-value" id="kpiExpFixed" style="color:#2563eb;">0.00 ₺</div>
+          <div class="expense-kpi-sub">Kira, stopaj, elektrik, su, aidat, personel</div>
+        </div>
+
+        <!-- 3. Toptancı Mal Alımı -->
+        <div class="expense-kpi-card kpi-proc">
+          <div class="expense-kpi-title">
+            <span>📦 Toptancı Mal Alımı</span>
+            <span class="expense-kpi-tag" style="background:#ecfdf5; color:#047857;">Mal Maliyeti</span>
+          </div>
+          <div class="expense-kpi-value text-success" id="kpiExpProc">0.00 ₺</div>
+          <div class="expense-kpi-sub">Ürün ve stok tedarik maliyeti</div>
+        </div>
+
+        <!-- 4. Tahmini Vergi Tasarrufu (%20) -->
+        <div class="expense-kpi-card kpi-taxshield">
+          <div class="expense-kpi-title">
+            <span>💰 Tahmini Vergi Tasarrufu</span>
+            <span class="expense-kpi-tag" style="background:#dcfce7; color:#166534;">%20 Vergi Kalkanı</span>
+          </div>
+          <div class="expense-kpi-value" id="kpiExpTaxShield" style="color:#059669;">0.00 ₺</div>
+          <div class="expense-kpi-sub">Faturalı giderlerin sağladığı net tasarruf</div>
         </div>
       </div>
 
-      <!-- 🏛️ DUAL FINANCIAL OVERVIEW CARD: FİİLİ KÂR VS. VERGİ YÜKÜ -->
-      <div class="dual-financial-card mb-4" id="dualFinancialOverviewCard">
+      <!-- 📅 HAFTALIK DÖKÜM ÇEKMECESİ (OPTIONAL WEEKLY DRAWER) -->
+      <div class="mb-3">
+        <button type="button" class="btn btn-secondary btn-sm" id="btnToggleWeeklyDrawer" onclick="toggleWeeklyExpenseDrawer()" style="width:100%; display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid var(--border); color:var(--text); font-weight:600; padding:9px 14px; border-radius:var(--radius);">
+          <span>📅 Haftalık Gider Dökümü (1. - 4.+ Hafta & Bugün)</span>
+          <span id="weeklyDrawerIcon" style="color:var(--primary); font-weight:700;">▾ Göster</span>
+        </button>
+        <div id="weeklyExpenseDrawer" style="display:none; margin-top:8px; padding:12px; background:#f1f5f9; border-radius:var(--radius); border:1px solid var(--border);">
+          <div class="weekly-drawer-grid">
+            <div class="weekly-mini-card">
+              <div class="text-xs text-muted">📅 Bugün</div>
+              <b id="kpiExpToday" style="font-size:14px; color:#1d4ed8;">0.00 ₺</b>
+            </div>
+            <div class="weekly-mini-card">
+              <div class="text-xs text-muted">1. Hafta (1-7)</div>
+              <b id="kpiExpW1" style="font-size:14px; color:#4338ca;">0.00 ₺</b>
+            </div>
+            <div class="weekly-mini-card">
+              <div class="text-xs text-muted">2. Hafta (8-14)</div>
+              <b id="kpiExpW2" style="font-size:14px; color:#6d28d9;">0.00 ₺</b>
+            </div>
+            <div class="weekly-mini-card">
+              <div class="text-xs text-muted">3. Hafta (15-21)</div>
+              <b id="kpiExpW3" style="font-size:14px; color:#be185d;">0.00 ₺</b>
+            </div>
+            <div class="weekly-mini-card">
+              <div class="text-xs text-muted">4.+ Hafta (22+)</div>
+              <b id="kpiExpW4" style="font-size:14px; color:#be123c;">0.00 ₺</b>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 📊 DETAYLI MALİYE & VERGİ RAPORU TOGGLE BUTTON (COLLAPSED BY DEFAULT) -->
+      <div class="mb-3">
+        <button type="button" class="btn btn-secondary btn-sm" id="btnToggleTaxReport" onclick="toggleDetailedTaxReport()" style="display:inline-flex; align-items:center; gap:8px; font-weight:600; padding:8px 16px; background:#f8fafc; border:1px solid var(--border); border-radius:var(--radius);">
+          <span>📊 Detaylı Maliye & Vergi Raporu (Gelişmiş)</span>
+          <span id="taxReportToggleIcon" style="color:var(--primary); font-weight:700;">▾ Aç</span>
+        </button>
+      </div>
+
+      <!-- 🏛️ DUAL FINANCIAL OVERVIEW CARD: FİİLİ KÂR VS. VERGİ YÜKÜ (HIDDEN BY DEFAULT) -->
+      <div class="dual-financial-card mb-4" id="dualFinancialOverviewCard" style="display:none;">
         <div class="df-header">
           <div class="df-title-box">
             <span class="df-icon">📊</span>
@@ -478,12 +486,12 @@
         </div>
       </div>
 
-      <!-- 📋 TEKİLLEŞTİRİLMİŞ GİDER LİSTESİ (UNIFIED EXPENSE LEDGER STREAM - 11 KOLON) -->
+      <!-- 📋 TEKİLLEŞTİRİLMİŞ TEMİZ GİDER LİSTESİ (MINIMAL 6 KOLON) -->
       <div style="background:white; padding:18px 20px; border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow-sm);">
         <div class="flex justify-between items-center mb-3 flex-wrap gap-2">
           <div>
-            <h3 style="margin:0; font-size:16px;">📑 Birleşik Gider ve Alım Günlüğü (Unified Ledger Stream)</h3>
-            <span class="text-xs text-muted">E-Tablo'daki <code>GİDER - [AY YIL]</code> sayfasına satır satır işlenen 11 kolonluk tekilleştirilmiş akış</span>
+            <h3 style="margin:0; font-size:16px;">📑 Gider ve Harcama Defteri</h3>
+            <span class="text-xs text-muted">E-Tablo ile çift yönlü senkronize, sadeleştirilmiş işletme defteri</span>
           </div>
           <div class="flex gap-2 flex-wrap items-center">
             <input type="text" id="expenseSearchInput" class="search-input" placeholder="🔍 Gider veya firma ara..." style="width:200px;" oninput="renderExpensesTable()">
@@ -506,16 +514,10 @@
             <thead>
               <tr>
                 <th>Tarih</th>
-                <th>Saat</th>
-                <th>Ana Kategori</th>
-                <th>Alt Tür</th>
-                <th>Açıklama</th>
+                <th>Kategori / Açıklama</th>
                 <th>Tutar</th>
-                <th>KDV</th>
-                <th>KDV Tutarı</th>
-                <th>Ödeme Yöntemi</th>
+                <th>Ödeme</th>
                 <th>Fatura Durumu</th>
-                <th>Matrah İndirimi</th>
                 <th>İşlem</th>
               </tr>
             </thead>

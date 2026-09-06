@@ -1110,9 +1110,42 @@ textarea.fc { resize: vertical; min-height: 60px; }
 .expense-kpi-card.kpi-w2::before { background: #8b5cf6; }
 .expense-kpi-card.kpi-w3::before { background: #ec4899; }
 .expense-kpi-card.kpi-w4::before { background: #f43f5e; }
-.expense-kpi-card.kpi-fixed::before { background: #d97706; }
+.expense-kpi-card.kpi-fixed::before { background: #2563eb; }
 .expense-kpi-card.kpi-proc::before { background: #059669; }
+.expense-kpi-card.kpi-taxshield::before { background: linear-gradient(90deg, #10b981, #059669); }
 .expense-kpi-card.kpi-total::before { background: linear-gradient(90deg, #ef4444, #b91c1c); }
+
+.weekly-drawer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+.weekly-mini-card {
+  background: white;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  text-align: center;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+.weekly-mini-card .text-xs {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.tax-panel-toggle-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background var(--duration);
+}
+.tax-panel-toggle-bar:hover {
+  background: #f1f5f9;
+}
 
 .expense-kpi-title {
   font-size: 11.5px;

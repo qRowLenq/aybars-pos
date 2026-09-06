@@ -2,7 +2,7 @@
    STATE MANAGEMENT — localStorage + Sample Data
    =================================================================== */
 
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxaGgSwt6Iaer3jg5uxyRlKmzhz030jxA7wxJ6G2lNRI6hASrgB6Ww6mT4fTejd-oQ/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_l1PLYUVmHL6dqnholoKke2JsTx56FScjd4qa6veqcoK49ztzLqggwp9M7uze10sU/exec";
 
 const defaultCategories = ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum / Kozmetik", "Kampanyalar"];
 
