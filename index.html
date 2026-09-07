@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <title>🐾 Petshop Kasa Sistemi</title>
-  <link rel="stylesheet" href="css/styles.css?v=20260908_2">
+  <link rel="stylesheet" href="css/styles.css?v=20260908_3">
 </head>
 <body>
 
@@ -54,6 +54,7 @@
       <div class="catalog-area">
         <div class="catalog-toolbar flex gap-2 items-center">
           <input type="text" id="catalogSearch" class="search-input" placeholder="🔍 Barkod okut veya ürün ara..." oninput="renderCatalog()">
+          <select id="posCatFilter" class="fc pos-cat-select" onchange="filterCategory(this.value)" title="Kategoriye Göre Filtrele"></select>
           <div id="categoryFilterBar" class="category-bar flex-1"></div>
           <button class="btn btn-primary btn-sm" onclick="openAddProductModal()" style="white-space:nowrap;">+ Yeni Ürün</button>
         </div>
@@ -1334,15 +1335,15 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/products_catalog.js?v=20260908_2"></script>
-  <script src="js/state.js?v=20260908_2"></script>
-  <script src="js/ui.js?v=20260908_2"></script>
-  <script src="js/pos.js?v=20260908_2"></script>
-  <script src="js/orders.js?v=20260908_2"></script>
-  <script src="js/inventory.js?v=20260908_2"></script>
-  <script src="js/crm.js?v=20260908_2"></script>
-  <script src="js/procurement.js?v=20260908_2"></script>
-  <script src="js/expenses.js?v=20260908_2"></script>
-  <script src="js/app.js?v=20260908_2"></script>
+  <script src="js/products_catalog.js?v=20260908_3"></script>
+  <script src="js/state.js?v=20260908_3"></script>
+  <script src="js/ui.js?v=20260908_3"></script>
+  <script src="js/pos.js?v=20260908_3"></script>
+  <script src="js/orders.js?v=20260908_3"></script>
+  <script src="js/inventory.js?v=20260908_3"></script>
+  <script src="js/crm.js?v=20260908_3"></script>
+  <script src="js/procurement.js?v=20260908_3"></script>
+  <script src="js/expenses.js?v=20260908_3"></script>
+  <script src="js/app.js?v=20260908_3"></script>
 </body>
 </html>

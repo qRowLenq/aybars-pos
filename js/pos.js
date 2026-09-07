@@ -14,10 +14,21 @@ function getActiveCategories() {
   return clean.length > 0 ? clean : def;
 }
 
+// ── Category Helper ──
+function getCatBadgeClass(cat) {
+  if (!cat) return "cat-badge-default";
+  const c = cat.toLowerCase();
+  if (c.includes("kedi")) return "cat-badge-cat";
+  if (c.includes("köpek") || c.includes("kopek")) return "cat-badge-dog";
+  if (c.includes("kuş") || c.includes("kus") || c.includes("kemirgen")) return "cat-badge-bird";
+  if (c.includes("açık") || c.includes("acik") || c.includes("mama")) return "cat-badge-food";
+  if (c.includes("kum") || c.includes("kozmetik")) return "cat-badge-care";
+  return "cat-badge-default";
+}
+
 // ── Category Bar ──
 function initCategoryBar() {
   const bar = document.getElementById("categoryFilterBar");
-  if (!bar) return;
   if (!window.selectedCategory) window.selectedCategory = "TÜMÜ";
   selectedCategory = window.selectedCategory;
 
@@ -25,12 +36,20 @@ function initCategoryBar() {
   if (typeof window !== "undefined") window.categories = catList;
   if (typeof categories !== "undefined") categories = catList;
 
-  let html = `<button class="cat-chip ${selectedCategory === 'TÜMÜ' ? 'active' : ''}" onclick="filterCategory('TÜMÜ')">TÜMÜ</button>`;
-  catList.forEach(cat => {
-    html += `<button class="cat-chip ${selectedCategory === cat ? 'active' : ''}" onclick="filterCategory('${cat}')">${cat}</button>`;
-  });
-  html += `<button class="btn btn-ghost btn-xs" style="border-radius:var(--radius-full); margin-left:4px;" onclick="promptNewCategory()">+ Kategori</button>`;
-  bar.innerHTML = html;
+  if (bar) {
+    let html = `<button class="cat-chip ${selectedCategory === 'TÜMÜ' ? 'active' : ''}" onclick="filterCategory('TÜMÜ')">TÜMÜ</button>`;
+    catList.forEach(cat => {
+      html += `<button class="cat-chip ${selectedCategory === cat ? 'active' : ''}" onclick="filterCategory('${cat}')">${cat}</button>`;
+    });
+    html += `<button class="btn btn-ghost btn-xs" style="border-radius:var(--radius-full); margin-left:4px;" onclick="promptNewCategory()">+ Kategori</button>`;
+    bar.innerHTML = html;
+  }
+
+  const posSel = document.getElementById("posCatFilter");
+  if (posSel && posSel.value !== selectedCategory) {
+    posSel.value = selectedCategory;
+  }
+
   populateCategoryDropdowns();
 }
 
@@ -51,8 +70,14 @@ function promptNewCategory() {
 }
 
 function filterCategory(cat) {
-  selectedCategory = cat;
-  if (typeof window !== "undefined") window.selectedCategory = cat;
+  selectedCategory = cat || "TÜMÜ";
+  if (typeof window !== "undefined") window.selectedCategory = selectedCategory;
+
+  const posSel = document.getElementById("posCatFilter");
+  if (posSel && posSel.value !== selectedCategory) {
+    posSel.value = selectedCategory;
+  }
+
   initCategoryBar();
   renderCatalog();
 }
@@ -102,7 +127,13 @@ function renderCatalog() {
     card.className = "product-card";
     const curStock = (p.stock !== undefined && p.stock !== null) ? Number(p.stock) : 0;
     const curPrice = (p.price !== undefined && p.price !== null) ? Number(p.price) : 0;
+    const catName = p.category || 'Genel';
+    const badgeClass = getCatBadgeClass(catName);
+
     card.innerHTML = `
+      <div class="p-top-row">
+        <span class="p-cat-badge ${badgeClass}" title="Kategori: ${catName}">${catName}</span>
+      </div>
       <div class="p-name" title="${p.name}">${p.name}</div>
       <div class="p-footer">
         <span class="p-stock ${curStock <= 2 ? 'critical' : ''}">Stok: ${curStock}</span>
@@ -576,4 +607,13 @@ function restoreHeldCart(idx) {
   cart = [...heldCarts[idx].items];
   heldCarts.splice(idx, 1);
   saveData(); renderCart(); closeModal("holdCartsModal"); updateAllBadges();
+}
+
+// Window global exports
+if (typeof window !== "undefined") {
+  window.initCategoryBar = initCategoryBar;
+  window.filterCategory = filterCategory;
+  window.renderCatalog = renderCatalog;
+  window.addToCart = addToCart;
+  window.getCatBadgeClass = getCatBadgeClass;
 }

@@ -22,7 +22,12 @@ function switchTab(tabId) {
     fab.style.display = (tabId === "pos" && window.cart && window.cart.length > 0) ? "inline-flex" : "none";
   }
 
-  if (tabId === "pos") { renderCatalog(); renderPosSalesHistory(); }
+  if (tabId === "pos") {
+    if (typeof initCategoryBar === "function") initCategoryBar();
+    if (typeof populateCategoryDropdowns === "function") populateCategoryDropdowns();
+    renderCatalog();
+    renderPosSalesHistory();
+  }
   if (tabId === "orders") renderOrdersTab();
   if (tabId === "inventory") {
     const activeSub = document.querySelector("#tab-inventory .subtab-view.active");
@@ -171,6 +176,15 @@ function populateCategoryDropdowns() {
     let catList = Array.isArray(window.categories) ? window.categories : (typeof categories !== "undefined" && Array.isArray(categories) ? categories : []);
     if (!catList || catList.length === 0) {
       catList = ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum / Kozmetik", "Kampanyalar"];
+    }
+
+    const posSel = document.getElementById("posCatFilter");
+    if (posSel) {
+      const curPosVal = window.selectedCategory || "TÜMÜ";
+      posSel.innerHTML = `<option value="TÜMÜ">🏷️ Tüm Kategoriler</option>` + catList.map(c => `<option value="${c}">${c}</option>`).join("");
+      if ([...posSel.options].some(o => o.value === curPosVal)) {
+        posSel.value = curPosVal;
+      }
     }
 
     const invSel = document.getElementById("invCatFilter");
