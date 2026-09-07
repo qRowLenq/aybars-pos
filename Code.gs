@@ -271,7 +271,7 @@ function buildMonthlySalesSheetTemplate(sheet, monthYearStr) {
   sheet.getRange("R3:X3").merge().setFormula("=SUM(R5:X5)").setNumberFormat("₺#,##0.00").setBackground("#0f172a").setFontColor("#34d399").setFontWeight("bold").setFontSize(11).setHorizontalAlignment("center");
   sheet.getRange("Z3:AF3").merge().setFormula("=SUM(Z5:AF5)").setNumberFormat("₺#,##0.00").setBackground("#0f172a").setFontColor("#34d399").setFontWeight("bold").setFontSize(11).setHorizontalAlignment("center");
   sheet.getRange("AH3:AN3").merge().setFormula("=SUM(AH5:AN5)").setNumberFormat("₺#,##0.00").setBackground("#0f172a").setFontColor("#34d399").setFontWeight("bold").setFontSize(11).setHorizontalAlignment("center");
-  sheet.getRange("AP3:AQ3").merge().setFormula("=SUM(B3, J3, R3, Z3, AH3)").setNumberFormat("₺#,##0.00").setBackground("#064e3b").setFontColor("#fef08a").setFontWeight("bold").setFontSize(13).setHorizontalAlignment("center");
+  sheet.getRange("AP3:AQ3").merge().setFormula("=B3+J3+R3+Z3+AH3").setNumberFormat("₺#,##0.00").setBackground("#064e3b").setFontColor("#fef08a").setFontWeight("bold").setFontSize(13).setHorizontalAlignment("center");
   sheet.setRowHeight(3, 28);
 
   var daysW1 = ["Pzt (01)", "Sal (02)", "Çar (03)", "Per (04)", "Cum (05)", "Cmt (06)", "Paz (07)"];
@@ -324,6 +324,14 @@ function ensureSalesSheetStructure(sheet) {
   sheet.setRowHeight(9, 22);
   sheet.setRowHeight(10, 20);
 
+  // Hafta toplamları ve Aylık Gelir Toplamını hatasız formülle bağla
+  sheet.getRange("B3:H3").merge().setFormula("=SUM(B5:H5)").setNumberFormat("₺#,##0.00").setBackground("#0f172a").setFontColor("#34d399").setFontWeight("bold").setFontSize(11).setHorizontalAlignment("center");
+  sheet.getRange("J3:P3").merge().setFormula("=SUM(J5:P5)").setNumberFormat("₺#,##0.00").setBackground("#0f172a").setFontColor("#34d399").setFontWeight("bold").setFontSize(11).setHorizontalAlignment("center");
+  sheet.getRange("R3:X3").merge().setFormula("=SUM(R5:X5)").setNumberFormat("₺#,##0.00").setBackground("#0f172a").setFontColor("#34d399").setFontWeight("bold").setFontSize(11).setHorizontalAlignment("center");
+  sheet.getRange("Z3:AF3").merge().setFormula("=SUM(Z5:AF5)").setNumberFormat("₺#,##0.00").setBackground("#0f172a").setFontColor("#34d399").setFontWeight("bold").setFontSize(11).setHorizontalAlignment("center");
+  sheet.getRange("AH3:AN3").merge().setFormula("=SUM(AH5:AN5)").setNumberFormat("₺#,##0.00").setBackground("#0f172a").setFontColor("#34d399").setFontWeight("bold").setFontSize(11).setHorizontalAlignment("center");
+  sheet.getRange("AP3:AQ3").merge().setFormula("=B3+J3+R3+Z3+AH3").setNumberFormat("₺#,##0.00").setBackground("#064e3b").setFontColor("#fef08a").setFontWeight("bold").setFontSize(13).setHorizontalAlignment("center");
+
   function applyDayFormulas(startCol, count) {
     for (var c = 0; c < count; c++) {
       var colIdx = startCol + c;
@@ -350,6 +358,20 @@ function ensureSalesSheetStructure(sheet) {
   applyDayFormulas(18, 7);
   applyDayFormulas(26, 7);
   applyDayFormulas(34, 7);
+
+  // Varsa #ERROR! veya bozuk hücreleri sıfırla
+  try {
+    for (var col = 2; col <= 40; col++) {
+      if (col === 9 || col === 17 || col === 25 || col === 33) continue;
+      var vals = sheet.getRange(6, col, 4, 1).getValues();
+      for (var r = 0; r < vals.length; r++) {
+        var vStr = String(vals[r][0] || "");
+        if (vStr.indexOf("#ERROR") !== -1 || vStr.indexOf("#VALUE") !== -1 || vStr.indexOf("#N/A") !== -1 || vStr.indexOf("#REF") !== -1) {
+          sheet.getRange(6 + r, col).setValue(0);
+        }
+      }
+    }
+  } catch (cleanErr) {}
 }
 
 function getSalesColumnForDay(dayNum) {
@@ -383,21 +405,21 @@ function handleSaveSale(ss, data) {
     else cardAmt = totalAmt;
   }
 
-  if (cardAmt > 0) {
+  if (cardAmt !== 0) {
     var curCard = Number(sheet.getRange(6, targetCol).getValue()) || 0;
-    sheet.getRange(6, targetCol).setValue(curCard + cardAmt);
+    sheet.getRange(6, targetCol).setValue(Math.max(0, curCard + cardAmt));
   }
-  if (cashAmt > 0) {
+  if (cashAmt !== 0) {
     var curCash = Number(sheet.getRange(7, targetCol).getValue()) || 0;
-    sheet.getRange(7, targetCol).setValue(curCash + cashAmt);
+    sheet.getRange(7, targetCol).setValue(Math.max(0, curCash + cashAmt));
   }
-  if (transferAmt > 0) {
+  if (transferAmt !== 0) {
     var curTrans = Number(sheet.getRange(8, targetCol).getValue()) || 0;
-    sheet.getRange(8, targetCol).setValue(curTrans + transferAmt);
+    sheet.getRange(8, targetCol).setValue(Math.max(0, curTrans + transferAmt));
   }
-  if (platformAmt > 0) {
+  if (platformAmt !== 0) {
     var curPlat = Number(sheet.getRange(9, targetCol).getValue()) || 0;
-    sheet.getRange(9, targetCol).setValue(curPlat + platformAmt);
+    sheet.getRange(9, targetCol).setValue(Math.max(0, curPlat + platformAmt));
   }
 
   var colLetter = getColumnLetter(targetCol);
@@ -1193,12 +1215,20 @@ function repairEverything() {
     fixAllErrorCells(dcSheet);
   }
   
+  var allSheets = ss.getSheets();
+  for (var i = 0; i < allSheets.length; i++) {
+    var sName = allSheets[i].getName().toUpperCase();
+    if (sName.indexOf("GELİR") !== -1 || sName.indexOf("GELIR") !== -1) {
+      ensureSalesSheetStructure(allSheets[i]);
+    }
+  }
+  
   var d = new Date();
   var monthYearStr = getMonthYearTitle(d);
   var salesSheet = getOrCreateMonthlySalesSheet(ss, monthYearStr);
   ensureSalesSheetStructure(salesSheet);
   
-  Logger.log("✅ Tüm tablolar başarıyla onarıldı ve güncellendi!");
+  Logger.log("✅ Tüm tablolar (GELİR ve Gün Sonu Kasa) başarıyla onarıldı, #ERROR! formülleri düzeltildi!");
 }
 
 // ===================================================================

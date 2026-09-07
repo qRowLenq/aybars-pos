@@ -557,16 +557,39 @@ function refundSale(saleId) {
   }
 
   const refundVat = sale.vatTotal ? -Math.abs(sale.vatTotal) : 0;
+  const refundTotal = -Math.abs(sale.total);
+  
+  let refundCard = 0;
+  let refundCash = 0;
+  let refundTransfer = 0;
+
+  if (sale.splitCard || sale.splitCash || sale.splitTransfer) {
+    refundCard = sale.splitCard ? -Math.abs(sale.splitCard) : 0;
+    refundCash = sale.splitCash ? -Math.abs(sale.splitCash) : 0;
+    refundTransfer = sale.splitTransfer ? -Math.abs(sale.splitTransfer) : 0;
+  } else {
+    const pType = (sale.paymentType || "").toLowerCase();
+    if (pType.includes("nakit") && !pType.includes("parçalı")) {
+      refundCash = refundTotal;
+    } else if (pType.includes("havale") || pType.includes("iban") || pType.includes("eft")) {
+      refundTransfer = refundTotal;
+    } else {
+      refundCard = refundTotal;
+    }
+  }
 
   sendToGoogleSheets({
     action: "save_sale",
-    date: nowDate(),
+    date: sale.date || nowDate(),
     time: nowTime(),
     customerName: sale.customerName,
     channel: "Satış İptali / İade",
     itemsSummary: `İADE: ${sale.itemsSummary}`,
     paymentType: sale.paymentType,
-    total: -Math.abs(sale.total),
+    total: refundTotal,
+    cardSales: refundCard,
+    cashSales: refundCash,
+    transferSales: refundTransfer,
     vatTotal: refundVat,
     isOfficial: sale.isOfficial !== undefined ? sale.isOfficial : true
   });
