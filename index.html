@@ -40,6 +40,9 @@
       <label class="btn btn-ghost btn-sm" style="cursor:pointer; margin:0;" title="İndirdiğiniz veya mevcut yedek JSON dosyasını sisteme yükleyin">
         📥 Yükle <input type="file" style="display:none;" accept=".json" onchange="importData(event)">
       </label>
+      <button class="btn btn-ghost btn-sm" onclick="openGoogleSheetConfigModal()" title="Google E-Tablo Web App Bağlantı URL'sini Değiştir">
+        ⚙️ E-Tablo URL
+      </button>
       <button class="btn btn-outline btn-sm" onclick="downloadAybars222Backup()" title="222 Ürünün hazır JSON yedek dosyasını bilgisayarınıza veya telefonunuza indirir. 'Yükle' seçeneğinden yükleyebilirsiniz." style="border-color:rgba(255,255,255,0.3); color:#f8fafc; font-weight:600;">
         📥 222 Ürün Dosyasını İndir
       </button>
@@ -1326,19 +1329,41 @@
     </div>
   </div>
 
+  <!-- Google Sheet Config Modal -->
+  <div class="modal-overlay" id="googleSheetConfigModal">
+    <div class="modal-box" style="max-width:540px;">
+      <div class="modal-title flex justify-between items-center">
+        <span>⚙️ Google E-Tablo Bağlantı Ayarı</span>
+        <button class="btn btn-ghost btn-xs" onclick="closeModal('googleSheetConfigModal')">✕</button>
+      </div>
+      <div class="hint-box mb-3 text-sm">
+        💡 <b>Başka Bilgisayara Kurarken:</b> Yeni bir Google E-Tablo açıp içindeki Apps Script kodunu dağıttığınızda size verilen <b>Web Uygulaması URL'sini</b> (<code>.../exec</code> ile biten) buraya yapıştırıp kaydedin. Kodlarla uğraşmanıza gerek kalmaz.
+      </div>
+      <div class="fg mb-3">
+        <label>Google Apps Script Web Uygulaması URL:</label>
+        <input type="text" id="customSheetUrlInput" class="fc text-sm" placeholder="https://script.google.com/macros/s/.../exec">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('googleSheetConfigModal')">İptal</button>
+        <button class="btn btn-outline" onclick="resetGoogleSheetUrl()">Varsayılana Sıfırla</button>
+        <button class="btn btn-primary" onclick="saveGoogleSheetUrl()">💾 Kaydet</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Container -->
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/products_catalog.js?v=20260907_11"></script>
-  <script src="js/state.js?v=20260907_11"></script>
-  <script src="js/ui.js?v=20260907_11"></script>
-  <script src="js/pos.js?v=20260907_11"></script>
-  <script src="js/orders.js?v=20260907_11"></script>
-  <script src="js/inventory.js?v=20260907_11"></script>
-  <script src="js/crm.js?v=20260907_11"></script>
-  <script src="js/procurement.js?v=20260907_11"></script>
-  <script src="js/expenses.js?v=20260907_11"></script>
-  <script src="js/app.js?v=20260907_11"></script>
+  <script src="js/products_catalog.js?v=20260907_12"></script>
+  <script src="js/state.js?v=20260907_12"></script>
+  <script src="js/ui.js?v=20260907_12"></script>
+  <script src="js/pos.js?v=20260907_12"></script>
+  <script src="js/orders.js?v=20260907_12"></script>
+  <script src="js/inventory.js?v=20260907_12"></script>
+  <script src="js/crm.js?v=20260907_12"></script>
+  <script src="js/procurement.js?v=20260907_12"></script>
+  <script src="js/expenses.js?v=20260907_12"></script>
+  <script src="js/app.js?v=20260907_12"></script>
 </body>
 </html>
