@@ -302,7 +302,14 @@ function renderPlatformOrdersGrouped() {
   container.innerHTML = "";
 
   if (platformPendingOrders.length === 0) {
-    container.innerHTML = `<div class="empty-state">Bekleyen platform siparişi yok.</div>`;
+    container.innerHTML = `<div class="empty-state" style="grid-column:1/-1; padding:24px; text-align:center;">
+      <div style="font-size:30px; margin-bottom:6px;">📱</div>
+      <div class="text-muted font-bold" style="font-size:13.5px;">Bekleyen platform siparişi bulunmuyor.</div>
+      <div class="text-xs text-muted mt-1">Yemeksepeti veya Getir'den gelen hakediş ödemelerini manuel eklemek için butona tıklayabilirsiniz.</div>
+      <div class="mt-3">
+        <button class="btn btn-success btn-sm" onclick="openManualPlatformIncomeModal()">💰 + Manuel Platform Geliri Ekle</button>
+      </div>
+    </div>`;
     return;
   }
 
@@ -316,12 +323,17 @@ function renderPlatformOrdersGrouped() {
   Object.keys(grouped).forEach(key => {
     const items = grouped[key];
     const dayTotal = items.reduce((s, o) => s + o.total, 0);
+    const channelName = items[0]?.channel || "Getir";
+    const orderDate = items[0]?.date || "";
     let html = `<div style="background:white; border:1px solid var(--border); border-radius:var(--radius); padding:14px; box-shadow:var(--shadow-sm);">
-      <div class="flex items-center justify-between mb-2">
-        <b>${key}</b>
+      <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+        <div>
+          <b style="font-size:14.5px;">${key}</b>
+          <div class="text-xs text-muted mt-0.5">Sipariş Brüt Toplamı: <b class="text-primary">${dayTotal.toFixed(2)} ₺</b> (${items.length} sipariş)</div>
+        </div>
         <div class="flex items-center gap-2">
-          <b class="text-primary">${dayTotal.toFixed(2)} ₺</b>
-          <button class="btn btn-outline btn-sm" onclick="settlePlatformDay('${key}')" title="Bu siparişleri listeden kaldırır. Net tutarı E-Tabloya manuel gelir olarak ekleyin.">✓ Listeden Kapat</button>
+          <button class="btn btn-success btn-sm" onclick="openManualPlatformIncomeModal('${channelName}', ${dayTotal}, '${key}', '${orderDate}')" title="Bankaya yatan net hakediş tutarını girip E-Tabloya ve sisteme gelir olarak kaydedin">💰 Net Gelir Girişi Yap</button>
+          <button class="btn btn-ghost btn-sm" onclick="settlePlatformDay('${key}')" title="Gelir girmeden sadece listeden temizler">Listeden Kapat</button>
         </div>
       </div>`;
     items.forEach(o => { html += `<div class="text-sm" style="padding:4px 0; border-top:1px solid var(--border-light);">${o.time} — ${o.customerName}: ${o.itemsSummary} (<b>${Number(o.total).toFixed(2)} ₺</b>)</div>`; });
@@ -333,13 +345,137 @@ function renderPlatformOrdersGrouped() {
 function settlePlatformDay(key) {
   const items = platformPendingOrders.filter(o => `${o.channel} — ${o.date}` === key);
   const dayTotal = items.reduce((s, o) => s + o.total, 0);
-  // Kullanıcı talebi: Getir/Yemeksepeti komisyonları dinamik değiştiğinden E-Tablo'ya otomatik aktarım yapılmaz.
-  // Net gelir E-Tablo'ya manuel girileceği için buradan sadece listeden temizlenir.
   platformPendingOrders = platformPendingOrders.filter(o => `${o.channel} — ${o.date}` !== key);
   saveData();
   renderPlatformOrdersGrouped();
   updateAllBadges();
   toast(`✓ ${key} siparişleri (${dayTotal.toFixed(2)} ₺) listeden kapatıldı.`);
+}
+
+// ── Manuel Platform Gelir Girişi (Yemeksepeti / Getir) ──
+function openManualPlatformIncomeModal(platform, gross, key, orderDate) {
+  const pSelect = document.getElementById("mpiPlatform");
+  if (pSelect) {
+    if (platform && (platform.includes("Yemeksepeti") || platform.toLowerCase().includes("yemek"))) {
+      pSelect.value = "Yemeksepeti";
+    } else if (platform && (platform.includes("Getir") || platform.toLowerCase().includes("getir"))) {
+      pSelect.value = "Getir";
+    } else if (platform) {
+      pSelect.value = platform;
+    } else {
+      pSelect.value = "Getir";
+    }
+  }
+
+  const dInput = document.getElementById("mpiDate");
+  if (dInput) {
+    if (orderDate && orderDate.includes(".")) {
+      const parts = orderDate.split(".");
+      dInput.value = `${parts[2]}-${parts[1]}-${parts[0]}`;
+    } else {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, "0");
+      const d = String(now.getDate()).padStart(2, "0");
+      dInput.value = `${y}-${m}-${d}`;
+    }
+  }
+
+  const gInput = document.getElementById("mpiGrossAmount");
+  if (gInput) gInput.value = (gross !== undefined && gross > 0) ? Number(gross).toFixed(2) : "";
+
+  const nInput = document.getElementById("mpiNetAmount");
+  if (nInput) {
+    nInput.value = "";
+    setTimeout(() => nInput.focus(), 150);
+  }
+
+  const noteInput = document.getElementById("mpiNote");
+  if (noteInput) {
+    const curP = pSelect ? pSelect.value : "Getir";
+    noteInput.value = `${curP} Haftalık Net Hakediş Tahsilatı`;
+  }
+
+  const keyInput = document.getElementById("mpiGroupKey");
+  if (keyInput) keyInput.value = key || "";
+
+  openModal("manualPlatformIncomeModal");
+}
+
+function handleMpiPlatformChange() {
+  const pSelect = document.getElementById("mpiPlatform");
+  const noteInput = document.getElementById("mpiNote");
+  if (pSelect && noteInput) {
+    noteInput.value = `${pSelect.value} Haftalık Net Hakediş Tahsilatı`;
+  }
+}
+
+function saveManualPlatformIncome() {
+  const platform = document.getElementById("mpiPlatform")?.value || "Getir";
+  const dateVal = document.getElementById("mpiDate")?.value;
+  let dateStr = nowDate();
+  if (dateVal && dateVal.includes("-")) {
+    const parts = dateVal.split("-");
+    dateStr = `${parts[2]}.${parts[1]}.${parts[0]}`;
+  }
+
+  const grossVal = parseFloat(document.getElementById("mpiGrossAmount")?.value) || 0;
+  const netVal = parseFloat(document.getElementById("mpiNetAmount")?.value);
+
+  if (isNaN(netVal) || netVal <= 0) {
+    return toast("Lütfen bankaya yatan geçerli bir net gelir tutarı girin!", "warning");
+  }
+
+  const payType = document.getElementById("mpiPaymentType")?.value || "Havale / IBAN";
+  const note = (document.getElementById("mpiNote")?.value || "").trim();
+  const groupKey = document.getElementById("mpiGroupKey")?.value;
+
+  const desc = note || `${platform} Net Gelir Tahsilatı${grossVal > 0 ? ' (Brüt: ' + grossVal.toFixed(2) + ' ₺)' : ''}`;
+
+  // Satış / Gelir Geçmişine ekle
+  const saleItem = {
+    id: Date.now(),
+    date: dateStr,
+    time: nowTime(),
+    customerName: platform + " (Platform Geliri)",
+    itemsSummary: desc,
+    soldItems: [],
+    total: netVal,
+    vatTotal: Number((netVal - (netVal / 1.20)).toFixed(2)),
+    paymentType: payType,
+    splitCash: payType.includes("Nakit") ? netVal : 0,
+    splitCard: payType.includes("Kart") ? netVal : 0,
+    splitTransfer: (!payType.includes("Nakit") && !payType.includes("Kart")) ? netVal : 0,
+    isOfficial: true
+  };
+  salesHistory.unshift(saleItem);
+
+  // Belirli bir grup üzerinden kapatılıyorsa o grubu listeden kaldır
+  if (groupKey) {
+    platformPendingOrders = platformPendingOrders.filter(o => `${o.channel} — ${o.date}` !== groupKey);
+  }
+
+  // Google Sheets'e gönder
+  sendToGoogleSheets({
+    action: "save_platform_income",
+    platform: platform,
+    date: dateStr,
+    time: nowTime(),
+    grossAmount: grossVal,
+    netAmount: netVal,
+    total: netVal,
+    paymentType: payType,
+    note: desc,
+    isOfficial: true
+  });
+
+  saveData();
+  closeModal("manualPlatformIncomeModal");
+  renderOrdersTab();
+  renderPosSalesHistory();
+  updateAllBadges();
+
+  toast(`✅ ${platform} net geliri (${netVal.toFixed(2)} ₺) başarıyla kaydedildi ve E-Tablo'ya aktarıldı!`, "success");
 }
 
 // ── Delivered History ──
@@ -366,4 +502,15 @@ function clearDeliveredOrders() {
     deliveredOrders = [];
     saveData(); renderDeliveredOrdersList();
   }
+}
+
+// Window global exports
+if (typeof window !== "undefined") {
+  window.renderOrdersTab = renderOrdersTab;
+  window.openDispatchModal = openDispatchModal;
+  window.saveDispatchOrder = saveDispatchOrder;
+  window.openManualPlatformIncomeModal = openManualPlatformIncomeModal;
+  window.handleMpiPlatformChange = handleMpiPlatformChange;
+  window.saveManualPlatformIncome = saveManualPlatformIncome;
+  window.settlePlatformDay = settlePlatformDay;
 }

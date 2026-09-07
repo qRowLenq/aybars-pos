@@ -138,18 +138,25 @@
 
     <!-- 2. SİPARİŞLER -->
     <section id="tab-orders" class="tab-pane subtabs-container">
-      <div class="subtabs-header">
-        <button class="subtab-btn active" data-sub="pending" onclick="switchOrdersSubtab('pending')">🛵 Yoldaki Siparişler <span class="badge" id="pendingOrdersCount">0</span></button>
-        <button class="subtab-btn" data-sub="platform" onclick="switchOrdersSubtab('platform')">📱 Platform Tahsilat <span class="badge" id="platformPendingBadge">0</span></button>
-        <button class="subtab-btn" data-sub="delivered" onclick="switchOrdersSubtab('delivered')">✅ Teslim Edilenler</button>
+      <div class="subtabs-header flex items-center justify-between flex-wrap gap-2">
+        <div class="flex gap-1 flex-wrap">
+          <button class="subtab-btn active" data-sub="pending" onclick="switchOrdersSubtab('pending')">🛵 Yoldaki Siparişler <span class="badge" id="pendingOrdersCount">0</span></button>
+          <button class="subtab-btn" data-sub="platform" onclick="switchOrdersSubtab('platform')">📱 Platform Tahsilat <span class="badge" id="platformPendingBadge">0</span></button>
+          <button class="subtab-btn" data-sub="delivered" onclick="switchOrdersSubtab('delivered')">✅ Teslim Edilenler</button>
+        </div>
+        <button class="btn btn-success btn-sm" onclick="openManualPlatformIncomeModal()" style="white-space:nowrap;">💰 + Yemeksepeti / Getir Geliri Ekle</button>
       </div>
 
       <div id="subtab-orders-pending" class="subtab-view active">
         <div id="singleOrdersList" class="form-row form-row-3"></div>
       </div>
       <div id="subtab-orders-platform" class="subtab-view">
+        <div class="flex justify-between items-center mb-2 flex-wrap gap-2">
+          <b>📱 Yemeksepeti & Getir Platform Tahsilatları</b>
+          <button class="btn btn-success btn-sm" onclick="openManualPlatformIncomeModal()">💰 + Manuel Platform Geliri Ekle</button>
+        </div>
         <div class="hint-box dark mb-3 text-sm">
-          💡 <b>Platform Siparişleri:</b> Getir ve Yemeksepeti komisyon oranları değişken olduğundan E-Tablo'ya otomatik gelir yansıtılmaz. Siparişler girdiğinizde anında stoktan düşer. Kurye teslim edince buraya düşer. Bankanıza yatan net tutarı E-Tablo'ya manuel gelir olarak ekledikten sonra buradaki siparişleri "Listeden Kapat" ile silebilirsiniz.
+          💡 <b>Yemeksepeti & Getir Gelir Takibi:</b> Siparişler verildiğinde anında stoktan düşer. Komisyonlar haftalık/aylık değiştiği için, banka hesabınıza yatan net tutarları aşağıdaki <b>"💰 Net Gelir Girişi Yap"</b> butonuna basarak doğrudan sisteme ve E-Tablo'ya manuel gelir olarak işleyebilirsiniz.
         </div>
         <div id="platformOrdersGroupedList" class="form-row form-row-2"></div>
       </div>
@@ -721,6 +728,68 @@
       <div class="modal-actions">
         <button class="btn btn-ghost" onclick="closeModal('dispatchModal')">Vazgeç</button>
         <button class="btn btn-warning" onclick="saveDispatchOrder()">Siparişi Yola Çıkar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Manuel Platform Geliri Ekle (Yemeksepeti / Getir) -->
+  <div class="modal-overlay" id="manualPlatformIncomeModal">
+    <div class="modal-box" style="max-width:480px;">
+      <div class="modal-title flex justify-between items-center">
+        <span>🛵 Yemeksepeti & Getir Manuel Gelir Girişi</span>
+        <button class="btn btn-ghost btn-xs" onclick="closeModal('manualPlatformIncomeModal')">✕</button>
+      </div>
+
+      <div class="hint-box mb-3 text-sm" style="background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; padding:10px 12px; border-radius:var(--radius-sm);">
+        💡 <b>Komisyon Düşülmüş Net Gelir:</b> Getir veya Yemeksepeti komisyonları kestikten sonra banka hesabınıza yatan net tutarı buraya girin. Bu tutar günlük cironuza ve E-Tablo'ya resmi gelir olarak yansır.
+      </div>
+
+      <div class="fg">
+        <label>📱 Platform Seçin</label>
+        <select id="mpiPlatform" class="fc" onchange="handleMpiPlatformChange()">
+          <option value="Getir">🛵 Getir</option>
+          <option value="Yemeksepeti">🍔 Yemeksepeti</option>
+          <option value="Trendyol Yemek">🥡 Trendyol Yemek</option>
+          <option value="Diğer Platform">📱 Diğer Platform</option>
+        </select>
+      </div>
+
+      <div class="form-row form-row-2">
+        <div class="fg">
+          <label>📅 Tahsilat Tarihi</label>
+          <input type="date" id="mpiDate" class="fc">
+        </div>
+        <div class="fg">
+          <label>💳 Tahsilat Hesabı</label>
+          <select id="mpiPaymentType" class="fc">
+            <option value="Havale / IBAN">📲 Banka Hesabı (Havale/IBAN)</option>
+            <option value="Kredi Kartı">💳 Kredi Kartı / POS</option>
+            <option value="Nakit">💵 Nakit Kasa</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row form-row-2">
+        <div class="fg">
+          <label>📦 Brüt Sipariş Tutarı <span class="text-xs text-muted">(İsteğe Bağlı)</span></label>
+          <input type="number" step="any" min="0" id="mpiGrossAmount" class="fc" placeholder="0.00 ₺">
+        </div>
+        <div class="fg">
+          <label><b style="color:#059669;">💰 Bankaya Yatan Net Tutar (TL) *</b></label>
+          <input type="number" step="any" min="0" id="mpiNetAmount" class="fc font-bold text-success" style="font-size:16px;" placeholder="0.00 ₺" required>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label>📝 Açıklama / Dekont Notu</label>
+        <input type="text" id="mpiNote" class="fc" placeholder="Örn: Getir haftalık hakediş net ödemesi">
+      </div>
+
+      <input type="hidden" id="mpiGroupKey" value="">
+
+      <div class="modal-actions mt-3">
+        <button class="btn btn-ghost" onclick="closeModal('manualPlatformIncomeModal')">Vazgeç</button>
+        <button class="btn btn-success" onclick="saveManualPlatformIncome()">💾 Net Geliri Sisteme & E-Tabloya Kaydet</button>
       </div>
     </div>
   </div>
@@ -1332,15 +1401,15 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/products_catalog.js?v=20260908_3"></script>
-  <script src="js/state.js?v=20260908_3"></script>
-  <script src="js/ui.js?v=20260908_3"></script>
-  <script src="js/pos.js?v=20260908_3"></script>
-  <script src="js/orders.js?v=20260908_3"></script>
-  <script src="js/inventory.js?v=20260908_3"></script>
-  <script src="js/crm.js?v=20260908_3"></script>
-  <script src="js/procurement.js?v=20260908_3"></script>
-  <script src="js/expenses.js?v=20260908_3"></script>
-  <script src="js/app.js?v=20260908_3"></script>
+  <script src="js/products_catalog.js?v=20260908_4"></script>
+  <script src="js/state.js?v=20260908_4"></script>
+  <script src="js/ui.js?v=20260908_4"></script>
+  <script src="js/pos.js?v=20260908_4"></script>
+  <script src="js/orders.js?v=20260908_4"></script>
+  <script src="js/inventory.js?v=20260908_4"></script>
+  <script src="js/crm.js?v=20260908_4"></script>
+  <script src="js/procurement.js?v=20260908_4"></script>
+  <script src="js/expenses.js?v=20260908_4"></script>
+  <script src="js/app.js?v=20260908_4"></script>
 </body>
 </html>

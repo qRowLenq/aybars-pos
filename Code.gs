@@ -100,6 +100,11 @@ function doPost(e) {
         handleDailyClose(ss, data);
         break;
 
+      case "save_platform_income":
+      case "platform_income":
+        handleSavePlatformIncome(ss, data);
+        break;
+
       case "inventory_sync":
         handleInventorySync(ss, data);
         break;
@@ -281,44 +286,64 @@ function handleSaveSale(ss, data) {
   var dayNum = dateObj.getDate();
   var targetCol = getSalesColumnForDay(dayNum);
 
-  var maxRows = Math.min(sheet.getMaxRows(), 500);
-  var targetRow = 6;
-  var colRange = sheet.getRange(6, targetCol, maxRows - 5, 1).getValues();
-
-  for (var r = 0; r < colRange.length; r++) {
-    var val = colRange[r][0];
-    if (val === "" || val === null || val === undefined) {
-      targetRow = 6 + r;
-      break;
-    }
-    if (r === colRange.length - 1) {
-      targetRow = 6 + colRange.length;
-      sheet.insertRowAfter(targetRow - 1);
-    }
-  }
-
+  // Günün konsolide toplam hücresi: 6. satır (Günün toplam cirosu)
+  var targetCell = sheet.getRange(6, targetCol);
+  var currentVal = Number(targetCell.getValue()) || 0;
   var totalAmt = Number(data.total || 0);
-  var isOfficial = (data.isOfficial === true || data.isOfficial === "true");
+  var newVal = currentVal + totalAmt;
 
-  var targetCell = sheet.getRange(targetRow, targetCol);
-  targetCell.setValue(totalAmt)
+  targetCell.setValue(newVal)
     .setNumberFormat("₺#,##0.00")
     .setHorizontalAlignment("right")
-    .setFontSize(9)
+    .setFontWeight("bold")
+    .setFontSize(9.5)
+    .setBackground("#f0fdf4")
+    .setFontColor("#15803d")
     .setVerticalAlignment("middle");
 
-  if (isOfficial) {
-    targetCell.setBackground("#ecfdf5");
-  } else {
-    targetCell.setBackground("#ffffff");
-  }
+  var isOfficial = (data.isOfficial === true || data.isOfficial === "true");
+  var existingNote = targetCell.getNote() || "";
+  var lineNote = (data.time || getTimeFormatted()) + " — " + (data.paymentType || "Nakit") + ": " + totalAmt.toFixed(2) + " ₺ (" + (data.itemsSummary || "Satış") + ")";
+  var updatedNote = existingNote ? (existingNote + "\n" + lineNote) : ("Bugünkü Satışlar:\n" + lineNote);
+  targetCell.setNote(updatedNote);
 
-  var noteText = "🕒 Saat: " + (data.time || getTimeFormatted()) + "\n" +
-    "🛍️ Kalemler: " + (data.itemsSummary || "Muhtelif Satış") + "\n" +
-    "💳 Ödeme: " + (data.paymentType || "Nakit") + "\n" +
-    "👤 Müşteri: " + (data.customerName || "Tezgâh") + "\n" +
-    "🧾 Fiş Durumu: " + (isOfficial ? "Resmi (Fişli)" : "İç Kayıt (Fişsiz)");
-  targetCell.setNote(noteText);
+  if (data.officialSales !== undefined || data.taxBase !== undefined) {
+    handleSyncTaxReport(ss, data);
+  }
+}
+
+function handleSavePlatformIncome(ss, data) {
+  var dateObj = parseDateHelper(data.date);
+  var monthYearStr = getMonthYearTitle(dateObj);
+  var sheet = getOrCreateMonthlySalesSheet(ss, monthYearStr);
+
+  var dayNum = dateObj.getDate();
+  var targetCol = getSalesColumnForDay(dayNum);
+
+  // Günün konsolide toplam hücresi: 6. satır
+  var targetCell = sheet.getRange(6, targetCol);
+  var currentVal = Number(targetCell.getValue()) || 0;
+  var netAmt = Number(data.netAmount || data.total || 0);
+  var newVal = currentVal + netAmt;
+
+  targetCell.setValue(newVal)
+    .setNumberFormat("₺#,##0.00")
+    .setHorizontalAlignment("right")
+    .setFontWeight("bold")
+    .setFontSize(9.5)
+    .setBackground("#f0fdf4")
+    .setFontColor("#15803d")
+    .setVerticalAlignment("middle");
+
+  var platform = data.platform || "Platform";
+  var gross = Number(data.grossAmount || 0);
+  var existingNote = targetCell.getNote() || "";
+  var lineNote = "🛵 " + platform + " Net Hakediş: " + netAmt.toFixed(2) + " ₺" +
+    (gross > 0 ? (" (Brüt: " + gross.toFixed(2) + " ₺)") : "") +
+    " [" + (data.paymentType || "Banka Hesabı") + "]" +
+    (data.note ? (" — " + data.note) : "");
+  var updatedNote = existingNote ? (existingNote + "\n" + lineNote) : ("Bugünkü Gelirler:\n" + lineNote);
+  targetCell.setNote(updatedNote);
 
   if (data.officialSales !== undefined || data.taxBase !== undefined) {
     handleSyncTaxReport(ss, data);
@@ -945,6 +970,38 @@ function handleDailyClose(ss, data) {
   }
 
   sheet.setRowHeight(targetRow, 26);
+
+  // 2. GELİR - [AY YIL] sayfasına gün sonu konsolide toplam cirosunu ve ayrıntılı dökümünü damgala
+  try {
+    var dateObj = parseDateHelper(data.date);
+    var monthYearStr = getMonthYearTitle(dateObj);
+    var salesSheet = getOrCreateMonthlySalesSheet(ss, monthYearStr);
+    var dayNum = dateObj.getDate();
+    var targetCol = getSalesColumnForDay(dayNum);
+
+    var dayCell = salesSheet.getRange(6, targetCol);
+    dayCell.setValue(totalSales)
+      .setNumberFormat("₺#,##0.00")
+      .setHorizontalAlignment("right")
+      .setFontWeight("bold")
+      .setFontSize(10)
+      .setBackground("#f0fdf4")
+      .setFontColor("#15803d")
+      .setVerticalAlignment("middle");
+
+    var summaryNote = "🏁 GÜN SONU KONSOLİDE GELİR (" + (data.date || getTodayFormatted()) + ")\n" +
+      "━━━━━━━━━━━━━━━━━━━━\n" +
+      "💳 Kredi Kartı: " + cardSales.toFixed(2) + " ₺\n" +
+      "💵 Nakit Satış: " + cashSales.toFixed(2) + " ₺\n" +
+      "📲 Havale / IBAN: " + transferSales.toFixed(2) + " ₺\n" +
+      "━━━━━━━━━━━━━━━━━━━━\n" +
+      "💰 Günlük Toplam Ciro: " + totalSales.toFixed(2) + " ₺\n" +
+      "🕐 Kapanış Saati: " + (data.time || getTimeFormatted()) + "\n" +
+      "📌 Kasa Durumu: " + statusText;
+    dayCell.setNote(summaryNote);
+  } catch (syncErr) {
+    Logger.log("GELİR sayfasına gün sonu damgalanırken hata: " + syncErr);
+  }
 }
 
 // ===================================================================
