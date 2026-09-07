@@ -6,13 +6,13 @@
 function openDailyCloseModal() {
   document.querySelectorAll(".banknote-grid .fc").forEach(inp => inp.value = "");
   document.getElementById("dcTotalCash").innerText = "0.00 ₺";
-  document.getElementById("dcExpectedCash").innerText = "Hesaplanıyor...";
-  document.getElementById("dcDifference").innerText = "-";
+  calculateDailyClose();
+  renderDailyCloseSalesTable();
   openModal("dailyCloseModal");
 }
 
 function calculateDailyClose() {
-  const getVal = id => Number(document.getElementById(id).value) || 0;
+  const getVal = id => Number(document.getElementById(id)?.value) || 0;
   
   const b200 = getVal("b200") * 200;
   const b100 = getVal("b100") * 100;
@@ -23,70 +23,195 @@ function calculateDailyClose() {
   const coin = getVal("bCoin");
 
   const actualTotal = b200 + b100 + b50 + b20 + b10 + b5 + coin;
-  document.getElementById("dcTotalCash").innerText = actualTotal.toFixed(2) + " ₺";
+  const totalCashEl = document.getElementById("dcTotalCash");
+  if (totalCashEl) totalCashEl.innerText = actualTotal.toFixed(2) + " ₺";
 
   const today = nowDate();
-  
-  // Calculate expected cash: Günün Toplam Nakit Satışları - Günün Kasadan Çıkan Nakit Giderleri
+  const todaySales = (salesHistory || []).filter(s => s.date === today);
+
   let cashSales = 0;
-  const todaySales = salesHistory.filter(s => s.date === today && (s.paymentType || "").includes("Nakit"));
-  cashSales += todaySales.reduce((s, x) => s + (Number(x.total) || 0), 0);
-  
-  // + Debt Collections (Cash)
-  customers.forEach(c => {
-    (c.purchaseHistory || []).filter(h => h.date === today && (h.payment || "").includes("Nakit")).forEach(h => {
-      cashSales += (Number(h.total) || 0);
-    });
+  let cardSales = 0;
+  let transferSales = 0;
+  let totalRevenue = 0;
+
+  let cardCount = 0;
+  let cashCount = 0;
+  let transferCount = 0;
+
+  todaySales.forEach(s => {
+    const bk = (typeof getSalePaymentBreakdown === "function") 
+      ? getSalePaymentBreakdown(s) 
+      : { cash: Number(s.splitCash) || 0, card: Number(s.splitCard) || 0, transfer: Number(s.splitTransfer) || 0 };
+    
+    cashSales += bk.cash;
+    cardSales += bk.card;
+    transferSales += bk.transfer;
+    totalRevenue += (Number(s.total) || 0);
+
+    if (bk.card > 0) cardCount++;
+    if (bk.cash > 0) cashCount++;
+    if (bk.transfer > 0) transferCount++;
   });
 
+  // + Müşteri veresiye tahsilatları
+  if (Array.isArray(window.customers || customers)) {
+    (window.customers || customers).forEach(c => {
+      (c.purchaseHistory || []).filter(h => h.date === today && (h.payment || "").includes("Tahsilat")).forEach(h => {
+        const p = (h.payment || "").toLowerCase();
+        const amt = Number(h.total) || 0;
+        if (p.includes("nakit")) {
+          cashSales += amt;
+          cashCount++;
+        } else if (p.includes("kart")) {
+          cardSales += amt;
+          cardCount++;
+        } else if (p.includes("havale") || p.includes("iban")) {
+          transferSales += amt;
+          transferCount++;
+        }
+        totalRevenue += amt;
+      });
+    });
+  }
+
+  // - Nakit Çıkan Giderler
   let cashExpenses = 0;
-  // - Expenses (Cash)
-  const todayExpenses = expenses.filter(e => e.date === today && (
-    (e.paymentMethod && (e.paymentMethod.includes("Nakit") || e.paymentMethod.includes("Kasa"))) ||
-    (e.source && (e.source.includes("Nakit") || e.source.includes("Kasa"))) ||
-    e.status === "Peşin Ödendi"
-  ));
-  cashExpenses += todayExpenses.reduce((s, x) => s + (Number(x.amount) || 0), 0);
-
-  // - Supplier Payments (Cash)
-  suppliers.forEach(s => {
-    (s.transactions || []).filter(t => t.date === today && t.type === "Ödeme" && (t.item || "").includes("Kasa (Nakit)")).forEach(t => {
-      cashExpenses += (Number(t.amount) || 0);
+  if (Array.isArray(window.expenses || expenses)) {
+    (window.expenses || expenses).filter(e => e.date === today && (
+      (e.paymentMethod && (e.paymentMethod.includes("Nakit") || e.paymentMethod.includes("Kasa"))) ||
+      (e.source && (e.source.includes("Nakit") || e.source.includes("Kasa"))) ||
+      e.status === "Peşin Ödendi"
+    )).forEach(e => {
+      cashExpenses += (Number(e.amount) || 0);
     });
-  });
+  }
 
-  const expectedCash = cashSales - cashExpenses;
-  document.getElementById("dcExpectedCash").innerText = expectedCash.toFixed(2) + " ₺";
+  // - Nakit Toptancı Ödemeleri
+  if (Array.isArray(window.suppliers || suppliers)) {
+    (window.suppliers || suppliers).forEach(s => {
+      (s.transactions || []).filter(t => t.date === today && t.type === "Ödeme" && (t.item || "").includes("Kasa (Nakit)")).forEach(t => {
+        cashExpenses += (Number(t.amount) || 0);
+      });
+    });
+  }
+
+  // UI Güncelleme: Kredi Kartı
+  const cardEl = document.getElementById("dcCardSales");
+  if (cardEl) cardEl.innerText = cardSales.toFixed(2) + " ₺";
+  const cardCountEl = document.getElementById("dcCardCount");
+  if (cardCountEl) cardCountEl.innerText = `${cardCount} işlem`;
+
+  // UI Güncelleme: Nakit
+  const cashEl = document.getElementById("dcCashSalesDisplay");
+  if (cashEl) cashEl.innerText = cashSales.toFixed(2) + " ₺";
+  const cashCountEl = document.getElementById("dcCashCount");
+  if (cashCountEl) cashCountEl.innerText = `${cashCount} işlem`;
+
+  // UI Güncelleme: Havale / IBAN
+  const transferEl = document.getElementById("dcTransferSales");
+  if (transferEl) transferEl.innerText = transferSales.toFixed(2) + " ₺";
+  const transferCountEl = document.getElementById("dcTransferCount");
+  if (transferCountEl) transferCountEl.innerText = `${transferCount} işlem`;
+
+  // EN ALTTA TOPLAT: Günlük Toplam Gelir (Ciro)
+  const totalRevEl = document.getElementById("dcTotalSalesDisplay");
+  if (totalRevEl) totalRevEl.innerText = totalRevenue.toFixed(2) + " ₺";
+  const totalCountEl = document.getElementById("dcTotalCountDisplay");
+  if (totalCountEl) totalCountEl.innerText = `Toplam ${todaySales.length} işlem`;
+
+  // Kasada olması beklenen nakit
+  const expectedCash = Math.max(0, cashSales - cashExpenses);
+  const expCashEl = document.getElementById("dcExpectedCash");
+  if (expCashEl) expCashEl.innerText = expectedCash.toFixed(2) + " ₺";
   
   const diff = actualTotal - expectedCash;
   const diffEl = document.getElementById("dcDifference");
-  diffEl.innerText = (diff > 0 ? "+" : "") + diff.toFixed(2) + " ₺";
-  diffEl.className = diff >= 0 ? (diff === 0 ? "text-success font-bold" : "text-primary font-bold") : "text-danger font-bold";
+  if (diffEl) {
+    diffEl.innerText = (diff > 0 ? "+" : "") + diff.toFixed(2) + " ₺";
+    diffEl.className = diff >= 0 ? (diff === 0 ? "text-success font-bold" : "text-primary font-bold") : "text-danger font-bold";
+  }
+}
+
+function renderDailyCloseSalesTable() {
+  const tbody = document.getElementById("dcSalesTableBody");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  const today = nowDate();
+  const todaySales = (salesHistory || []).filter(s => s.date === today);
+
+  if (todaySales.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8; padding:16px;">Bugün henüz satış yapılmadı.</td></tr>`;
+    return;
+  }
+
+  todaySales.forEach(s => {
+    let badgeStyle = "background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe;";
+    let badgeIcon = "💳";
+    const pType = (s.paymentType || "").toLowerCase();
+    if (pType.includes("nakit") && !pType.includes("parçalı")) {
+      badgeStyle = "background:#f0fdf4; color:#166534; border:1px solid #bbf7d0;";
+      badgeIcon = "💵";
+    } else if (pType.includes("havale") || pType.includes("iban") || pType.includes("eft")) {
+      badgeStyle = "background:#f0f9ff; color:#0369a1; border:1px solid #bae6fd;";
+      badgeIcon = "📲";
+    } else if (pType.includes("parçalı")) {
+      badgeStyle = "background:#faf5ff; color:#7e22ce; border:1px solid #e9d5ff;";
+      badgeIcon = "✂️";
+    } else if (pType.includes("veresiye")) {
+      badgeStyle = "background:#fef2f2; color:#b91c1c; border:1px solid #fecaca;";
+      badgeIcon = "📝";
+    }
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="font-weight:600; color:#64748b;">${s.time || "-"}</td>
+      <td><span class="badge" style="font-size:11px; font-weight:600; ${badgeStyle}">${badgeIcon} ${s.paymentType}</span></td>
+      <td style="max-width:280px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${s.itemsSummary || ''}">${s.itemsSummary || '-'}</td>
+      <td style="text-align:right; font-weight:700; color:#0f172a;">${Number(s.total).toFixed(2)} ₺</td>
+    `;
+    tbody.appendChild(tr);
+  });
 }
 
 function completeDailyClose() {
-  const actualStr = document.getElementById("dcTotalCash").innerText.replace("₺", "").trim();
+  const actualStr = document.getElementById("dcTotalCash")?.innerText.replace("₺", "").trim() || "0";
   const actualNum = parseFloat(actualStr.replace(/\./g, "").replace(",", ".")) || 0;
-  const expStr = document.getElementById("dcExpectedCash").innerText.replace("₺", "").trim();
+  const expStr = document.getElementById("dcExpectedCash")?.innerText.replace("₺", "").trim() || "0";
   const expNum = parseFloat(expStr.replace(/\./g, "").replace(",", ".")) || 0;
   const diffNum = actualNum - expNum;
 
   const today = nowDate();
+  const todaySales = (salesHistory || []).filter(s => s.date === today);
   let cashSales = 0;
-  salesHistory.filter(s => s.date === today && (s.paymentType || "").includes("Nakit")).forEach(s => cashSales += (Number(s.total) || 0));
-  customers.forEach(c => {
-    (c.purchaseHistory || []).filter(h => h.date === today && (h.payment || "").includes("Nakit")).forEach(h => cashSales += (Number(h.total) || 0));
+  let cardSales = 0;
+  let transferSales = 0;
+  let totalRevenue = 0;
+
+  todaySales.forEach(s => {
+    const bk = (typeof getSalePaymentBreakdown === "function") 
+      ? getSalePaymentBreakdown(s) 
+      : { cash: Number(s.splitCash) || 0, card: Number(s.splitCard) || 0, transfer: Number(s.splitTransfer) || 0 };
+    cashSales += bk.cash;
+    cardSales += bk.card;
+    transferSales += bk.transfer;
+    totalRevenue += (Number(s.total) || 0);
   });
 
   let cashExpenses = 0;
-  expenses.filter(e => e.date === today && (
-    (e.paymentMethod && (e.paymentMethod.includes("Nakit") || e.paymentMethod.includes("Kasa"))) ||
-    (e.source && (e.source.includes("Nakit") || e.source.includes("Kasa"))) ||
-    e.status === "Peşin Ödendi"
-  )).forEach(e => cashExpenses += (Number(e.amount) || 0));
-  suppliers.forEach(s => {
-    (s.transactions || []).filter(t => t.date === today && t.type === "Ödeme" && (t.item || "").includes("Kasa (Nakit)")).forEach(t => cashExpenses += (Number(t.amount) || 0));
-  });
+  if (Array.isArray(window.expenses || expenses)) {
+    (window.expenses || expenses).filter(e => e.date === today && (
+      (e.paymentMethod && (e.paymentMethod.includes("Nakit") || e.paymentMethod.includes("Kasa"))) ||
+      (e.source && (e.source.includes("Nakit") || e.source.includes("Kasa"))) ||
+      e.status === "Peşin Ödendi"
+    )).forEach(e => cashExpenses += (Number(e.amount) || 0));
+  }
+
+  if (Array.isArray(window.suppliers || suppliers)) {
+    (window.suppliers || suppliers).forEach(s => {
+      (s.transactions || []).filter(t => t.date === today && t.type === "Ödeme" && (t.item || "").includes("Kasa (Nakit)")).forEach(t => cashExpenses += (Number(t.amount) || 0));
+    });
+  }
   
   sendToGoogleSheets({ 
     action: "daily_close", 
@@ -95,12 +220,15 @@ function completeDailyClose() {
     actualCash: actualNum,
     expectedCash: expNum,
     cashSales: cashSales,
+    cardSales: cardSales,
+    transferSales: transferSales,
+    totalSales: totalRevenue,
     cashExpenses: cashExpenses,
     difference: diffNum 
   });
 
   closeModal("dailyCloseModal");
-  toast("🏁 Gün sonu sayımı başarıyla E-Tablo'ya gönderildi!");
+  toast("🏁 Gün sonu sayımı ve gelir özeti başarıyla kaydedildi!");
 }
 
 // ── Backup System ──

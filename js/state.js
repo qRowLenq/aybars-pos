@@ -395,4 +395,48 @@ function resetToDefaultCatalog() {
   }
 }
 
+// ── Helper to calculate Cash, Card, Transfer (Havale/IBAN) and Credit portions ──
+function getSalePaymentBreakdown(sale) {
+  if (!sale) return { cash: 0, card: 0, transfer: 0, credit: 0 };
+  const total = Number(sale.total) || 0;
+
+  if (typeof sale.splitCash === "number" || typeof sale.splitCard === "number" || typeof sale.splitTransfer === "number" || typeof sale.splitCredit === "number") {
+    return {
+      cash: Number(sale.splitCash) || 0,
+      card: Number(sale.splitCard) || 0,
+      transfer: Number(sale.splitTransfer) || 0,
+      credit: Number(sale.splitCredit) || 0
+    };
+  }
+
+  const pType = (sale.paymentType || "").toLowerCase();
+  
+  if (pType.includes("parçalı")) {
+    let cash = 0, card = 0, transfer = 0;
+    const cashMatch = pType.match(/([\d.,]+)\s*₺?\s*nakit/i);
+    const cardMatch = pType.match(/([\d.,]+)\s*₺?\s*kart/i);
+    const transferMatch = pType.match(/([\d.,]+)\s*₺?\s*(?:havale|eft|iban)/i);
+
+    if (cashMatch) cash = parseFloat(cashMatch[1].replace(",", ".")) || 0;
+    if (cardMatch) card = parseFloat(cardMatch[1].replace(",", ".")) || 0;
+    if (transferMatch) transfer = parseFloat(transferMatch[1].replace(",", ".")) || 0;
+
+    if (cash === 0 && card === 0 && transfer === 0) {
+      card = total;
+    }
+    return { cash, card, transfer, credit: 0 };
+  }
+
+  if (pType.includes("nakit")) {
+    return { cash: total, card: 0, transfer: 0, credit: 0 };
+  }
+  if (pType.includes("havale") || pType.includes("eft") || pType.includes("iban") || pType.includes("banka")) {
+    return { cash: 0, card: 0, transfer: total, credit: 0 };
+  }
+  if (pType.includes("veresiye")) {
+    return { cash: 0, card: 0, transfer: 0, credit: total };
+  }
+  return { cash: 0, card: total, transfer: 0, credit: 0 };
+}
+
 
