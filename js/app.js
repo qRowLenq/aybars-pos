@@ -167,6 +167,7 @@ function initializeApp() {
   renderCart();
   renderPosSalesHistory();
   renderInventoryTable();
+  if (typeof renderQuickPricingTable === "function") renderQuickPricingTable();
   renderBundlesTable();
   renderWasteTable();
   renderSuppliersTable();

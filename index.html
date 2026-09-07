@@ -139,6 +139,7 @@
     <section id="tab-inventory" class="tab-pane subtabs-container">
       <div class="subtabs-header">
         <button class="subtab-btn active" data-sub="stock" onclick="switchInvSubtab('stock')">📦 Stok & Fiyat Listesi</button>
+        <button class="subtab-btn" data-sub="quick-pricing" onclick="switchInvSubtab('quick-pricing')">⚡ Hızlı Fiyat & Stok Girişi</button>
         <button class="subtab-btn" data-sub="bundles" onclick="switchInvSubtab('bundles')">🎁 Kampanya / Paket</button>
         <button class="subtab-btn" data-sub="waste" onclick="switchInvSubtab('waste')">🗑️ Fire / Zayi</button>
       </div>
@@ -172,15 +173,117 @@
           <div id="sktRadarBatchList" class="skt-batch-list"></div>
         </div>
 
-        <div class="flex gap-2 mb-3 items-center">
+        <div class="flex gap-2 mb-3 items-center flex-wrap">
           <input type="text" id="invSearchInput" class="search-input" placeholder="🔍 Ürün Ara..." oninput="renderInventoryTable()">
           <select id="invCatFilter" class="fc" style="width:200px;" onchange="renderInventoryTable()"></select>
           <button class="btn btn-primary" onclick="openAddProductModal()">+ Yeni Ürün Ekle</button>
+          <button class="btn btn-warning" onclick="switchInvSubtab('quick-pricing')">⚡ Toplu / Hızlı Düzenle</button>
+          <button class="btn btn-ghost btn-xs text-muted" onclick="resetToDefaultCatalog()" title="Kataloğu 222 ürünlük varsayılana sıfırla">🔄 Kataloğu Sıfırla</button>
         </div>
         <table class="data-table">
-          <thead><tr><th>Ürün Adı</th><th>Kategori</th><th>Tedarikçi</th><th>Maliyet</th><th>Fiyat</th><th>KDV</th><th>Kâr Marjı</th><th>Stok</th><th>İşlemler</th></tr></thead>
+          <thead><tr><th>Ürün Adı</th><th>Kategori</th><th>Tedarikçi</th><th>Alış Maliyeti</th><th>Satış Fiyatı</th><th>KDV</th><th>Kâr Marjı</th><th>Stok</th><th>İşlemler</th></tr></thead>
           <tbody id="inventoryTableBody"></tbody>
         </table>
+      </div>
+
+      <!-- ⚡ HIZLI FİYAT & STOK GİRİŞİ (QUICK BULK PRICING & STOCK MANAGER) -->
+      <div id="subtab-inv-quick-pricing" class="subtab-view">
+        <div class="quick-pricing-header mb-3">
+          <div class="quick-pricing-hero">
+            <div class="hero-text">
+              <h3>⚡ Toplu Fiyat & Stok Yönetim Masası</h3>
+              <p>222 ürünün alış fiyatını, satış fiyatını ve stok sayısını hızlıca girin. Değişiklikler anında kaydedilir.</p>
+            </div>
+            <div class="quick-pricing-progress-box">
+              <div class="progress-labels">
+                <span>Hazır Ürün Oranı:</span>
+                <b id="qpProgressPercent">0%</b>
+              </div>
+              <div class="progress-bar-bg">
+                <div id="qpProgressBarFill" class="progress-bar-fill" style="width:0%;"></div>
+              </div>
+              <div class="progress-sub" id="qpProgressText">222 üründen 0 tanesi hazır</div>
+            </div>
+          </div>
+
+          <div class="quick-stat-grid mt-3">
+            <div class="q-stat-card">
+              <span class="q-stat-icon">📦</span>
+              <div>
+                <div class="q-stat-title">Toplam Ürün</div>
+                <div class="q-stat-val" id="qpTotalProducts">222</div>
+              </div>
+            </div>
+            <div class="q-stat-card cursor-pointer" onclick="filterQuickPricing('missing-price')" title="Filtrele">
+              <span class="q-stat-icon">🏷️</span>
+              <div>
+                <div class="q-stat-title">Satış Fiyatı Bekleyen</div>
+                <div class="q-stat-val text-warning" id="qpMissingPrice">0</div>
+              </div>
+            </div>
+            <div class="q-stat-card cursor-pointer" onclick="filterQuickPricing('missing-cost')" title="Filtrele">
+              <span class="q-stat-icon">📥</span>
+              <div>
+                <div class="q-stat-title">Alış Fiyatı Bekleyen</div>
+                <div class="q-stat-val text-warning" id="qpMissingCost">0</div>
+              </div>
+            </div>
+            <div class="q-stat-card cursor-pointer" onclick="filterQuickPricing('zero-stock')" title="Filtrele">
+              <span class="q-stat-icon">⚠️</span>
+              <div>
+                <div class="q-stat-title">Stok Sayısı 0 Olan</div>
+                <div class="q-stat-val text-danger" id="qpZeroStock">0</div>
+              </div>
+            </div>
+            <div class="q-stat-card cursor-pointer" onclick="filterQuickPricing('ready')" title="Filtrele">
+              <span class="q-stat-icon">✅</span>
+              <div>
+                <div class="q-stat-title">Tam Tanımlanan</div>
+                <div class="q-stat-val text-success" id="qpReadyCount">0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="quick-pricing-toolbar flex justify-between items-center gap-2 mb-3 flex-wrap">
+          <div class="flex items-center gap-2 flex-wrap">
+            <input type="text" id="qpSearchInput" class="search-input" placeholder="🔍 Ürün Ara (örn: Felicia, Canin, Kum)..." oninput="renderQuickPricingTable()">
+            <select id="qpCategoryFilter" class="fc" style="width:180px;" onchange="renderQuickPricingTable()"></select>
+            
+            <div class="qp-filter-chips flex gap-1">
+              <button class="btn btn-xs btn-ghost active qp-filter-btn" data-filter="all" onclick="setQpFilter('all')">Tümü</button>
+              <button class="btn btn-xs btn-ghost qp-filter-btn" data-filter="missing-price" onclick="setQpFilter('missing-price')">Fiyatı Eksikler</button>
+              <button class="btn btn-xs btn-ghost qp-filter-btn" data-filter="missing-cost" onclick="setQpFilter('missing-cost')">Maliyeti Eksikler</button>
+              <button class="btn btn-xs btn-ghost qp-filter-btn" data-filter="zero-stock" onclick="setQpFilter('zero-stock')">Stoğu 0 Olanlar</button>
+              <button class="btn btn-xs btn-ghost qp-filter-btn" data-filter="ready" onclick="setQpFilter('ready')">Tamamlananlar</button>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button class="btn btn-outline btn-sm" onclick="bulkSetDefaultStock()" title="Stoğu 0 olan ürünlere toplu adet ata">📦 Toplu Stok Ata</button>
+            <button class="btn btn-outline btn-sm" onclick="bulkApplyMargin()" title="Alış fiyatına göre kâr marjı ile satış fiyatı hesapla">⚡ Toplu Kâr Ekle</button>
+            <button class="btn btn-success btn-sm" onclick="saveQuickPricingAll()">💾 Tümünü Kaydet</button>
+          </div>
+        </div>
+
+        <div class="qp-table-container">
+          <table class="data-table qp-table">
+            <thead>
+              <tr>
+                <th style="width:45px; text-align:center;">#</th>
+                <th>Ürün Adı</th>
+                <th style="width:140px;">Kategori</th>
+                <th style="width:130px; text-align:right;">Alış Fiyatı (₺)</th>
+                <th style="width:130px; text-align:right;">Satış Fiyatı (₺)</th>
+                <th style="width:105px; text-align:center;">Stok Sayısı</th>
+                <th style="width:100px; text-align:center;">Kâr Marjı</th>
+                <th style="width:130px; text-align:center;">Durum</th>
+                <th style="width:70px; text-align:center;">İşlem</th>
+              </tr>
+            </thead>
+            <tbody id="quickPricingTableBody"></tbody>
+          </table>
+        </div>
       </div>
 
       <div id="subtab-inv-bundles" class="subtab-view">
@@ -1088,6 +1191,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Scripts -->
+  <script src="js/products_catalog.js"></script>
   <script src="js/state.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/pos.js"></script>

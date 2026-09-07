@@ -55,7 +55,12 @@ function switchSubtab(container, prefix, subId, renderFn) {
 
 // Convenience wrappers for each section's subtabs
 function switchInvSubtab(subId) {
-  const fns = { stock: renderInventoryTable, bundles: renderBundlesTable, waste: renderWasteTable };
+  const fns = {
+    stock: renderInventoryTable,
+    "quick-pricing": renderQuickPricingTable,
+    bundles: renderBundlesTable,
+    waste: renderWasteTable
+  };
   switchSubtab("tab-inventory", "subtab-inv-", subId, fns[subId]);
 }
 function switchOrdersSubtab(subId) {

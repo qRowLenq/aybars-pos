@@ -6,98 +6,12 @@ const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_l1PLYUVmHL
 
 const defaultCategories = ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum / Kozmetik", "Kampanyalar"];
 
-// ── Sample Data ──
-const sampleProducts = [
-  { 
-    id: 101, 
-    name: "Reflex Plus Somonlu Yetişkin Kedi Maması 15kg", 
-    category: "Kedi", 
-    price: 1150, 
-    cost: 780, 
-    vatRate: 20, 
-    stock: 12, 
-    supplier: "Marmara Pet Toptan",
-    batches: [
-      { lotNumber: "LOT-2608-A", expiry: "2026-09", qty: 3, cost: 780, date: "10.08.2026" },
-      { lotNumber: "LOT-2609-B", expiry: "2027-05", qty: 9, cost: 780, date: "02.09.2026" }
-    ]
-  },
-  { 
-    id: 102, 
-    name: "Pro Plan Somonlu Kısırlaştırılmış Kedi 3kg", 
-    category: "Kedi", 
-    price: 820, 
-    cost: 580, 
-    vatRate: 20, 
-    stock: 8, 
-    supplier: "Marmara Pet Toptan",
-    batches: [
-      { lotNumber: "LOT-PP-2610", expiry: "2026-10", qty: 2, cost: 580, date: "15.08.2026" },
-      { lotNumber: "LOT-PP-2706", expiry: "2027-06", qty: 6, cost: 580, date: "01.09.2026" }
-    ]
-  },
-  { 
-    id: 103, 
-    name: "Royal Canin Fit 32 Yetişkin Kedi Maması 4kg", 
-    category: "Kedi", 
-    price: 950, 
-    cost: 690, 
-    vatRate: 20, 
-    stock: 5, 
-    supplier: "Anadolu Mama Dağıtım",
-    batches: [
-      { lotNumber: "LOT-RC-0918", expiry: "2026-09-18", qty: 2, cost: 690, date: "01.09.2026" },
-      { lotNumber: "LOT-RC-2708", expiry: "2027-08-01", qty: 3, cost: 690, date: "01.09.2026" }
-    ]
-  },
-  { 
-    id: 104, 
-    name: "Reflex Aktif Karbonlu Topaklanan Kedi Kumu 10L", 
-    category: "Kum / Kozmetik", 
-    price: 190, 
-    cost: 120, 
-    vatRate: 20, 
-    stock: 24, 
-    supplier: "Ege Pet Depo",
-    batches: [
-      { lotNumber: "LOT-RK-2812", expiry: "2028-12", qty: 24, cost: 120, date: "28.08.2026" }
-    ]
-  },
-  { 
-    id: 105, 
-    name: "Sanicat Marsilya Sabunlu İnce Kedi Kumu 10L", 
-    category: "Kum / Kozmetik", 
-    price: 240, 
-    cost: 155, 
-    vatRate: 20, 
-    stock: 15, 
-    supplier: "Ege Pet Depo",
-    batches: [
-      { lotNumber: "LOT-SC-2701", expiry: "2027-01", qty: 15, cost: 155, date: "28.08.2026" }
-    ]
-  },
-  { 
-    id: 106, 
-    name: "Royal Canin Mini Adult Yetişkin Köpek Maması 8kg", 
-    category: "Köpek", 
-    price: 1450, 
-    cost: 1050, 
-    vatRate: 20, 
-    stock: 6, 
-    supplier: "Anadolu Mama Dağıtım",
-    batches: [
-      { lotNumber: "LOT-RC-2704", expiry: "2027-04", qty: 6, cost: 1050, date: "01.09.2026" }
-    ]
-  },
-  { id: 107, name: "Reflex Kuzu Etli & Pirinçli Yetişkin Köpek 15kg", category: "Köpek", price: 1080, cost: 720, vatRate: 20, stock: 9, supplier: "Marmara Pet Toptan", batches: [] },
-  { id: 108, name: "Gold Wings Premium Muhabbet Kuşu Yemi 1kg", category: "Kuş / Kemirgen", price: 95, cost: 60, vatRate: 20, stock: 30, supplier: "Kuzey Kuş & Pet", batches: [] },
-  { id: 109, name: "Quik Kemirgen & Tavşan Yemi 750gr", category: "Kuş / Kemirgen", price: 85, cost: 52, vatRate: 20, stock: 16, supplier: "Kuzey Kuş & Pet", batches: [] },
-  { id: 110, name: "Tavuklu Açık Kedi Maması (1 Kilo)", category: "Açık Mama", price: 85, cost: 50, vatRate: 20, stock: 45, supplier: "Marmara Pet Toptan", batches: [] }
-];
+// ── Products Database (222 Ürünlük Güncel Liste) ──
+const sampleProducts = (typeof catalogProducts !== "undefined" && Array.isArray(catalogProducts) && catalogProducts.length > 0)
+  ? catalogProducts
+  : [];
 
-const sampleBundles = [
-  { id: 401, name: "🎁 [KAMPANYA] Eko Kedi Paketi (15kg Reflex + 10L Kum)", category: "Kampanyalar", price: 1250, cost: 900, vatRate: 20, stock: 99, isBundle: true, bundleItems: [{ productId: 101, name: "Reflex Plus Somonlu Yetişkin Kedi Maması 15kg", qty: 1 }, { productId: 104, name: "Reflex Aktif Karbonlu Topaklanan Kedi Kumu 10L", qty: 1 }] }
-];
+const sampleBundles = [];
 
 const sampleSuppliers = [
   { id: 201, name: "Marmara Pet Toptan", phone: "0532 100 2030", notes: "30 Gün vadeli çalışılır. Salı ve Perşembe sevkiyat.", balance: 5400, transactions: [{ id: 1001, date: "02.09.2026", time: "11:30", type: "Alım", item: "5 Koli Reflex Mama + 2 Çuval Açık Mama", amount: 5400, vatRate: 20, vatAmount: 900, status: "Açık Hesap (Borç)", invoiceImg: null }] },
@@ -258,14 +172,27 @@ function loadState() {
   let cats = raw("ps_categories");
   window.categories = (Array.isArray(cats) && cats.length > 0) ? cats : [...defaultCategories];
 
+  const CURRENT_CATALOG_VERSION = "2026_09_v2_222_catalog";
+  const savedVer = localStorage.getItem("ps_catalog_version");
   let prods = raw("ps_products");
-  window.products = (prods && prods.length > 0) ? prods : [...sampleProducts, ...sampleBundles];
+
+  if (savedVer !== CURRENT_CATALOG_VERSION) {
+    // 222 yeni ürün kataloğuna otomatik geçiş yap
+    window.products = JSON.parse(JSON.stringify(sampleProducts));
+    localStorage.setItem("ps_products", JSON.stringify(window.products));
+    localStorage.setItem("ps_catalog_version", CURRENT_CATALOG_VERSION);
+  } else {
+    window.products = (prods && prods.length > 0) ? prods : JSON.parse(JSON.stringify(sampleProducts));
+  }
   
   // Ensure product integrity & batches array
   window.products.forEach(p => {
     if (p.vatRate === undefined || p.vatRate === null) p.vatRate = 20;
     else p.vatRate = Number(p.vatRate);
     if (!Array.isArray(p.batches)) p.batches = [];
+    if (p.cost === undefined) p.cost = 0;
+    if (p.price === undefined) p.price = 0;
+    if (p.stock === undefined) p.stock = 0;
   });
 
   let sups = raw("ps_suppliers");
@@ -367,5 +294,17 @@ function findMatchingProduct(query) {
   if (found) return found;
 
   return null;
+}
+
+// ── Reset catalog to default 222 items helper ──
+function resetToDefaultCatalog() {
+  if (confirm("Tüm ürün listesini 222 ürünlük varsayılan orijinal listeye sıfırlamak istiyor musunuz?\n\n(DİKKAT: Sonradan girdiğiniz özel fiyat ve stoklar sıfırlanacaktır)")) {
+    window.products = JSON.parse(JSON.stringify(sampleProducts));
+    saveData();
+    if (typeof renderCatalog === "function") renderCatalog();
+    if (typeof renderInventoryTable === "function") renderInventoryTable();
+    if (typeof renderQuickPricingTable === "function") renderQuickPricingTable();
+    if (typeof toast === "function") toast("✅ Ürün kataloğu 222 ürünlük varsayılan listeye sıfırlandı!");
+  }
 }
 
