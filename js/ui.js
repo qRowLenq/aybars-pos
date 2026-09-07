@@ -233,12 +233,81 @@ function updateCustomerDropdown() {
   if (dl) dl.innerHTML = customers.map(c => `<option value="${c.name} - ${c.phone || ''}">`).join("");
 }
 
-// ── Date/Time Helpers ──
-function nowDate() {
+// ── Date/Time Helpers (With Active Business Day Support) ──
+function getRealCalendarDate() {
   const d = new Date();
   const day = String(d.getDate()).padStart(2, "0");
   const month = String(d.getMonth() + 1).padStart(2, "0");
   const year = d.getFullYear();
   return `${day}.${month}.${year}`;
 }
-function nowTime() { return new Date().toLocaleTimeString("tr-TR", { hour: '2-digit', minute: '2-digit' }); }
+
+function getNextDayDateString(dateStr) {
+  const base = dateStr || nowDate();
+  const p = base.split(".");
+  const d = new Date(parseInt(p[2], 10), parseInt(p[1], 10) - 1, parseInt(p[0], 10));
+  d.setDate(d.getDate() + 1);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}.${month}.${year}`;
+}
+
+function getPrevDayDateString(dateStr) {
+  const base = dateStr || nowDate();
+  const p = base.split(".");
+  const d = new Date(parseInt(p[2], 10), parseInt(p[1], 10) - 1, parseInt(p[0], 10));
+  d.setDate(d.getDate() - 1);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}.${month}.${year}`;
+}
+
+function nowDate() {
+  if (window.activeBusinessDate) {
+    return window.activeBusinessDate;
+  }
+  const saved = localStorage.getItem("ps_active_business_date");
+  if (saved) {
+    window.activeBusinessDate = saved;
+    return saved;
+  }
+  return getRealCalendarDate();
+}
+
+function nowTime() {
+  return new Date().toLocaleTimeString("tr-TR", { hour: '2-digit', minute: '2-digit' });
+}
+
+function promptChangeBusinessDate() {
+  const current = nowDate();
+  const real = getRealCalendarDate();
+  const input = prompt(`İşletme / Kasa Çalışma Gününü Değiştir:\n(Mevcut: ${current}, Gerçek Takvim: ${real})\n\nFormat: GG.AA.YYYY (Örn: 09.09.2026)`, current);
+  if (!input) return;
+  const trimmed = input.trim();
+  if (/^\d{2}\.\d{2}\.\d{4}$/.test(trimmed)) {
+    window.activeBusinessDate = trimmed;
+    localStorage.setItem("ps_active_business_date", trimmed);
+    if (typeof renderPosSalesHistory === "function") renderPosSalesHistory();
+    toast(`📅 Aktif çalışma günü değiştirildi: ${trimmed}`);
+  } else {
+    toast("Geçersiz tarih formatı! Lütfen GG.AA.YYYY formatında girin.", "error");
+  }
+}
+
+function resetBusinessDateToToday() {
+  const real = getRealCalendarDate();
+  window.activeBusinessDate = real;
+  localStorage.setItem("ps_active_business_date", real);
+  if (typeof renderPosSalesHistory === "function") renderPosSalesHistory();
+  toast(`🔄 Aktif çalışma günü gerçek takvim tarihine (${real}) sıfırlandı.`);
+}
+
+window.getRealCalendarDate = getRealCalendarDate;
+window.getNextDayDateString = getNextDayDateString;
+window.getPrevDayDateString = getPrevDayDateString;
+window.nowDate = nowDate;
+window.nowTime = nowTime;
+window.promptChangeBusinessDate = promptChangeBusinessDate;
+window.resetBusinessDateToToday = resetBusinessDateToToday;

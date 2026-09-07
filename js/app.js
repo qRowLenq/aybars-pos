@@ -402,57 +402,76 @@ function completeDailyClose() {
     difference: diffNum 
   });
 
+  // GÜN SONU SONRASI OTOMATİK BİR SONRAKİ GÜNE GEÇİŞ (Yeni gün başlar: Örn: 8 Eylül -> 9 Eylül)
+  const nextDay = (typeof getNextDayDateString === "function") 
+    ? getNextDayDateString(today) 
+    : today;
+  window.activeBusinessDate = nextDay;
+  localStorage.setItem("ps_active_business_date", nextDay);
+
   // UI'ı anında güncelle
   if (typeof renderPosSalesHistory === "function") renderPosSalesHistory();
   renderDailyCloseModalView();
 
   closeModal("dailyCloseModal");
-  toast("🏁 Gün sonu sayımı ve gelir özeti başarıyla kaydedildi! Kasa kapatıldı.");
+  toast(`🏁 ${today} gün sonu kapatıldı! Kasa yeni güne (${nextDay}) geçti. Yeni satışlar ${nextDay} sütununa yazılacak.`, "success");
 }
 
 function reopenTodayDailyClose() {
-  const today = nowDate();
-  if (!confirm("⚠️ Gün sonunu iptal edip günü geri açmak (eski güne dönmek) istiyor musunuz?\n\nBu işlemle kasa gün sonu kapanışı iptal edilir ve satış yapmaya devam edebilirsiniz.")) {
+  // Geri açılacak gün: Son kapatılan gün sonu kaydı veya mevcut gün
+  const lastClosed = (window.dailyCloseRecords && window.dailyCloseRecords.length > 0) ? window.dailyCloseRecords[0] : null;
+  const targetDay = lastClosed ? lastClosed.date : ((typeof getPrevDayDateString === "function") ? getPrevDayDateString(nowDate()) : nowDate());
+
+  if (!confirm(`⚠️ ${targetDay} tarihli gün sonunu iptal edip o güne geri dönmek istiyor musunuz?\n\nBu işlemle ${targetDay} gün sonu kaydı iptal edilir, kasa o güne geri döner ve satış yapmaya devam edebilirsiniz.`)) {
     return;
   }
 
-  dailyCloseRecords = (window.dailyCloseRecords || dailyCloseRecords || []).filter(r => r.date !== today);
+  dailyCloseRecords = (window.dailyCloseRecords || dailyCloseRecords || []).filter(r => r.date !== targetDay);
   window.dailyCloseRecords = dailyCloseRecords;
   saveData();
+
+  // Aktif çalışma gününü eski güne geri al
+  window.activeBusinessDate = targetDay;
+  localStorage.setItem("ps_active_business_date", targetDay);
 
   // Google Sheets'e gün sonu iptali gönder
   sendToGoogleSheets({
     action: "reopen_daily_close",
-    date: today
+    date: targetDay
   });
 
   if (typeof renderPosSalesHistory === "function") renderPosSalesHistory();
   renderDailyCloseModalView();
 
-  toast("↩️ Gün sonu iptal edildi! Gün başarıyla geri açıldı (Eski güne dönüldü).", "success");
+  toast(`↩️ ${targetDay} gün sonu iptal edildi! Kasa ${targetDay} gününe geri döndü.`, "success");
 }
 
 function reopenDailyCloseById(closeId) {
   const rec = (window.dailyCloseRecords || dailyCloseRecords || []).find(r => r.id === closeId);
   if (!rec) return;
 
-  if (!confirm(`⚠️ ${rec.date} tarihli gün sonu kapanışını iptal edip günü geri açmak istiyor musunuz?`)) {
+  if (!confirm(`⚠️ ${rec.date} tarihli gün sonu kapanışını iptal edip ${rec.date} gününe geri dönmek istiyor musunuz?`)) {
     return;
   }
 
+  const targetDay = rec.date;
   dailyCloseRecords = (window.dailyCloseRecords || dailyCloseRecords || []).filter(r => r.id !== closeId);
   window.dailyCloseRecords = dailyCloseRecords;
   saveData();
 
+  // Aktif çalışma gününü seçilen güne geri al
+  window.activeBusinessDate = targetDay;
+  localStorage.setItem("ps_active_business_date", targetDay);
+
   sendToGoogleSheets({
     action: "reopen_daily_close",
-    date: rec.date
+    date: targetDay
   });
 
   if (typeof renderPosSalesHistory === "function") renderPosSalesHistory();
   renderDailyCloseModalView();
 
-  toast(`↩️ ${rec.date} tarihli gün sonu iptal edildi ve gün geri açıldı!`, "success");
+  toast(`↩️ ${targetDay} tarihli gün sonu iptal edildi ve kasa ${targetDay} gününe geri döndü!`, "success");
 }
 
 // ── Backup System ──

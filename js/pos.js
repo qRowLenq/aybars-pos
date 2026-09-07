@@ -424,27 +424,33 @@ function renderPosSalesHistory() {
   // Gün Sonu Durum Rozeti ve Kapatıldı/Geri Aç Bildirim Kutusu
   const statusBadge = document.getElementById("posDayStatusBadge");
   const closedNoticeBox = document.getElementById("posClosedNoticeBox");
-  const closeRecord = (typeof getTodayDailyCloseRecord === "function") 
-    ? getTodayDailyCloseRecord(nowDate()) 
-    : (Array.isArray(window.dailyCloseRecords) ? window.dailyCloseRecords.find(r => r.date === nowDate()) : null);
+  const currentWorkingDay = nowDate();
+  
+  const closeRecordForCurrent = (typeof getTodayDailyCloseRecord === "function") 
+    ? getTodayDailyCloseRecord(currentWorkingDay) 
+    : (Array.isArray(window.dailyCloseRecords) ? window.dailyCloseRecords.find(r => r.date === currentWorkingDay) : null);
 
-  if (closeRecord) {
+  const lastClosedRecord = (Array.isArray(window.dailyCloseRecords) && window.dailyCloseRecords.length > 0)
+    ? window.dailyCloseRecords[0]
+    : null;
+
+  if (closeRecordForCurrent) {
     if (statusBadge) {
-      statusBadge.innerHTML = `🔒 Gün Sonu Kapatıldı (${closeRecord.time || ""})`;
+      statusBadge.innerHTML = `🔒 ${currentWorkingDay} Kapatıldı (${closeRecordForCurrent.time || ""})`;
       statusBadge.style.background = "#fee2e2";
       statusBadge.style.color = "#991b1b";
       statusBadge.style.border = "1px solid #fecaca";
     }
     if (closedNoticeBox) {
-      const diffNum = Number(closeRecord.difference) || 0;
+      const diffNum = Number(closeRecordForCurrent.difference) || 0;
       const diffStr = diffNum >= 0 ? `+${diffNum.toFixed(2)}` : `${diffNum.toFixed(2)}`;
       closedNoticeBox.style.display = "block";
       closedNoticeBox.innerHTML = `
         <div style="background:#fffbeb; border:1px solid #fde68a; border-left:4px solid #f59e0b; border-radius:var(--radius-sm); padding:10px 12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
           <div style="font-size:12px; color:#92400e;">
-            <b>🔒 Bugün Saat ${closeRecord.time || ""} itibarıyla Gün Sonu Kapatıldı.</b>
+            <b>🔒 ${currentWorkingDay} Tarihli Gün Sonu Kapatıldı (${closeRecordForCurrent.time || ""}).</b>
             <div style="font-size:11px; opacity:0.9; margin-top:2px;">
-              Ciro: <b>${(Number(closeRecord.totalRevenue) || 0).toFixed(2)} ₺</b> | Sayılan Kasa: <b>${(Number(closeRecord.actualCash) || 0).toFixed(2)} ₺</b> | Kasa Farkı: <b>${diffStr} ₺</b>
+              Ciro: <b>${(Number(closeRecordForCurrent.totalRevenue) || 0).toFixed(2)} ₺</b> | Sayılan Kasa: <b>${(Number(closeRecordForCurrent.actualCash) || 0).toFixed(2)} ₺</b> | Kasa Farkı: <b>${diffStr} ₺</b>
             </div>
           </div>
           <button class="btn btn-outline btn-xs" style="border-color:#f59e0b; color:#b45309; font-weight:700; white-space:nowrap;" onclick="reopenTodayDailyClose()">
@@ -453,9 +459,38 @@ function renderPosSalesHistory() {
         </div>
       `;
     }
+  } else if (lastClosedRecord && lastClosedRecord.date !== currentWorkingDay) {
+    // Önceki gün kapatılmış ve yeni güne (örneğin 9 Eylül'e) geçilmiş
+    if (statusBadge) {
+      statusBadge.innerHTML = `🟢 ${currentWorkingDay} Açık (Yeni Gün)`;
+      statusBadge.style.background = "#dcfce7";
+      statusBadge.style.color = "#166534";
+      statusBadge.style.border = "1px solid #bbf7d0";
+    }
+    if (closedNoticeBox) {
+      closedNoticeBox.style.display = "block";
+      closedNoticeBox.innerHTML = `
+        <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-left:4px solid #10b981; border-radius:var(--radius-sm); padding:9px 12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <div style="font-size:12px; color:#166534;">
+            <b>🏁 ${lastClosedRecord.date} Gün Sonu Kapatıldı.</b>
+            <div style="font-size:11px; color:#15803d; margin-top:2px;">
+              Kasa yeni çalışma gününe (<b>${currentWorkingDay}</b>) geçti. Yeni satışlar E-Tablo'daki <b>${currentWorkingDay}</b> sütununa yazılacaktır.
+            </div>
+          </div>
+          <div class="flex gap-1 items-center">
+            <button class="btn btn-outline btn-xs" style="border-color:#f59e0b; color:#b45309; font-weight:700; white-space:nowrap;" onclick="reopenTodayDailyClose()">
+              ↩️ Düne Dön (${lastClosedRecord.date} Gününü Geri Aç)
+            </button>
+            <button class="btn btn-ghost btn-xs" style="font-size:11px;" onclick="promptChangeBusinessDate()" title="Tarihi Değiştir">
+              📅 Tarih Ayarla
+            </button>
+          </div>
+        </div>
+      `;
+    }
   } else {
     if (statusBadge) {
-      statusBadge.innerHTML = `🟢 Gün Açık`;
+      statusBadge.innerHTML = `🟢 ${currentWorkingDay} Açık`;
       statusBadge.style.background = "#dcfce7";
       statusBadge.style.color = "#166534";
       statusBadge.style.border = "1px solid #bbf7d0";
