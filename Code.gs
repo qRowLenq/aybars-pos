@@ -1388,3 +1388,58 @@ function fixGunSonuTablosu() {
   }
 }
 
+/**
+ * Ürün ve stoklara dokunmadan, tüm finansal tabloları (GELİR, GİDER, Gün Sonu Kasa) sıfırlar.
+ * Apps Script editöründe bu fonksiyonu seçip "Çalıştır" diyerek sayfaları tek tıkla sıfırlayabilirsiniz.
+ */
+function resetSpreadsheetFinancials() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  // 1. Gün Sonu Kasa geçmişini temizle
+  var dcSheet = ss.getSheetByName("Gün Sonu Kasa");
+  if (dcSheet && dcSheet.getLastRow() > 1) {
+    dcSheet.getRange(2, 1, dcSheet.getLastRow() - 1, dcSheet.getLastColumn()).clearContent().clearFormat();
+    Logger.log("Gün Sonu Kasa geçmişi temizlendi.");
+  }
+
+  // 2. Tüm GELİR sayfalarındaki gün sütunlarını sıfırla
+  var allSheets = ss.getSheets();
+  for (var i = 0; i < allSheets.length; i++) {
+    var s = allSheets[i];
+    var sName = s.getName().toUpperCase();
+    if (sName.indexOf("GELİR") !== -1 || sName.indexOf("GELIR") !== -1) {
+      for (var col = 2; col <= 40; col++) {
+        if (col === 9 || col === 17 || col === 25 || col === 33) continue;
+        s.getRange(6, col, 5, 1).clearContent();
+      }
+      ensureSalesSheetStructure(s);
+      Logger.log(s.getName() + " gelir takvimi sıfırlandı.");
+    }
+    
+    // 3. Tüm GİDER sayfalarındaki harcama satırlarını temizle (Bölüm A ve B)
+    if (sName.indexOf("GİDER") !== -1 || sName.indexOf("GIDER") !== -1) {
+      if (s.getLastRow() > 6) {
+        s.getRange(7, 1, s.getLastRow() - 6, s.getLastColumn()).clearContent();
+        Logger.log(s.getName() + " gider satırları temizlendi.");
+      }
+    }
+  }
+
+  // 4. Mali Rapor & Vergi panelini sıfırla
+  handleSyncTaxReport(ss, {
+    officialSales: 0,
+    expensesTotal: 0,
+    taxBase: 0,
+    estimatedIncomeTax: 0,
+    netCashProfit: 0,
+    collectedVat: 0,
+    deductibleVat: 0,
+    payableVat: 0,
+    cardSales: 0,
+    invoicedPurchases: 0,
+    riskAmount: 0
+  });
+
+  Logger.log("✅ Finansal tablolar (Gelir, Gider, Gün Sonu) sıfırlandı. Ürünler ve stoklar korundu!");
+}
+

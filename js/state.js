@@ -248,16 +248,16 @@ function loadState() {
   products = window.products;
 
   let sups = raw("ps_suppliers");
-  window.suppliers = (sups && sups.length > 0) ? sups : [...sampleSuppliers];
+  window.suppliers = Array.isArray(sups) ? sups : [...sampleSuppliers];
 
   let custs = raw("ps_customers");
-  window.customers = (custs && custs.length > 0) ? custs : [...sampleCustomers];
+  window.customers = Array.isArray(custs) ? custs : [...sampleCustomers];
 
   let bnds = raw("ps_bundles");
-  window.bundles = (bnds && bnds.length > 0) ? bnds : [...sampleBundles];
+  window.bundles = Array.isArray(bnds) ? bnds : [...sampleBundles];
 
   let waste = raw("ps_waste_records");
-  window.wasteRecords = (waste && waste.length > 0) ? waste : [...sampleWaste];
+  window.wasteRecords = Array.isArray(waste) ? waste : [...sampleWaste];
 
   window.orders = raw("ps_orders") || [];
   window.platformPendingOrders = raw("ps_platform_pending") || [];
@@ -265,7 +265,7 @@ function loadState() {
   window.salesHistory = raw("ps_sales_history") || [];
   
   let exp = raw("ps_expenses");
-  window.expenses = (exp && exp.length > 0) ? exp : [...sampleExpenses];
+  window.expenses = Array.isArray(exp) ? exp : [...sampleExpenses];
   
   window.manualDeficits = raw("ps_deficits") || [];
   window.heldCarts = raw("ps_held_carts") || [];
@@ -481,5 +481,82 @@ function getSalePaymentBreakdown(sale) {
   }
   return { cash: 0, card: total, transfer: 0, credit: 0 };
 }
+
+/**
+ * Ürünler ve kategoriler DIŞINDAKİ tüm operasyonel verileri sıfırlar:
+ * - Müşteriler ve Veresiye Kayıtları
+ * - Tedarikçiler ve Toptancı Borçları
+ * - Satış Geçmişi, Ciro ve Siparişler
+ * - Gider Defteri ve Harcamalar
+ * - Gün Sonu Kasa Mutabakatları
+ * - Askıdaki Sepetler ve Zayi Kayıtları
+ */
+function resetTransactionsKeepProducts() {
+  const confirmed = confirm(
+    "⚠️ DİKKAT: ÜRÜNLER (222 ÜRÜN) VE KATEGORİLER KORUNACAK!\n\n" +
+    "Aşağıdaki tüm veriler tamamen sıfırlanacaktır:\n" +
+    "• Müşteriler ve Veresiye Kayıtları\n" +
+    "• Tedarikçiler ve Toptancı Borçları\n" +
+    "• Satış Geçmişi, Ciro ve Siparişler\n" +
+    "• Gider Defteri ve Harcamalar\n" +
+    "• Gün Sonu Kasa Mutabakatları\n" +
+    "• Askıdaki Sepetler ve Zayi Kayıtları\n\n" +
+    "Bu sıfırlamayı onaylıyor musunuz?"
+  );
+  if (!confirmed) return;
+
+  // 1. Müşteri & Veresiye sıfırla
+  window.customers = [];
+  customers = [];
+
+  // 2. Tedarikçi & Toptancı borçları sıfırla
+  window.suppliers = [];
+  suppliers = [];
+
+  // 3. Satışlar & Gelir geçmişi sıfırla
+  window.salesHistory = [];
+  salesHistory = [];
+
+  // 4. Siparişler & Teslimatlar sıfırla
+  window.orders = [];
+  orders = [];
+  window.platformPendingOrders = [];
+  platformPendingOrders = [];
+  window.deliveredOrders = [];
+  deliveredOrders = [];
+
+  // 5. Giderler & Alımlar sıfırla
+  window.expenses = [];
+  expenses = [];
+  window.manualDeficits = [];
+  manualDeficits = [];
+
+  // 6. Gün Sonu Mutabakatları & Askıdaki sepetler sıfırla
+  window.dailyCloseRecords = [];
+  dailyCloseRecords = [];
+  window.heldCarts = [];
+  heldCarts = [];
+  window.wasteRecords = [];
+  wasteRecords = [];
+  window.bundles = [];
+  bundles = [];
+  window.cart = [];
+  cart = [];
+
+  // 7. Aktif iş gününü sıfırla
+  localStorage.removeItem("ps_active_business_date");
+
+  // 8. Kalıcı depolamaya kaydet (Ürünler ve kategoriler aynen korunur)
+  saveData();
+
+  // 9. E-Tablo Mali Raporu sıfır gönder
+  if (typeof syncTaxReportToSheets === "function") {
+    syncTaxReportToSheets();
+  }
+
+  alert("✅ Tüm müşteri, tedarikçi, gelir, gider ve kasa kayıtları başarıyla sıfırlandı!\n\nÜrünler ve kategoriler eksiksiz olarak korundu.");
+  location.reload();
+}
+window.resetTransactionsKeepProducts = resetTransactionsKeepProducts;
 
 
