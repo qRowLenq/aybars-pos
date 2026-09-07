@@ -142,6 +142,20 @@ function createJsonResponse(dataObj) {
 // 2. YARDIMCI VE TARİH METOTLARI
 // ===================================================================
 
+function safeParseMoney(val) {
+  if (typeof val === "number") return isNaN(val) ? 0 : val;
+  if (!val) return 0;
+  var s = String(val).replace(/[^0-9.,-]/g, "").trim();
+  if (!s) return 0;
+  if (s.indexOf(".") !== -1 && s.indexOf(",") !== -1) {
+    s = s.replace(/\./g, "").replace(",", ".");
+  } else if (s.indexOf(",") !== -1) {
+    s = s.replace(",", ".");
+  }
+  var n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
 function parseDateHelper(dateStr) {
   if (!dateStr) return new Date();
   if (dateStr instanceof Date) return dateStr;
@@ -406,19 +420,19 @@ function handleSaveSale(ss, data) {
   }
 
   if (cardAmt !== 0) {
-    var curCard = Number(sheet.getRange(6, targetCol).getValue()) || 0;
+    var curCard = safeParseMoney(sheet.getRange(6, targetCol).getValue());
     sheet.getRange(6, targetCol).setValue(Math.max(0, curCard + cardAmt));
   }
   if (cashAmt !== 0) {
-    var curCash = Number(sheet.getRange(7, targetCol).getValue()) || 0;
+    var curCash = safeParseMoney(sheet.getRange(7, targetCol).getValue());
     sheet.getRange(7, targetCol).setValue(Math.max(0, curCash + cashAmt));
   }
   if (transferAmt !== 0) {
-    var curTrans = Number(sheet.getRange(8, targetCol).getValue()) || 0;
+    var curTrans = safeParseMoney(sheet.getRange(8, targetCol).getValue());
     sheet.getRange(8, targetCol).setValue(Math.max(0, curTrans + transferAmt));
   }
   if (platformAmt !== 0) {
-    var curPlat = Number(sheet.getRange(9, targetCol).getValue()) || 0;
+    var curPlat = safeParseMoney(sheet.getRange(9, targetCol).getValue());
     sheet.getRange(9, targetCol).setValue(Math.max(0, curPlat + platformAmt));
   }
 
