@@ -2,13 +2,54 @@
    APP INIT & CORE FUNCTIONALITY — Backup, Daily Close, Startup
    =================================================================== */
 
-// ── Daily Close (Gün Sonu Kapanış) ──
+// ── Daily Close (Gün Sonu Kapanış & Eski Güne Dönme) ──
 function openDailyCloseModal() {
   document.querySelectorAll(".banknote-grid .fc").forEach(inp => inp.value = "");
-  document.getElementById("dcTotalCash").innerText = "0.00 ₺";
+  const totalCashEl = document.getElementById("dcTotalCash");
+  if (totalCashEl) totalCashEl.innerText = "0.00 ₺";
+  switchDcModalTab("today");
   calculateDailyClose();
   renderDailyCloseSalesTable();
+  renderDailyCloseModalView();
   openModal("dailyCloseModal");
+}
+
+function switchDcModalTab(tab) {
+  const todaySec = document.getElementById("dcTodaySection");
+  const historySec = document.getElementById("dcHistorySection");
+  const tabToday = document.getElementById("tabDcToday");
+  const tabHistory = document.getElementById("tabDcHistory");
+
+  if (tab === "today") {
+    if (todaySec) todaySec.style.display = "block";
+    if (historySec) historySec.style.display = "none";
+    if (tabToday) {
+      tabToday.style.background = "var(--primary)";
+      tabToday.style.color = "#fff";
+      tabToday.style.borderColor = "var(--primary)";
+    }
+    if (tabHistory) {
+      tabHistory.style.background = "#f1f5f9";
+      tabHistory.style.color = "#475569";
+      tabHistory.style.borderColor = "transparent";
+    }
+    calculateDailyClose();
+    renderDailyCloseSalesTable();
+  } else {
+    if (todaySec) todaySec.style.display = "none";
+    if (historySec) historySec.style.display = "block";
+    if (tabToday) {
+      tabToday.style.background = "#f1f5f9";
+      tabToday.style.color = "#475569";
+      tabToday.style.borderColor = "transparent";
+    }
+    if (tabHistory) {
+      tabHistory.style.background = "var(--primary)";
+      tabHistory.style.color = "#fff";
+      tabHistory.style.borderColor = "var(--primary)";
+    }
+    renderDailyCloseModalView();
+  }
 }
 
 function calculateDailyClose() {
@@ -32,7 +73,6 @@ function calculateDailyClose() {
   let cashSales = 0;
   let cardSales = 0;
   let transferSales = 0;
-  let totalRevenue = 0;
 
   let cardCount = 0;
   let cashCount = 0;
@@ -46,7 +86,6 @@ function calculateDailyClose() {
     cashSales += bk.cash;
     cardSales += bk.card;
     transferSales += bk.transfer;
-    totalRevenue += (Number(s.total) || 0);
 
     if (bk.card > 0) cardCount++;
     if (bk.cash > 0) cashCount++;
@@ -176,6 +215,101 @@ function renderDailyCloseSalesTable() {
   });
 }
 
+function renderDailyCloseModalView() {
+  const today = nowDate();
+  const todayRecord = (typeof getTodayDailyCloseRecord === "function") 
+    ? getTodayDailyCloseRecord(today) 
+    : (dailyCloseRecords || []).find(r => r.date === today);
+
+  const closedAlert = document.getElementById("dcTodayClosedAlert");
+  const closedSubText = document.getElementById("dcTodayClosedSubText");
+  const btnReopen = document.getElementById("btnReopenTodayAction");
+  const btnComplete = document.getElementById("btnCompleteCloseAction");
+
+  if (todayRecord) {
+    if (closedAlert) closedAlert.style.display = "block";
+    if (closedSubText) {
+      closedSubText.innerHTML = `Saat <b>${todayRecord.time || ""}</b> itibarıyla gün sonu yapılmış. Toplam Ciro: <b>${(Number(todayRecord.totalRevenue) || 0).toFixed(2)} ₺</b> | Sayılan Kasa: <b>${(Number(todayRecord.actualCash) || 0).toFixed(2)} ₺</b>`;
+    }
+    if (btnReopen) btnReopen.style.display = "inline-block";
+    if (btnComplete) {
+      btnComplete.innerHTML = "🔄 Gün Sonunu Yeniden Kaydet";
+      btnComplete.className = "btn btn-outline";
+    }
+  } else {
+    if (closedAlert) closedAlert.style.display = "none";
+    if (btnReopen) btnReopen.style.display = "none";
+    if (btnComplete) {
+      btnComplete.innerHTML = "🏁 Gün Sonunu Kapat";
+      btnComplete.className = "btn btn-warning";
+    }
+  }
+
+  // Geçmiş Gün Sonları Listesi
+  const histContainer = document.getElementById("dcHistoryList");
+  if (histContainer) {
+    histContainer.innerHTML = "";
+    const list = Array.isArray(window.dailyCloseRecords || dailyCloseRecords) 
+      ? [...(window.dailyCloseRecords || dailyCloseRecords)] 
+      : [];
+
+    if (list.length === 0) {
+      histContainer.innerHTML = `
+        <div style="text-align:center; padding:24px 12px; color:#94a3b8; font-size:12px;">
+          Henüz kaydedilmiş gün sonu kapanış kaydı bulunmuyor.
+        </div>
+      `;
+      return;
+    }
+
+    // Tarihe göre ters sırala
+    list.sort((a, b) => (b.closedAt || b.date || "").localeCompare(a.closedAt || a.date || ""));
+
+    list.forEach(rec => {
+      const isToday = rec.date === today;
+      const diff = Number(rec.difference) || 0;
+      let diffBadge = "✅ Tam Mutabakat";
+      let diffColor = "#166534";
+      let diffBg = "#dcfce7";
+
+      if (diff > 0.01) {
+        diffBadge = `📈 +${diff.toFixed(2)} ₺ Fazla`;
+        diffColor = "#1e40af";
+        diffBg = "#dbeafe";
+      } else if (diff < -0.01) {
+        diffBadge = `⚠️ ${diff.toFixed(2)} ₺ Açık`;
+        diffColor = "#991b1b";
+        diffBg = "#fee2e2";
+      }
+
+      const itemDiv = document.createElement("div");
+      itemDiv.style.cssText = "background:#fff; border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 12px; margin-bottom:8px; box-shadow:0 1px 2px rgba(0,0,0,0.03);";
+      itemDiv.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <b style="font-size:13px; color:#0f172a;">📅 ${rec.date} <span style="font-weight:normal; color:#64748b; font-size:11px;">(${rec.time || ""})</span></b>
+            ${isToday ? '<span class="badge" style="background:#fef3c7; color:#92400e; font-size:10px; font-weight:700; border:1px solid #fde68a;">Bugün</span>' : ''}
+          </div>
+          <span class="badge" style="font-size:10.5px; font-weight:700; background:${diffBg}; color:${diffColor};">${diffBadge}</span>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; font-size:11.5px; background:#f8fafc; padding:7px 9px; border-radius:6px; margin-bottom:8px;">
+          <div><span style="color:#64748b; font-size:10.5px; display:block;">Toplam Ciro:</span><b style="color:#6b21a8;">${(Number(rec.totalRevenue) || 0).toFixed(2)} ₺</b></div>
+          <div><span style="color:#64748b; font-size:10.5px; display:block;">Nakit Satış:</span><b>${(Number(rec.cashSales) || 0).toFixed(2)} ₺</b></div>
+          <div><span style="color:#64748b; font-size:10.5px; display:block;">Kredi Kartı:</span><b>${(Number(rec.cardSales) || 0).toFixed(2)} ₺</b></div>
+          <div><span style="color:#64748b; font-size:10.5px; display:block;">Havale/IBAN:</span><b>${(Number(rec.transferSales) || 0).toFixed(2)} ₺</b></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:11.5px; padding-top:4px; border-top:1px dashed #e2e8f0;">
+          <span style="color:#64748b;">Sayılan: <b>${(Number(rec.actualCash) || 0).toFixed(2)} ₺</b> (Beklenen: ${(Number(rec.expectedCash) || 0).toFixed(2)} ₺)</span>
+          <button class="btn btn-outline btn-xs" style="border-color:#f59e0b; color:#b45309; font-weight:700;" onclick="reopenDailyCloseById('${rec.id}')">
+            ↩️ Eski Güne Dön (İptal Et)
+          </button>
+        </div>
+      `;
+      histContainer.appendChild(itemDiv);
+    });
+  }
+}
+
 function completeDailyClose() {
   const actualStr = document.getElementById("dcTotalCash")?.innerText.replace("₺", "").trim() || "0";
   const actualNum = parseFloat(actualStr.replace(/\./g, "").replace(",", ".")) || 0;
@@ -231,10 +365,32 @@ function completeDailyClose() {
       (s.transactions || []).filter(t => t.date === today && t.type === "Ödeme" && (t.item || "").includes("Kasa (Nakit)")).forEach(t => cashExpenses += (Number(t.amount) || 0));
     });
   }
+
+  // Gün Sonu Kaydı oluştur ve yerel belleğe / localStorage'a kaydet
+  const closeRecord = {
+    id: "dc_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6),
+    date: today,
+    time: nowTime(),
+    actualCash: actualNum,
+    expectedCash: expNum,
+    cashSales: cashSales,
+    cardSales: cardSales,
+    transferSales: transferSales,
+    totalRevenue: totalRevenue,
+    cashExpenses: cashExpenses,
+    difference: diffNum,
+    closedAt: new Date().toISOString()
+  };
+
+  dailyCloseRecords = (window.dailyCloseRecords || dailyCloseRecords || []).filter(r => r.date !== today);
+  dailyCloseRecords.unshift(closeRecord);
+  window.dailyCloseRecords = dailyCloseRecords;
+  saveData();
   
+  // Google E-Tablo'ya gönder
   sendToGoogleSheets({ 
     action: "daily_close", 
-    date: nowDate(),
+    date: today,
     time: nowTime(),
     actualCash: actualNum,
     expectedCash: expNum,
@@ -246,8 +402,57 @@ function completeDailyClose() {
     difference: diffNum 
   });
 
+  // UI'ı anında güncelle
+  if (typeof renderPosSalesHistory === "function") renderPosSalesHistory();
+  renderDailyCloseModalView();
+
   closeModal("dailyCloseModal");
-  toast("🏁 Gün sonu sayımı ve gelir özeti başarıyla kaydedildi!");
+  toast("🏁 Gün sonu sayımı ve gelir özeti başarıyla kaydedildi! Kasa kapatıldı.");
+}
+
+function reopenTodayDailyClose() {
+  const today = nowDate();
+  if (!confirm("⚠️ Gün sonunu iptal edip günü geri açmak (eski güne dönmek) istiyor musunuz?\n\nBu işlemle kasa gün sonu kapanışı iptal edilir ve satış yapmaya devam edebilirsiniz.")) {
+    return;
+  }
+
+  dailyCloseRecords = (window.dailyCloseRecords || dailyCloseRecords || []).filter(r => r.date !== today);
+  window.dailyCloseRecords = dailyCloseRecords;
+  saveData();
+
+  // Google Sheets'e gün sonu iptali gönder
+  sendToGoogleSheets({
+    action: "reopen_daily_close",
+    date: today
+  });
+
+  if (typeof renderPosSalesHistory === "function") renderPosSalesHistory();
+  renderDailyCloseModalView();
+
+  toast("↩️ Gün sonu iptal edildi! Gün başarıyla geri açıldı (Eski güne dönüldü).", "success");
+}
+
+function reopenDailyCloseById(closeId) {
+  const rec = (window.dailyCloseRecords || dailyCloseRecords || []).find(r => r.id === closeId);
+  if (!rec) return;
+
+  if (!confirm(`⚠️ ${rec.date} tarihli gün sonu kapanışını iptal edip günü geri açmak istiyor musunuz?`)) {
+    return;
+  }
+
+  dailyCloseRecords = (window.dailyCloseRecords || dailyCloseRecords || []).filter(r => r.id !== closeId);
+  window.dailyCloseRecords = dailyCloseRecords;
+  saveData();
+
+  sendToGoogleSheets({
+    action: "reopen_daily_close",
+    date: rec.date
+  });
+
+  if (typeof renderPosSalesHistory === "function") renderPosSalesHistory();
+  renderDailyCloseModalView();
+
+  toast(`↩️ ${rec.date} tarihli gün sonu iptal edildi ve gün geri açıldı!`, "success");
 }
 
 // ── Backup System ──
@@ -408,6 +613,16 @@ function initializeApp() {
   const vEl = document.getElementById("appVersion");
   if(vEl) vEl.innerText = "v3.0.0 (Enterprise Financial & Tax Architecture)";
 }
+
+// Expose daily close functions globally
+window.openDailyCloseModal = openDailyCloseModal;
+window.switchDcModalTab = switchDcModalTab;
+window.calculateDailyClose = calculateDailyClose;
+window.renderDailyCloseSalesTable = renderDailyCloseSalesTable;
+window.renderDailyCloseModalView = renderDailyCloseModalView;
+window.completeDailyClose = completeDailyClose;
+window.reopenTodayDailyClose = reopenTodayDailyClose;
+window.reopenDailyCloseById = reopenDailyCloseById;
 
 // Start app when DOM is ready
 if (document.readyState === "loading") {

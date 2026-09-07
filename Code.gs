@@ -100,6 +100,11 @@ function doPost(e) {
         handleDailyClose(ss, data);
         break;
 
+      case "reopen_daily_close":
+      case "reopen_day":
+        handleReopenDailyClose(ss, data);
+        break;
+
       case "save_platform_income":
       case "platform_income":
         handleSavePlatformIncome(ss, data);
@@ -1001,6 +1006,42 @@ function handleDailyClose(ss, data) {
     dayCell.setNote(summaryNote);
   } catch (syncErr) {
     Logger.log("GELİR sayfasına gün sonu damgalanırken hata: " + syncErr);
+  }
+}
+
+function handleReopenDailyClose(ss, data) {
+  var targetDate = data.date || getTodayFormatted();
+  var sheetName = "Gün Sonu Kasa";
+  var sheet = ss.getSheetByName(sheetName);
+
+  if (sheet && sheet.getLastRow() > 1) {
+    var lastRow = sheet.getLastRow();
+    var dates = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+    // Son satırdan yukarı doğru hedef tarihe ait kaydı bulup sil veya iptal olarak işaretle
+    for (var r = dates.length - 1; r >= 0; r--) {
+      var rowDate = String(dates[r][0] || "").trim();
+      if (rowDate === targetDate || (!targetDate && r === dates.length - 1)) {
+        sheet.deleteRow(r + 2);
+        break;
+      }
+    }
+  }
+
+  // GELİR sayfasındaki gün sonu damgasını ve notunu temizle
+  try {
+    var dateObj = parseDateHelper(targetDate);
+    var monthYearStr = getMonthYearTitle(dateObj);
+    var salesSheet = ss.getSheetByName("GELİR - " + monthYearStr);
+    if (salesSheet) {
+      var dayNum = dateObj.getDate();
+      var targetCol = getSalesColumnForDay(dayNum);
+      var dayCell = salesSheet.getRange(6, targetCol);
+      dayCell.clearNote();
+      dayCell.setBackground(null);
+      dayCell.setFontColor(null);
+    }
+  } catch (syncErr) {
+    Logger.log("GELİR sayfasından gün sonu damgası temizlenirken hata: " + syncErr);
   }
 }
 

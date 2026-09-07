@@ -23,6 +23,8 @@ var expenses = [];
 var manualDeficits = [];
 var heldCarts = [];
 var cart = [];
+var dailyCloseRecords = [];
+window.dailyCloseRecords = dailyCloseRecords;
 
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_l1PLYUVmHL6dqnholoKke2JsTx56FScjd4qa6veqcoK49ztzLqggwp9M7uze10sU/exec";
 
@@ -267,6 +269,7 @@ function loadState() {
   
   window.manualDeficits = raw("ps_deficits") || [];
   window.heldCarts = raw("ps_held_carts") || [];
+  window.dailyCloseRecords = raw("ps_daily_closes") || [];
 
   // Runtime state
   window.cart = [];
@@ -290,6 +293,7 @@ function loadState() {
   expenses = window.expenses;
   manualDeficits = window.manualDeficits;
   heldCarts = window.heldCarts;
+  dailyCloseRecords = window.dailyCloseRecords;
   cart = window.cart;
 }
 
@@ -307,6 +311,7 @@ function saveData() {
   const expList = window.expenses || expenses || [];
   const defList = window.manualDeficits || manualDeficits || [];
   const hldList = window.heldCarts || heldCarts || [];
+  const dclList = window.dailyCloseRecords || dailyCloseRecords || [];
 
   // Keep global sync
   products = pList;
@@ -322,6 +327,7 @@ function saveData() {
   expenses = expList;
   manualDeficits = defList;
   heldCarts = hldList;
+  dailyCloseRecords = dclList;
 
   localStorage.setItem("ps_categories", JSON.stringify(cList));
   localStorage.setItem("ps_products", JSON.stringify(pList));
@@ -336,6 +342,24 @@ function saveData() {
   localStorage.setItem("ps_held_carts", JSON.stringify(hldList));
   localStorage.setItem("ps_bundles", JSON.stringify(bndList));
   localStorage.setItem("ps_waste_records", JSON.stringify(wstList));
+  localStorage.setItem("ps_daily_closes", JSON.stringify(dclList));
+}
+
+function isDayClosed(dateStr) {
+  const d = dateStr || nowDate();
+  const list = window.dailyCloseRecords || dailyCloseRecords || [];
+  return list.some(r => r.date === d);
+}
+
+function getTodayDailyCloseRecord(dateStr) {
+  const d = dateStr || nowDate();
+  const list = window.dailyCloseRecords || dailyCloseRecords || [];
+  return list.find(r => r.date === d) || null;
+}
+
+if (typeof window !== "undefined") {
+  window.isDayClosed = isDayClosed;
+  window.getTodayDailyCloseRecord = getTodayDailyCloseRecord;
 }
 
 function sendToGoogleSheets(payload) {

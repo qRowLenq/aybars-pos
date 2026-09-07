@@ -58,10 +58,18 @@
         <div id="productGrid" class="product-grid"></div>
 
         <div class="recent-sales-box mt-2">
-          <div class="rs-header">
-            <b>📜 Son Satışlar & Günlük Gelir (Bugün)</b>
-            <button class="btn btn-warning btn-xs" onclick="openDailyCloseModal()">🏁 Gün Sonu Sayımı Yap</button>
+          <div class="rs-header flex justify-between items-center mb-2 flex-wrap gap-2">
+            <div class="flex items-center gap-2">
+              <b>📜 Son Satışlar & Günlük Gelir (Bugün)</b>
+              <span id="posDayStatusBadge" class="badge" style="font-size:10.5px; background:#dcfce7; color:#166534; border:1px solid #bbf7d0;">🟢 Gün Açık</span>
+            </div>
+            <div class="flex gap-1" id="posDayActionsContainer">
+              <button class="btn btn-warning btn-xs" onclick="openDailyCloseModal()">🏁 Gün Sonu Sayımı Yap</button>
+            </div>
           </div>
+
+          <!-- Gün Sonu Kapatıldı Bildirimi (Kapatıldığında Görünür ve Geri Aç Butonu Sunar) -->
+          <div id="posClosedNoticeBox" style="display:none; margin-bottom:10px;"></div>
 
           <!-- Günlük Hızlı Gelir Özeti Kartları (Kart, Nakit, Havale, Toplam) -->
           <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:8px; margin-bottom:10px;">
@@ -1302,97 +1310,132 @@
 
   <!-- Daily Close -->
   <div class="modal-overlay" id="dailyCloseModal">
-    <div class="modal-box" style="max-width:540px;">
-      <div class="modal-title flex justify-between items-center">
-        <span>🏁 Gün Sonu Kasa Sayımı & Gelir Dökümü</span>
+    <div class="modal-box" style="max-width:560px;">
+      <div class="modal-title flex justify-between items-center mb-2">
+        <span>🏁 Gün Sonu Kasa Sayımı & Geçmiş</span>
         <button class="btn btn-ghost btn-xs" onclick="closeModal('dailyCloseModal')">✕</button>
       </div>
 
-      <!-- 1. GÜNLÜK GELİR DÖKÜMÜ KARTLARI (Ödeme Yöntemlerine Göre Ayrı Ayrı) -->
-      <div class="mb-3" style="background:#f8fafc; border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px;">
-        <div style="font-size:11.5px; font-weight:700; color:#64748b; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">
-          📊 Bugünün Gelir Dağılımı (Ayrı Ayrı Tahsilatlar)
+      <!-- Gün Sonu Modal Sekmeleri -->
+      <div class="flex gap-2 mb-3 pb-2" style="border-bottom:1px solid var(--border);">
+        <button class="btn btn-sm btn-primary" id="btnDcTabToday" onclick="switchDcModalTab('today')">🏁 Bugünün Sayımı</button>
+        <button class="btn btn-sm btn-ghost" id="btnDcTabHistory" onclick="switchDcModalTab('history')">📜 Geçmiş Gün Sonları & İptal (<span id="dcHistoryCount">0</span>)</button>
+      </div>
+
+      <!-- 1. SEKME: BUGÜNÜN GÜN SONU -->
+      <div id="dcTodaySection">
+        <!-- Gün Sonu Kapatıldıysa Çıkacak Uyarı & Geri Açma Kartı -->
+        <div id="dcTodayClosedAlert" style="display:none; background:#f0fdf4; border:1px solid #86efac; border-radius:var(--radius); padding:12px 14px; margin-bottom:12px;">
+          <div class="flex justify-between items-center">
+            <b style="color:#166534; font-size:13px;">✅ Bugünün Gün Sonu Kapatılmıştır</b>
+            <span class="badge" id="dcTodayClosedBadge" style="background:#dcfce7; color:#166534; font-weight:700;">Saat -</span>
+          </div>
+          <div class="text-xs text-muted mt-1" id="dcTodayClosedSubText">Ciro: 0.00 ₺ · Sayılan: 0.00 ₺</div>
+          <div class="mt-2">
+            <button class="btn btn-outline btn-sm" onclick="reopenTodayDailyClose()" style="border-color:#f59e0b; color:#b45309; font-weight:700; width:100%;">↩️ Yanlışlıkla Bastım - Günü Geri Aç (Eski Güne Dön)</button>
+          </div>
+        </div>
+
+        <!-- 1. GÜNLÜK GELİR DÖKÜMÜ KARTLARI (Ödeme Yöntemlerine Göre Ayrı Ayrı) -->
+        <div class="mb-3" style="background:#f8fafc; border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px;">
+          <div style="font-size:11.5px; font-weight:700; color:#64748b; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">
+            📊 Bugünün Gelir Dağılımı (Ayrı Ayrı Tahsilatlar)
+          </div>
+          
+          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:10px;">
+            <!-- Kredi Kartı -->
+            <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:var(--radius-sm); padding:10px 8px; text-align:center;">
+              <div style="font-size:11px; font-weight:700; color:#1d4ed8;">💳 KREDİ KARTI</div>
+              <div id="dcCardSales" style="font-size:17px; font-weight:900; color:#1e40af; margin-top:2px;">0.00 ₺</div>
+              <div id="dcCardCount" style="font-size:10.5px; color:#60a5fa; margin-top:1px;">0 işlem</div>
+            </div>
+            <!-- Nakit -->
+            <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:var(--radius-sm); padding:10px 8px; text-align:center;">
+              <div style="font-size:11px; font-weight:700; color:#166534;">💵 NAKİT</div>
+              <div id="dcCashSalesDisplay" style="font-size:17px; font-weight:900; color:#15803d; margin-top:2px;">0.00 ₺</div>
+              <div id="dcCashCount" style="font-size:10.5px; color:#4ade80; margin-top:1px;">0 işlem</div>
+            </div>
+            <!-- Havale / IBAN -->
+            <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:var(--radius-sm); padding:10px 8px; text-align:center;">
+              <div style="font-size:11px; font-weight:700; color:#0369a1;">📲 HAVALE / IBAN</div>
+              <div id="dcTransferSales" style="font-size:17px; font-weight:900; color:#0284c7; margin-top:2px;">0.00 ₺</div>
+              <div id="dcTransferCount" style="font-size:10.5px; color:#38bdf8; margin-top:1px;">0 işlem</div>
+            </div>
+          </div>
+
+          <!-- EN ALTTA TOPLAT: Günlük Toplam Gelir (Ciro) -->
+          <div style="background:linear-gradient(135deg, #7e22ce, #6b21a8); color:#fff; border-radius:var(--radius-sm); padding:12px 14px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:11px; font-weight:700; opacity:0.9; text-transform:uppercase; letter-spacing:0.5px;">💰 GÜNLÜK TOPLAM GELİR (CİRO)</div>
+              <div style="font-size:10.5px; opacity:0.8; margin-top:2px;" id="dcTotalCountDisplay">Toplam 0 işlem</div>
+            </div>
+            <div id="dcTotalSalesDisplay" style="font-size:22px; font-weight:900; text-shadow:0 1px 2px rgba(0,0,0,0.2);">0.00 ₺</div>
+          </div>
+        </div>
+
+        <!-- 2. ÇEKMECE NAKİT SAYIMI -->
+        <div class="hint-box mb-2 text-xs">
+          💡 <b>Nakit Kasa Kontrolü:</b> Çekmecedeki fiziki paraları girin. Sistem nakit satışlarla karşılaştırıp açığı/fazlayı söyler.
         </div>
         
-        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:10px;">
-          <!-- Kredi Kartı -->
-          <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:var(--radius-sm); padding:10px 8px; text-align:center;">
-            <div style="font-size:11px; font-weight:700; color:#1d4ed8;">💳 KREDİ KARTI</div>
-            <div id="dcCardSales" style="font-size:17px; font-weight:900; color:#1e40af; margin-top:2px;">0.00 ₺</div>
-            <div id="dcCardCount" style="font-size:10.5px; color:#60a5fa; margin-top:1px;">0 işlem</div>
-          </div>
-          <!-- Nakit -->
-          <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:var(--radius-sm); padding:10px 8px; text-align:center;">
-            <div style="font-size:11px; font-weight:700; color:#166534;">💵 NAKİT</div>
-            <div id="dcCashSalesDisplay" style="font-size:17px; font-weight:900; color:#15803d; margin-top:2px;">0.00 ₺</div>
-            <div id="dcCashCount" style="font-size:10.5px; color:#4ade80; margin-top:1px;">0 işlem</div>
-          </div>
-          <!-- Havale / IBAN -->
-          <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:var(--radius-sm); padding:10px 8px; text-align:center;">
-            <div style="font-size:11px; font-weight:700; color:#0369a1;">📲 HAVALE / IBAN</div>
-            <div id="dcTransferSales" style="font-size:17px; font-weight:900; color:#0284c7; margin-top:2px;">0.00 ₺</div>
-            <div id="dcTransferCount" style="font-size:10.5px; color:#38bdf8; margin-top:1px;">0 işlem</div>
+        <div class="banknote-grid mb-3">
+          <div class="fg mb-0"><label>200 ₺ Adet</label><input type="number" id="b200" class="fc" oninput="calculateDailyClose()"></div>
+          <div class="fg mb-0"><label>100 ₺ Adet</label><input type="number" id="b100" class="fc" oninput="calculateDailyClose()"></div>
+          <div class="fg mb-0"><label>50 ₺ Adet</label><input type="number" id="b50" class="fc" oninput="calculateDailyClose()"></div>
+          <div class="fg mb-0"><label>20 ₺ Adet</label><input type="number" id="b20" class="fc" oninput="calculateDailyClose()"></div>
+          <div class="fg mb-0"><label>10 ₺ Adet</label><input type="number" id="b10" class="fc" oninput="calculateDailyClose()"></div>
+          <div class="fg mb-0"><label>5 ₺ Adet</label><input type="number" id="b5" class="fc" oninput="calculateDailyClose()"></div>
+          <div class="fg mb-0" style="grid-column:span 3;"><label>Madeni Para Toplamı (₺)</label><input type="number" id="bCoin" class="fc" oninput="calculateDailyClose()"></div>
+        </div>
+        
+        <div style="background:#f8fafc; border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px;">
+          <div class="flex justify-between mb-1 text-sm"><span>Sayılan Kasa (Gerçek Nakit):</span> <b id="dcTotalCash">0.00 ₺</b></div>
+          <div class="flex justify-between mb-1 text-sm"><span>Sistem Beklentisi (Nakit Satışlar):</span> <b id="dcExpectedCash">0.00 ₺</b></div>
+          <hr style="margin:8px 0; border:0; border-top:1px dashed var(--border);">
+          <div class="flex justify-between items-center text-base">
+            <b>Kasa Farkı (Açık/Fazla):</b> 
+            <b id="dcDifference">-</b>
           </div>
         </div>
 
-        <!-- EN ALTTA TOPLAT: Günlük Toplam Gelir (Ciro) -->
-        <div style="background:linear-gradient(135deg, #7e22ce, #6b21a8); color:#fff; border-radius:var(--radius-sm); padding:12px 14px; display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <div style="font-size:11px; font-weight:700; opacity:0.9; text-transform:uppercase; letter-spacing:0.5px;">💰 GÜNLÜK TOPLAM GELİR (CİRO)</div>
-            <div style="font-size:10.5px; opacity:0.8; margin-top:2px;" id="dcTotalCountDisplay">Toplam 0 işlem</div>
+        <!-- 3. DETAYLI BUGÜNKÜ SATIŞLAR TABLOSU -->
+        <div class="mt-3">
+          <div class="flex justify-between items-center mb-1">
+            <b class="text-xs text-muted">📜 BUGÜNKÜ SATIŞLARIN AYRINTILI TABLOSU</b>
           </div>
-          <div id="dcTotalSalesDisplay" style="font-size:22px; font-weight:900; text-shadow:0 1px 2px rgba(0,0,0,0.2);">0.00 ₺</div>
+          <div style="max-height:160px; overflow-y:auto; border:1px solid var(--border); border-radius:var(--radius-sm);">
+            <table class="data-table" style="margin:0; font-size:11.5px;">
+              <thead>
+                <tr style="position:sticky; top:0; background:var(--bg); z-index:1;">
+                  <th style="width:65px;">Saat</th>
+                  <th style="width:120px;">Ödeme Tipi</th>
+                  <th>Satılan Ürünler</th>
+                  <th style="width:85px; text-align:right;">Tutar (₺)</th>
+                </tr>
+              </thead>
+              <tbody id="dcSalesTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+        
+        <div class="modal-actions mt-3 flex justify-between items-center flex-wrap gap-2">
+          <button class="btn btn-ghost" onclick="closeModal('dailyCloseModal')">Kapat</button>
+          <div class="flex gap-2" id="dcTodayActionsContainer">
+            <button class="btn btn-outline" id="btnReopenTodayAction" style="display:none; border-color:#f59e0b; color:#b45309; font-weight:700;" onclick="reopenTodayDailyClose()">↩️ Günü Geri Aç (Eski Güne Dön)</button>
+            <button class="btn btn-warning" id="btnCompleteCloseAction" onclick="completeDailyClose()">🏁 Gün Sonunu Kapat</button>
+          </div>
         </div>
       </div>
 
-      <!-- 2. ÇEKMECE NAKİT SAYIMI -->
-      <div class="hint-box mb-2 text-xs">
-        💡 <b>Nakit Kasa Kontrolü:</b> Çekmecedeki fiziki paraları girin. Sistem nakit satışlarla karşılaştırıp açığı/fazlayı söyler.
-      </div>
-      
-      <div class="banknote-grid mb-3">
-        <div class="fg mb-0"><label>200 ₺ Adet</label><input type="number" id="b200" class="fc" oninput="calculateDailyClose()"></div>
-        <div class="fg mb-0"><label>100 ₺ Adet</label><input type="number" id="b100" class="fc" oninput="calculateDailyClose()"></div>
-        <div class="fg mb-0"><label>50 ₺ Adet</label><input type="number" id="b50" class="fc" oninput="calculateDailyClose()"></div>
-        <div class="fg mb-0"><label>20 ₺ Adet</label><input type="number" id="b20" class="fc" oninput="calculateDailyClose()"></div>
-        <div class="fg mb-0"><label>10 ₺ Adet</label><input type="number" id="b10" class="fc" oninput="calculateDailyClose()"></div>
-        <div class="fg mb-0"><label>5 ₺ Adet</label><input type="number" id="b5" class="fc" oninput="calculateDailyClose()"></div>
-        <div class="fg mb-0" style="grid-column:span 3;"><label>Madeni Para Toplamı (₺)</label><input type="number" id="bCoin" class="fc" oninput="calculateDailyClose()"></div>
-      </div>
-      
-      <div style="background:#f8fafc; border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px;">
-        <div class="flex justify-between mb-1 text-sm"><span>Sayılan Kasa (Gerçek Nakit):</span> <b id="dcTotalCash">0.00 ₺</b></div>
-        <div class="flex justify-between mb-1 text-sm"><span>Sistem Beklentisi (Nakit Satışlar):</span> <b id="dcExpectedCash">0.00 ₺</b></div>
-        <hr style="margin:8px 0; border:0; border-top:1px dashed var(--border);">
-        <div class="flex justify-between items-center text-base">
-          <b>Kasa Farkı (Açık/Fazla):</b> 
-          <b id="dcDifference">-</b>
+      <!-- 2. SEKME: GEÇMİŞ GÜN SONLARI & GERİ ALMA -->
+      <div id="dcHistorySection" style="display:none;">
+        <div class="hint-box dark mb-3 text-xs">
+          💡 <b>Geçmiş Kasa Mutabakatları:</b> Yanlışlıkla gün sonu yaptıysanız veya eski güne dönüp satış eklemek isterseniz ilgili kaydın yanındaki <b>"↩️ Eski Güne Dön (İptal Et)"</b> butonuna basarak günü yeniden açabilirsiniz.
         </div>
-      </div>
-
-      <!-- 3. DETAYLI BUGÜNKÜ SATIŞLAR TABLOSU -->
-      <div class="mt-3">
-        <div class="flex justify-between items-center mb-1">
-          <b class="text-xs text-muted">📜 BUGÜNKÜ SATIŞLARIN AYRINTILI TABLOSU</b>
+        <div id="dcHistoryList" class="flex-col gap-2 max-h-[380px] overflow-y-auto"></div>
+        <div class="modal-actions mt-3">
+          <button class="btn btn-ghost" onclick="closeModal('dailyCloseModal')">Kapat</button>
         </div>
-        <div style="max-height:160px; overflow-y:auto; border:1px solid var(--border); border-radius:var(--radius-sm);">
-          <table class="data-table" style="margin:0; font-size:11.5px;">
-            <thead>
-              <tr style="position:sticky; top:0; background:var(--bg); z-index:1;">
-                <th style="width:65px;">Saat</th>
-                <th style="width:120px;">Ödeme Tipi</th>
-                <th>Satılan Ürünler</th>
-                <th style="width:85px; text-align:right;">Tutar (₺)</th>
-              </tr>
-            </thead>
-            <tbody id="dcSalesTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-      
-      <div class="modal-actions mt-3">
-        <button class="btn btn-ghost" onclick="closeModal('dailyCloseModal')">Kapat</button>
-        <button class="btn btn-warning" onclick="completeDailyClose()">🏁 Gün Sonunu Kapat</button>
       </div>
     </div>
   </div>

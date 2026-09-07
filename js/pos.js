@@ -421,6 +421,51 @@ function renderPosSalesHistory() {
   const totalEl = document.getElementById("posSummaryTotalSales");
   if (totalEl) totalEl.innerText = totalAll.toFixed(2) + " ₺";
 
+  // Gün Sonu Durum Rozeti ve Kapatıldı/Geri Aç Bildirim Kutusu
+  const statusBadge = document.getElementById("posDayStatusBadge");
+  const closedNoticeBox = document.getElementById("posClosedNoticeBox");
+  const closeRecord = (typeof getTodayDailyCloseRecord === "function") 
+    ? getTodayDailyCloseRecord(nowDate()) 
+    : (Array.isArray(window.dailyCloseRecords) ? window.dailyCloseRecords.find(r => r.date === nowDate()) : null);
+
+  if (closeRecord) {
+    if (statusBadge) {
+      statusBadge.innerHTML = `🔒 Gün Sonu Kapatıldı (${closeRecord.time || ""})`;
+      statusBadge.style.background = "#fee2e2";
+      statusBadge.style.color = "#991b1b";
+      statusBadge.style.border = "1px solid #fecaca";
+    }
+    if (closedNoticeBox) {
+      const diffNum = Number(closeRecord.difference) || 0;
+      const diffStr = diffNum >= 0 ? `+${diffNum.toFixed(2)}` : `${diffNum.toFixed(2)}`;
+      closedNoticeBox.style.display = "block";
+      closedNoticeBox.innerHTML = `
+        <div style="background:#fffbeb; border:1px solid #fde68a; border-left:4px solid #f59e0b; border-radius:var(--radius-sm); padding:10px 12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <div style="font-size:12px; color:#92400e;">
+            <b>🔒 Bugün Saat ${closeRecord.time || ""} itibarıyla Gün Sonu Kapatıldı.</b>
+            <div style="font-size:11px; opacity:0.9; margin-top:2px;">
+              Ciro: <b>${(Number(closeRecord.totalRevenue) || 0).toFixed(2)} ₺</b> | Sayılan Kasa: <b>${(Number(closeRecord.actualCash) || 0).toFixed(2)} ₺</b> | Kasa Farkı: <b>${diffStr} ₺</b>
+            </div>
+          </div>
+          <button class="btn btn-outline btn-xs" style="border-color:#f59e0b; color:#b45309; font-weight:700; white-space:nowrap;" onclick="reopenTodayDailyClose()">
+            ↩️ Yanlış Bastım - Günü Geri Aç (Eski Güne Dön)
+          </button>
+        </div>
+      `;
+    }
+  } else {
+    if (statusBadge) {
+      statusBadge.innerHTML = `🟢 Gün Açık`;
+      statusBadge.style.background = "#dcfce7";
+      statusBadge.style.color = "#166534";
+      statusBadge.style.border = "1px solid #bbf7d0";
+    }
+    if (closedNoticeBox) {
+      closedNoticeBox.style.display = "none";
+      closedNoticeBox.innerHTML = "";
+    }
+  }
+
   if (!container) return;
   container.innerHTML = "";
 
