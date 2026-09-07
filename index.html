@@ -40,9 +40,6 @@
       <label class="btn btn-ghost btn-sm" style="cursor:pointer; margin:0;" title="İndirdiğiniz veya mevcut yedek JSON dosyasını sisteme yükleyin">
         📥 Yükle <input type="file" style="display:none;" accept=".json" onchange="importData(event)">
       </label>
-      <button class="btn btn-ghost btn-sm" onclick="openGoogleSheetConfigModal()" title="Google E-Tablo Web App Bağlantı URL'sini Değiştir">
-        ⚙️ E-Tablo URL
-      </button>
       <button class="btn btn-outline btn-sm" onclick="downloadAybars222Backup()" title="222 Ürünün hazır JSON yedek dosyasını bilgisayarınıza veya telefonunuza indirir. 'Yükle' seçeneğinden yükleyebilirsiniz." style="border-color:rgba(255,255,255,0.3); color:#f8fafc; font-weight:600;">
         📥 222 Ürün Dosyasını İndir
       </button>
@@ -154,7 +151,7 @@
       </div>
       <div id="subtab-orders-platform" class="subtab-view">
         <div class="hint-box dark mb-3 text-sm">
-          💡 Platform (Getir/Yemeksepeti) siparişlerinin parası gün sonunda veya haftalık toplu yattığında buradan "Parası Yattı" işaretlenir ve E-Tablo'ya kasaya giriş olarak yansır.
+          💡 <b>Platform Siparişleri:</b> Getir ve Yemeksepeti komisyon oranları değişken olduğundan E-Tablo'ya otomatik gelir yansıtılmaz. Siparişler girdiğinizde anında stoktan düşer. Kurye teslim edince buraya düşer. Bankanıza yatan net tutarı E-Tablo'ya manuel gelir olarak ekledikten sonra buradaki siparişleri "Listeden Kapat" ile silebilirsiniz.
         </div>
         <div id="platformOrdersGroupedList" class="form-row form-row-2"></div>
       </div>
@@ -695,7 +692,8 @@
       <div class="modal-title">🛵 Gidecek Sipariş Oluştur</div>
       <div class="fg">
         <label>Müşteri Seç Veya Ara</label>
-        <input type="text" id="dispCustomerSearchInput" class="fc" list="dispatchCustomerList" placeholder="🔍 İsim veya Telefon yazın..." onchange="handleSelectDispatchCustomer(this.value)">
+        <input type="hidden" id="dispCustomerId">
+        <input type="text" id="dispCustomerSearchInput" class="fc" list="dispatchCustomerList" placeholder="🔍 İsim veya Telefon yazın..." onchange="handleSelectDispatchCustomer(this.value)" oninput="handleSelectDispatchCustomer(this.value)">
         <datalist id="dispatchCustomerList"></datalist>
       </div>
       <hr style="margin:15px 0; border:0; border-top:1px dashed var(--border);">
@@ -714,7 +712,10 @@
         </div>
         <div class="fg"><label>Ödeme Tercihi</label>
           <select id="dispPaymentType" class="fc">
-            <option>Nakit</option><option>Kredi Kartı</option><option>Online / Platform</option>
+            <option>Nakit</option>
+            <option>Kredi Kartı</option>
+            <option>Veresiye</option>
+            <option>Online / Platform</option>
           </select>
         </div>
       </div>
@@ -1329,41 +1330,19 @@
     </div>
   </div>
 
-  <!-- Google Sheet Config Modal -->
-  <div class="modal-overlay" id="googleSheetConfigModal">
-    <div class="modal-box" style="max-width:540px;">
-      <div class="modal-title flex justify-between items-center">
-        <span>⚙️ Google E-Tablo Bağlantı Ayarı</span>
-        <button class="btn btn-ghost btn-xs" onclick="closeModal('googleSheetConfigModal')">✕</button>
-      </div>
-      <div class="hint-box mb-3 text-sm">
-        💡 <b>Başka Bilgisayara Kurarken:</b> Yeni bir Google E-Tablo açıp içindeki Apps Script kodunu dağıttığınızda size verilen <b>Web Uygulaması URL'sini</b> (<code>.../exec</code> ile biten) buraya yapıştırıp kaydedin. Kodlarla uğraşmanıza gerek kalmaz.
-      </div>
-      <div class="fg mb-3">
-        <label>Google Apps Script Web Uygulaması URL:</label>
-        <input type="text" id="customSheetUrlInput" class="fc text-sm" placeholder="https://script.google.com/macros/s/.../exec">
-      </div>
-      <div class="modal-actions">
-        <button class="btn btn-ghost" onclick="closeModal('googleSheetConfigModal')">İptal</button>
-        <button class="btn btn-outline" onclick="resetGoogleSheetUrl()">Varsayılana Sıfırla</button>
-        <button class="btn btn-primary" onclick="saveGoogleSheetUrl()">💾 Kaydet</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Toast Container -->
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/products_catalog.js?v=20260907_12"></script>
-  <script src="js/state.js?v=20260907_12"></script>
-  <script src="js/ui.js?v=20260907_12"></script>
-  <script src="js/pos.js?v=20260907_12"></script>
-  <script src="js/orders.js?v=20260907_12"></script>
-  <script src="js/inventory.js?v=20260907_12"></script>
-  <script src="js/crm.js?v=20260907_12"></script>
-  <script src="js/procurement.js?v=20260907_12"></script>
-  <script src="js/expenses.js?v=20260907_12"></script>
-  <script src="js/app.js?v=20260907_12"></script>
+  <script src="js/products_catalog.js?v=20260908_1"></script>
+  <script src="js/state.js?v=20260908_1"></script>
+  <script src="js/ui.js?v=20260908_1"></script>
+  <script src="js/pos.js?v=20260908_1"></script>
+  <script src="js/orders.js?v=20260908_1"></script>
+  <script src="js/inventory.js?v=20260908_1"></script>
+  <script src="js/crm.js?v=20260908_1"></script>
+  <script src="js/procurement.js?v=20260908_1"></script>
+  <script src="js/expenses.js?v=20260908_1"></script>
+  <script src="js/app.js?v=20260908_1"></script>
 </body>
 </html>

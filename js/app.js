@@ -69,10 +69,12 @@ function calculateDailyClose() {
           transferSales += amt;
           transferCount++;
         }
-        totalRevenue += amt;
       });
     });
   }
+
+  // EN ALTTA TOPLAT: Günlük Toplam Gelir (Ciro) = Kredi Kartı + Nakit + Havale
+  const totalRevenue = cashSales + cardSales + transferSales;
 
   // - Nakit Çıkan Giderler
   let cashExpenses = 0;
@@ -117,7 +119,7 @@ function calculateDailyClose() {
   const totalRevEl = document.getElementById("dcTotalSalesDisplay");
   if (totalRevEl) totalRevEl.innerText = totalRevenue.toFixed(2) + " ₺";
   const totalCountEl = document.getElementById("dcTotalCountDisplay");
-  if (totalCountEl) totalCountEl.innerText = `Toplam ${todaySales.length} işlem`;
+  if (totalCountEl) totalCountEl.innerText = `Toplam ${cardCount + cashCount + transferCount} işlem`;
 
   // Kasada olması beklenen nakit
   const expectedCash = Math.max(0, cashSales - cashExpenses);
@@ -186,7 +188,6 @@ function completeDailyClose() {
   let cashSales = 0;
   let cardSales = 0;
   let transferSales = 0;
-  let totalRevenue = 0;
 
   todaySales.forEach(s => {
     const bk = (typeof getSalePaymentBreakdown === "function") 
@@ -195,8 +196,26 @@ function completeDailyClose() {
     cashSales += bk.cash;
     cardSales += bk.card;
     transferSales += bk.transfer;
-    totalRevenue += (Number(s.total) || 0);
   });
+
+  // + Müşteri veresiye tahsilatları
+  if (Array.isArray(window.customers || customers)) {
+    (window.customers || customers).forEach(c => {
+      (c.purchaseHistory || []).filter(h => h.date === today && (h.payment || "").includes("Tahsilat")).forEach(h => {
+        const p = (h.payment || "").toLowerCase();
+        const amt = Number(h.total) || 0;
+        if (p.includes("nakit")) {
+          cashSales += amt;
+        } else if (p.includes("kart")) {
+          cardSales += amt;
+        } else if (p.includes("havale") || p.includes("iban")) {
+          transferSales += amt;
+        }
+      });
+    });
+  }
+
+  const totalRevenue = cashSales + cardSales + transferSales;
 
   let cashExpenses = 0;
   if (Array.isArray(window.expenses || expenses)) {

@@ -13,6 +13,8 @@ function renderOrdersTab() {
 function openDispatchModal() {
   if (cart.length === 0) return toast("Sepet boş!", "warning");
   updateCustomerDropdown();
+  const idEl = document.getElementById("dispCustomerId");
+  if (idEl) idEl.value = "";
   document.getElementById("dispCustomerSearchInput").value = "";
   document.getElementById("dispCustomerName").value = "";
   document.getElementById("dispPhone").value = "";
@@ -23,6 +25,7 @@ function openDispatchModal() {
   if (selId) {
     const c = customers.find(cust => cust.id == selId);
     if (c) {
+      if (idEl) idEl.value = c.id;
       document.getElementById("dispCustomerName").value = c.name;
       document.getElementById("dispPhone").value = c.phone || "";
       document.getElementById("dispAddress").value = c.address || "";
@@ -33,10 +36,16 @@ function openDispatchModal() {
 }
 
 function handleSelectDispatchCustomer(val) {
-  if (!val) return;
+  if (!val) {
+    const idEl = document.getElementById("dispCustomerId");
+    if (idEl) idEl.value = "";
+    return;
+  }
   const cleanVal = val.split(" - ")[0].trim();
-  const c = customers.find(cust => cust.name.toLowerCase() === cleanVal.toLowerCase() || cust.phone === cleanVal);
+  const c = customers.find(cust => cust.name.toLowerCase() === cleanVal.toLowerCase() || cust.phone === cleanVal || String(cust.id) === cleanVal);
   if (c) {
+    const idEl = document.getElementById("dispCustomerId");
+    if (idEl) idEl.value = c.id;
     document.getElementById("dispCustomerName").value = c.name;
     document.getElementById("dispPhone").value = c.phone || "";
     document.getElementById("dispAddress").value = c.address || "";
@@ -49,16 +58,53 @@ function saveDispatchOrder() {
   const channel = document.getElementById("dispChannel").value;
   const paymentPref = document.getElementById("dispPaymentType").value;
   const cName = document.getElementById("dispCustomerName").value.trim() || "İsimsiz";
+  const phone = (document.getElementById("dispPhone").value || "").trim();
+  const address = (document.getElementById("dispAddress").value || "-").trim();
+  const note = (document.getElementById("dispNote").value || "").trim();
+  const custIdVal = document.getElementById("dispCustomerId")?.value;
+
+  let matchedCust = null;
+  if (custIdVal) {
+    matchedCust = customers.find(c => String(c.id) === String(custIdVal));
+  }
+  if (!matchedCust && cName && cName !== "İsimsiz") {
+    matchedCust = customers.find(c => c.name.toLowerCase() === cName.toLowerCase() || (phone && c.phone === phone));
+  }
+
+  // Veresiye kontrolü: Kayıtlı müşteri olmalı veya otomatik kaydedilmeli
+  if (paymentPref === "Veresiye") {
+    if (!matchedCust) {
+      if (!confirm(`"${cName}" kayıtlı müşteriler arasında bulunamadı.\n\nVeresiye paket sipariş oluşturabilmek için müşteri borç hesabının açılması gerekir.\n\nBu müşteriyi şimdi otomatik kaydetmek istiyor musunuz?`)) {
+        return;
+      }
+      matchedCust = {
+        id: Date.now(),
+        name: cName,
+        phone: phone || "-",
+        address: address || "-",
+        pet: note || "",
+        balance: 0,
+        purchaseHistory: []
+      };
+      customers.push(matchedCust);
+      if (typeof renderCrmCustomerList === "function") renderCrmCustomerList();
+    }
+  }
 
   const order = {
-    id: Date.now(), date: nowDate(), time: nowTime(), channel,
-    customerName: cName,
-    phone: document.getElementById("dispPhone").value || "-",
-    address: document.getElementById("dispAddress").value || "-",
-    note: document.getElementById("dispNote").value || "",
+    id: Date.now(),
+    date: nowDate(),
+    time: nowTime(),
+    channel,
+    customerId: matchedCust ? matchedCust.id : null,
+    customerName: matchedCust ? matchedCust.name : cName,
+    phone: phone || "-",
+    address: address || "-",
+    note: note,
     paymentMethod: paymentPref,
     itemsSummary: cart.map(i => `${i.qty}x ${i.name} (${i.customPrice.toFixed(2)} ₺)`).join(", "),
-    items: [...cart], total
+    items: [...cart],
+    total
   };
 
   // Deduct stock (FIFO Lot/Batch deduction)
@@ -84,7 +130,7 @@ function saveDispatchOrder() {
   cart = [];
   renderCart(); renderCatalog(); closeModal("dispatchModal"); saveData(); updateAllBadges();
   if (typeof renderSktRadarWidget === "function") renderSktRadarWidget();
-  toast("🛵 Sipariş yola çıktı!");
+  toast(paymentPref === "Veresiye" ? "🛵 Veresiye sipariş yola çıktı!" : "🛵 Sipariş yola çıktı!");
 }
 
 // ── Pending Orders List ──
@@ -127,6 +173,7 @@ function markOrderDelivered(idx) {
   const order = orders[idx];
   if (!order) return;
   const isPlatform = (order.channel === "Getir" || order.channel === "Yemeksepeti");
+  const isVeresiye = (order.paymentMethod === "Veresiye");
 
   const vatTotal = (order.items || []).reduce((sum, item) => {
     const lineTotal = (item.qty || 1) * (item.customPrice || item.price || 0);
@@ -134,14 +181,45 @@ function markOrderDelivered(idx) {
     return sum + (rate > 0 ? (lineTotal - (lineTotal / (1 + rate / 100))) : 0);
   }, 0);
 
-  const isOrderOfficial = (order.paymentMethod || "").includes("Kart") || (order.paymentMethod || "").includes("Platform") || (order.paymentMethod || "").includes("Banka") || (order.isOfficial !== undefined ? order.isOfficial : true);
+  // Veresiye ise kayıtlı müşterinin borcuna ekle
+  if (isVeresiye) {
+    let cust = null;
+    if (order.customerId) {
+      cust = customers.find(c => String(c.id) === String(order.customerId));
+    }
+    if (!cust && order.customerName && order.customerName !== "İsimsiz") {
+      cust = customers.find(c => c.name.toLowerCase() === order.customerName.toLowerCase());
+    }
+    if (cust) {
+      cust.balance = (cust.balance || 0) + Number(order.total || 0);
+      if (!cust.purchaseHistory) cust.purchaseHistory = [];
+      cust.purchaseHistory.unshift({
+        date: order.date || nowDate(),
+        time: order.time || nowTime(),
+        items: order.itemsSummary,
+        total: Number(order.total || 0),
+        payment: "Veresiye (Paket Sipariş)"
+      });
+      if (typeof renderCrmCustomerList === "function") renderCrmCustomerList();
+    }
+  }
+
+  const isOrderOfficial = isVeresiye ? false : ((order.paymentMethod || "").includes("Kart") || (order.paymentMethod || "").includes("Platform") || (order.paymentMethod || "").includes("Banka") || (order.isOfficial !== undefined ? order.isOfficial : true));
 
   salesHistory.unshift({
-    id: Date.now(), date: order.date, time: order.time,
-    customerName: order.customerName, itemsSummary: order.itemsSummary,
-    soldItems: order.items || [], total: order.total,
+    id: Date.now(),
+    date: order.date || nowDate(),
+    time: order.time || nowTime(),
+    customerName: order.customerName,
+    itemsSummary: order.itemsSummary,
+    soldItems: order.items || [],
+    total: order.total,
     vatTotal: Number(vatTotal.toFixed(2)),
-    paymentType: order.paymentMethod || "Nakit",
+    paymentType: isVeresiye ? "Veresiye" : (order.paymentMethod || "Nakit"),
+    splitCash: (!isVeresiye && order.paymentMethod === "Nakit") ? order.total : 0,
+    splitCard: (!isVeresiye && order.paymentMethod === "Kredi Kartı") ? order.total : 0,
+    splitTransfer: (!isVeresiye && (order.paymentMethod === "Banka" || order.paymentMethod === "Havale / IBAN")) ? order.total : 0,
+    splitCredit: isVeresiye ? order.total : 0,
     isOfficial: isOrderOfficial
   });
 
@@ -150,40 +228,53 @@ function markOrderDelivered(idx) {
     dualData = calculateDualFinancialOverview();
   }
 
-  sendToGoogleSheets({
-    action: "save_sale",
-    date: order.date || nowDate(),
-    time: order.time || nowTime(),
-    customerName: order.customerName,
-    channel: order.channel || "Telefon",
-    itemsSummary: order.itemsSummary,
-    paymentType: order.paymentMethod || "Nakit",
-    total: order.total,
-    vatTotal: Number(vatTotal.toFixed(2)),
-    isOfficial: isOrderOfficial,
-    officialSales: dualData ? Number(dualData.officialSales.toFixed(2)) : undefined,
-    invoicedPurchases: dualData ? Number(dualData.invoicedPurchases.toFixed(2)) : undefined,
-    expensesTotal: dualData ? Number(dualData.totalInvoicedDeductions.toFixed(2)) : undefined,
-    taxBase: dualData ? Number(dualData.officialTaxBase.toFixed(2)) : undefined,
-    payableVat: dualData ? Number(dualData.payableVat.toFixed(2)) : undefined,
-    estimatedIncomeTax: dualData ? Number(dualData.estimatedIncomeTax.toFixed(2)) : undefined,
-    netCashProfit: dualData ? Number(dualData.realProfit.toFixed(2)) : undefined,
-    riskAmount: dualData ? Number(dualData.riskAmount.toFixed(2)) : undefined,
-    riskStatus: dualData ? (dualData.isHighRisk ? "Yüksek Risk" : "Güvenli") : "Güvenli"
-  });
+  // ÖNEMLİ: Yemeksepeti ve Getir siparişleri E-Tablo'ya otomatik gelir olarak AKTARILMAZ!
+  // Komisyon oranları dinamik değiştiğinden ablası bankaya yatan net tutarı E-Tablo'ya manuel ekleyecek.
+  if (!isPlatform) {
+    sendToGoogleSheets({
+      action: "save_sale",
+      date: order.date || nowDate(),
+      time: order.time || nowTime(),
+      customerName: order.customerName,
+      channel: isVeresiye ? "Paket Veresiye" : (order.channel || "Telefon"),
+      itemsSummary: order.itemsSummary,
+      paymentType: isVeresiye ? "Veresiye" : (order.paymentMethod || "Nakit"),
+      total: order.total,
+      vatTotal: Number(vatTotal.toFixed(2)),
+      isOfficial: isOrderOfficial,
+      officialSales: dualData ? Number(dualData.officialSales.toFixed(2)) : undefined,
+      invoicedPurchases: dualData ? Number(dualData.invoicedPurchases.toFixed(2)) : undefined,
+      expensesTotal: dualData ? Number(dualData.totalInvoicedDeductions.toFixed(2)) : undefined,
+      taxBase: dualData ? Number(dualData.officialTaxBase.toFixed(2)) : undefined,
+      payableVat: dualData ? Number(dualData.payableVat.toFixed(2)) : undefined,
+      estimatedIncomeTax: dualData ? Number(dualData.estimatedIncomeTax.toFixed(2)) : undefined,
+      netCashProfit: dualData ? Number(dualData.realProfit.toFixed(2)) : undefined,
+      riskAmount: dualData ? Number(dualData.riskAmount.toFixed(2)) : undefined,
+      riskStatus: dualData ? (dualData.isHighRisk ? "Yüksek Risk" : "Güvenli") : "Güvenli"
+    });
 
-  if (typeof syncTaxReportToSheets === "function") {
-    setTimeout(syncTaxReportToSheets, 600);
+    if (typeof syncTaxReportToSheets === "function") {
+      setTimeout(syncTaxReportToSheets, 600);
+    }
   }
 
-  if (isPlatform && order.paymentMethod === "Online / Platform") {
+  if (isPlatform) {
     platformPendingOrders.unshift({ ...order, deliveredAt: nowTime() });
   }
 
   deliveredOrders.unshift(order);
   orders.splice(idx, 1);
-  saveData(); renderOrdersTab(); renderPosSalesHistory();
-  toast("✅ Sipariş teslim edildi!");
+  saveData();
+  renderOrdersTab();
+  renderPosSalesHistory();
+  
+  if (isVeresiye) {
+    toast(`✅ Sipariş teslim edildi ve "${order.customerName}" hesabına veresiye işlendi!`);
+  } else if (isPlatform) {
+    toast(`✅ ${order.channel} siparişi teslim edildi (Stok düşüldü, net gelir manuel girilecek).`);
+  } else {
+    toast("✅ Sipariş teslim edildi!");
+  }
 }
 
 function cancelOrder(idx) {
@@ -211,7 +302,7 @@ function renderPlatformOrdersGrouped() {
   container.innerHTML = "";
 
   if (platformPendingOrders.length === 0) {
-    container.innerHTML = `<div class="empty-state">Bekleyen platform tahsilatı yok.</div>`;
+    container.innerHTML = `<div class="empty-state">Bekleyen platform siparişi yok.</div>`;
     return;
   }
 
@@ -230,7 +321,7 @@ function renderPlatformOrdersGrouped() {
         <b>${key}</b>
         <div class="flex items-center gap-2">
           <b class="text-primary">${dayTotal.toFixed(2)} ₺</b>
-          <button class="btn btn-success btn-sm" onclick="settlePlatformDay('${key}')">💰 Parası Yattı</button>
+          <button class="btn btn-outline btn-sm" onclick="settlePlatformDay('${key}')" title="Bu siparişleri listeden kaldırır. Net tutarı E-Tabloya manuel gelir olarak ekleyin.">✓ Listeden Kapat</button>
         </div>
       </div>`;
     items.forEach(o => { html += `<div class="text-sm" style="padding:4px 0; border-top:1px solid var(--border-light);">${o.time} — ${o.customerName}: ${o.itemsSummary} (<b>${Number(o.total).toFixed(2)} ₺</b>)</div>`; });
@@ -242,21 +333,13 @@ function renderPlatformOrdersGrouped() {
 function settlePlatformDay(key) {
   const items = platformPendingOrders.filter(o => `${o.channel} — ${o.date}` === key);
   const dayTotal = items.reduce((s, o) => s + o.total, 0);
-  sendToGoogleSheets({
-    action: "save_sale",
-    date: nowDate(),
-    time: nowTime(),
-    customerName: key,
-    channel: "Platform Tahsilatı",
-    itemsSummary: `${items.length} sipariş tahsilatı`,
-    paymentType: "Banka / Havale",
-    total: dayTotal,
-    vatTotal: 0,
-    isOfficial: true
-  });
+  // Kullanıcı talebi: Getir/Yemeksepeti komisyonları dinamik değiştiğinden E-Tablo'ya otomatik aktarım yapılmaz.
+  // Net gelir E-Tablo'ya manuel girileceği için buradan sadece listeden temizlenir.
   platformPendingOrders = platformPendingOrders.filter(o => `${o.channel} — ${o.date}` !== key);
-  saveData(); renderPlatformOrdersGrouped(); updateAllBadges();
-  toast(`💰 ${key} tahsilatı (${dayTotal.toFixed(2)} ₺) işlendi!`);
+  saveData();
+  renderPlatformOrdersGrouped();
+  updateAllBadges();
+  toast(`✓ ${key} siparişleri (${dayTotal.toFixed(2)} ₺) listeden kapatıldı.`);
 }
 
 // ── Delivered History ──

@@ -19,47 +19,8 @@ var manualDeficits = [];
 var heldCarts = [];
 var cart = [];
 
-// ── GOOGLE APPS SCRIPT WEB APP URL (E-Tablo Bağlantısı) ──
-// Farklı bir bilgisayarda/E-Tabloda değiştirmek için:
-// 1. Sitedeki sağ üstteki "⚙️ E-Tablo URL" butonundan yapıştırabilirsiniz (Hiç koda dokunmadan).
-// 2. Veya aşağıdaki tırnak içine yeni Apps Script URL'nizi yazıp kaydedebilirsiniz:
-var DEFAULT_GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_l1PLYUVmHL6dqnholoKke2JsTx56FScjd4qa6veqcoK49ztzLqggwp9M7uze10sU/exec";
-var GOOGLE_SCRIPT_URL = localStorage.getItem("ps_google_script_url") || DEFAULT_GOOGLE_SCRIPT_URL;
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_l1PLYUVmHL6dqnholoKke2JsTx56FScjd4qa6veqcoK49ztzLqggwp9M7uze10sU/exec";
 
-function saveGoogleSheetUrl() {
-  const inp = document.getElementById("customSheetUrlInput");
-  const val = (inp ? inp.value : "").trim();
-  if (!val) {
-    alert("Lütfen geçerli bir Google Apps Script Web App URL'si girin!");
-    return;
-  }
-  if (!val.startsWith("https://script.google.com/")) {
-    if (!confirm("Girdiğiniz URL 'https://script.google.com/' ile başlamıyor.\n\nE-Tablo'nun doğru çalışması için 'Uzantılar > Apps Script > Dağıt > Web Uygulaması' linki olmalıdır.\nYine de kaydetmek istiyor musunuz?")) {
-      return;
-    }
-  }
-  localStorage.setItem("ps_google_script_url", val);
-  GOOGLE_SCRIPT_URL = val;
-  closeModal("googleSheetConfigModal");
-  if (typeof toast === "function") toast("✅ Yeni Google E-Tablo bağlantı URL'si başarıyla kaydedildi!");
-}
-
-function resetGoogleSheetUrl() {
-  if (confirm("E-Tablo bağlantısını varsayılan orijinal URL'ye sıfırlamak istiyor musunuz?")) {
-    localStorage.removeItem("ps_google_script_url");
-    GOOGLE_SCRIPT_URL = DEFAULT_GOOGLE_SCRIPT_URL;
-    const inp = document.getElementById("customSheetUrlInput");
-    if (inp) inp.value = DEFAULT_GOOGLE_SCRIPT_URL;
-    closeModal("googleSheetConfigModal");
-    if (typeof toast === "function") toast("🔄 E-Tablo bağlantısı orijinal URL'ye sıfırlandı.");
-  }
-}
-
-function openGoogleSheetConfigModal() {
-  const inp = document.getElementById("customSheetUrlInput");
-  if (inp) inp.value = localStorage.getItem("ps_google_script_url") || GOOGLE_SCRIPT_URL || DEFAULT_GOOGLE_SCRIPT_URL;
-  openModal("googleSheetConfigModal");
-}
 var catalogProducts = (typeof window !== "undefined" && window.catalogProducts && window.catalogProducts.length > 0)
   ? window.catalogProducts
   : ((typeof catalogProducts !== "undefined" && Array.isArray(catalogProducts)) ? catalogProducts : []);
@@ -474,6 +435,9 @@ function getSalePaymentBreakdown(sale) {
   }
   if (pType.includes("veresiye")) {
     return { cash: 0, card: 0, transfer: 0, credit: total };
+  }
+  if (pType.includes("platform") || pType.includes("online") || pType.includes("getir") || pType.includes("yemeksepeti")) {
+    return { cash: 0, card: 0, transfer: 0, credit: 0, platform: total };
   }
   return { cash: 0, card: total, transfer: 0, credit: 0 };
 }

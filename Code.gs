@@ -840,11 +840,50 @@ function handleDailyClose(ss, data) {
     sheet.appendRow(headers);
     formatHeaderRow(sheet, headers.length);
   } else {
-    // Sütun başlıkları eski formatta ise 12 sütunlu yeni formata güncelle
-    var firstRow = sheet.getRange(1, 1, 1, Math.min(sheet.getLastColumn(), headers.length)).getValues()[0];
+    // Sütun başlıkları eski 9 sütunlu formatta ise otomatik 12 sütuna dönüştür ve eski #ERROR! olan hücreleri düzelt
+    var firstRow = sheet.getRange(1, 1, 1, Math.min(sheet.getLastColumn(), 12)).getValues()[0];
     if (firstRow.length < 12 || firstRow[2] !== "Kredi Kartı (TL)") {
-      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-      formatHeaderRow(sheet, headers.length);
+      var lastRow = sheet.getLastRow();
+      if (lastRow > 1) {
+        var oldData = sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).getValues();
+        var migratedData = [];
+        for (var i = 0; i < oldData.length; i++) {
+          var r = oldData[i];
+          var oldCashSales = Number(r[2]) || 0;
+          var oldCashExp = Number(r[3]) || 0;
+          var oldExpected = Number(r[4]) || Math.max(0, oldCashSales - oldCashExp);
+          var oldActual = Number(r[5]) || 0;
+          var oldDiff = Number(r[6]) || (oldActual - oldExpected);
+          var oldStatus = (Math.abs(oldDiff) < 0.01) ? "✅ Tam Mutabakat" : (oldDiff > 0 ? "📈 Kasa Fazlası" : "⚠️ Kasa Açığı");
+          var oldNote = String(r[8] || r[7] || "Kasa mutabakat kaydı.");
+          if (oldNote.indexOf("#ERROR") !== -1 || oldNote.indexOf("IF(") !== -1) oldNote = "Kasa mutabakat kaydı.";
+
+          migratedData.push([
+            r[0], // Tarih
+            r[1], // Saat
+            0,    // Kredi Kartı
+            oldCashSales, // Nakit Satış
+            0,    // Havale
+            oldCashSales, // Toplam Ciro
+            oldCashExp,   // Nakit Gider
+            oldExpected,  // Beklenen Kasa Nakdi
+            oldActual,    // Sayılan Kasa
+            oldDiff,      // Kasa Farkı
+            oldStatus,    // Mutabakat Durumu (Formülsüz, sıfır hata!)
+            oldNote       // Açıklama
+          ]);
+        }
+        sheet.clear();
+        sheet.appendRow(headers);
+        formatHeaderRow(sheet, headers.length);
+        sheet.getRange(2, 1, migratedData.length, headers.length).setValues(migratedData);
+        sheet.getRange(2, 3, migratedData.length, 8).setNumberFormat("₺#,##0.00").setFontWeight("bold").setHorizontalAlignment("right");
+        sheet.getRange(2, 6, migratedData.length, 1).setBackground("#f3e8ff").setFontColor("#6b21a8");
+        sheet.getRange(2, 11, migratedData.length, 1).setHorizontalAlignment("center").setFontWeight("bold");
+      } else {
+        sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+        formatHeaderRow(sheet, headers.length);
+      }
     }
   }
 
@@ -872,6 +911,7 @@ function handleDailyClose(ss, data) {
 
   var targetRow = Math.max(sheet.getLastRow() + 1, 2);
 
+  // DİKKAT: Türkçe/İngilizce Excel yerel ayarlarında formül ayracı (virgül vs noktalı virgül) #ERROR! hatası ürettiğinden formül DEĞİL, doğrudan hesaplanmış saf değerler yazılır.
   var row = [
     data.date || getTodayFormatted(),
     data.time || getTimeFormatted(),
@@ -882,8 +922,8 @@ function handleDailyClose(ss, data) {
     cashExpenses,
     expectedCash,
     actualCash,
-    "=I" + targetRow + "-H" + targetRow,
-    '=IF(ROUND(J' + targetRow + ',2)=0,"✅ Tam Mutabakat",IF(J' + targetRow + '>0,"📈 Kasa Fazlası","⚠️ Kasa Açığı"))',
+    diff,
+    statusText,
     noteText
   ];
 
@@ -976,3 +1016,77 @@ function getColumnLetter(columnNumber) {
   }
   return letter;
 }
+
+/**
+ * E-Tablodaki "Gün Sonu Kasa" sayfasını tek tıkla 12 sütunlu yeni formata geçirir
+ * ve varsa eski formül parse hatası (#ERROR!) olan hücreleri temizleyip düzeltir.
+ * Google E-Tablo > Uzantılar > Apps Script ekranında bu fonksiyonu seçip "Çalıştır" diyebilirsiniz.
+ */
+function fixGunSonuTablosu() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Gün Sonu Kasa");
+  if (!sheet) {
+    Logger.log("'Gün Sonu Kasa' sayfası bulunamadı.");
+    return;
+  }
+  var headers = [
+    "Tarih", "Kapanış Saati", "Kredi Kartı (TL)", "Nakit Satış (TL)", "Havale / IBAN (TL)",
+    "Günlük Toplam Ciro (TL)", "Nakit Giderler (TL)", "Beklenen Kasa Nakdi (TL)", "Sayılan Kasa (TL)",
+    "Kasa Farkı (TL)", "Mutabakat Durumu", "Açıklama / Not"
+  ];
+  var lastRow = sheet.getLastRow();
+  if (lastRow > 1) {
+    var oldData = sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).getValues();
+    var migratedData = [];
+    for (var i = 0; i < oldData.length; i++) {
+      var r = oldData[i];
+      if (sheet.getLastColumn() >= 12 && sheet.getRange(1, 3).getValue() === "Kredi Kartı (TL)") {
+        var diffVal = Number(r[9]) || 0;
+        var stText = (Math.abs(diffVal) < 0.01) ? "✅ Tam Mutabakat" : (diffVal > 0 ? "📈 Kasa Fazlası" : "⚠️ Kasa Açığı");
+        r[10] = stText;
+        if (String(r[11]).indexOf("#ERROR") !== -1 || String(r[11]).indexOf("IF(") !== -1) {
+          r[11] = "Kasa mutabakat kaydı.";
+        }
+        migratedData.push(r);
+      } else {
+        var oldCashSales = Number(r[2]) || 0;
+        var oldCashExp = Number(r[3]) || 0;
+        var oldExpected = Number(r[4]) || Math.max(0, oldCashSales - oldCashExp);
+        var oldActual = Number(r[5]) || 0;
+        var oldDiff = Number(r[6]) || (oldActual - oldExpected);
+        var oldStatus = (Math.abs(oldDiff) < 0.01) ? "✅ Tam Mutabakat" : (oldDiff > 0 ? "📈 Kasa Fazlası" : "⚠️ Kasa Açığı");
+        var oldNote = String(r[8] || r[7] || "Kasa mutabakat kaydı.");
+        if (oldNote.indexOf("#ERROR") !== -1 || oldNote.indexOf("IF(") !== -1) oldNote = "Kasa mutabakat kaydı.";
+
+        migratedData.push([
+          r[0], // Tarih
+          r[1], // Saat
+          0,    // Kredi Kartı
+          oldCashSales, // Nakit Satış
+          0,    // Havale
+          oldCashSales, // Toplam Ciro
+          oldCashExp,   // Nakit Gider
+          oldExpected,  // Beklenen Kasa Nakdi
+          oldActual,    // Sayılan Kasa
+          oldDiff,      // Kasa Farkı
+          oldStatus,    // Mutabakat Durumu (Formülsüz, sıfır hata!)
+          oldNote       // Açıklama
+        ]);
+      }
+    }
+    sheet.clear();
+    sheet.appendRow(headers);
+    formatHeaderRow(sheet, headers.length);
+    sheet.getRange(2, 1, migratedData.length, headers.length).setValues(migratedData);
+    sheet.getRange(2, 3, migratedData.length, 8).setNumberFormat("₺#,##0.00").setFontWeight("bold").setHorizontalAlignment("right");
+    sheet.getRange(2, 6, migratedData.length, 1).setBackground("#f3e8ff").setFontColor("#6b21a8");
+    sheet.getRange(2, 11, migratedData.length, 1).setHorizontalAlignment("center").setFontWeight("bold");
+    SpreadsheetApp.flush();
+    Logger.log("Gün Sonu Kasa sayfası başarıyla 12 sütuna geçirildi ve #ERROR! hataları temizlendi.");
+  } else {
+    sheet.clear();
+    sheet.appendRow(headers);
+    formatHeaderRow(sheet, headers.length);
+  }
+}
+
