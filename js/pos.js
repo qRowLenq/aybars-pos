@@ -2,12 +2,31 @@
    POS MODULE — Catalog, Cart, Sales, Refund
    =================================================================== */
 
+var selectedCategory = (typeof window !== "undefined" && window.selectedCategory) ? window.selectedCategory : "TÜMÜ";
+if (typeof window !== "undefined") window.selectedCategory = selectedCategory;
+
+function getActiveCategories() {
+  const def = ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum / Kozmetik", "Kampanyalar"];
+  let list = (typeof window !== "undefined" && Array.isArray(window.categories) && window.categories.length > 0)
+    ? window.categories
+    : ((typeof categories !== "undefined" && Array.isArray(categories) && categories.length > 0) ? categories : def);
+  const clean = Array.from(new Set(list.filter(c => c && typeof c === "string" && c.trim())));
+  return clean.length > 0 ? clean : def;
+}
+
 // ── Category Bar ──
 function initCategoryBar() {
   const bar = document.getElementById("categoryFilterBar");
   if (!bar) return;
+  if (!window.selectedCategory) window.selectedCategory = "TÜMÜ";
+  selectedCategory = window.selectedCategory;
+
+  const catList = getActiveCategories();
+  if (typeof window !== "undefined") window.categories = catList;
+  if (typeof categories !== "undefined") categories = catList;
+
   let html = `<button class="cat-chip ${selectedCategory === 'TÜMÜ' ? 'active' : ''}" onclick="filterCategory('TÜMÜ')">TÜMÜ</button>`;
-  categories.forEach(cat => {
+  catList.forEach(cat => {
     html += `<button class="cat-chip ${selectedCategory === cat ? 'active' : ''}" onclick="filterCategory('${cat}')">${cat}</button>`;
   });
   html += `<button class="btn btn-ghost btn-xs" style="border-radius:var(--radius-full); margin-left:4px;" onclick="promptNewCategory()">+ Kategori</button>`;
@@ -17,44 +36,77 @@ function initCategoryBar() {
 
 function promptNewCategory() {
   const newCat = prompt("Yeni kategori adı:");
-  if (newCat && newCat.trim() && !categories.includes(newCat.trim())) {
-    categories.push(newCat.trim());
-    saveData();
-    initCategoryBar();
+  if (newCat && newCat.trim()) {
+    const trimmed = newCat.trim();
+    const catList = getActiveCategories();
+    if (!catList.includes(trimmed)) {
+      catList.push(trimmed);
+      if (typeof window !== "undefined") window.categories = catList;
+      if (typeof categories !== "undefined") categories = catList;
+      saveData();
+      initCategoryBar();
+      populateCategoryDropdowns();
+    }
   }
 }
 
 function filterCategory(cat) {
   selectedCategory = cat;
+  if (typeof window !== "undefined") window.selectedCategory = cat;
   initCategoryBar();
   renderCatalog();
 }
 
 // ── Catalog Grid ──
 function renderCatalog() {
-  const search = (document.getElementById("catalogSearch")?.value || "").toLowerCase();
+  const search = (document.getElementById("catalogSearch")?.value || "").trim().toLowerCase();
   const grid = document.getElementById("productGrid");
   if (!grid) return;
   grid.innerHTML = "";
 
-  const filtered = products.filter(p =>
-    (selectedCategory === "TÜMÜ" || p.category === selectedCategory) &&
-    p.name.toLowerCase().includes(search)
-  );
+  if (!window.selectedCategory) window.selectedCategory = "TÜMÜ";
+  selectedCategory = window.selectedCategory;
+
+  // Ürün havuzunu tüm güvenli kaynaklardan garantiye al
+  let prodList = (typeof window !== "undefined" && Array.isArray(window.products) && window.products.length > 0)
+    ? window.products
+    : ((typeof products !== "undefined" && Array.isArray(products) && products.length > 0)
+      ? products
+      : ((typeof window !== "undefined" && Array.isArray(window.catalogProducts) && window.catalogProducts.length > 0)
+        ? window.catalogProducts
+        : ((typeof catalogProducts !== "undefined" && Array.isArray(catalogProducts)) ? catalogProducts : [])));
+
+  if (!prodList) prodList = [];
+
+  const filtered = prodList.filter(p => {
+    if (!p) return false;
+    const catMatch = (selectedCategory === "TÜMÜ" || !selectedCategory || (p.category && p.category.toLowerCase() === selectedCategory.toLowerCase()));
+    const nameMatch = !search || (p.name && p.name.toLowerCase().includes(search)) || (p.barcode && String(p.barcode).includes(search));
+    return catMatch && nameMatch;
+  });
 
   if (filtered.length === 0) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Ürün bulunamadı. "+ Ürün Ekle" ile ürün ekleyebilirsiniz.</div>`;
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1; padding:32px 16px; text-align:center;">
+      <div style="font-size:32px; margin-bottom:8px;">📦</div>
+      <div style="font-weight:600; color:var(--text-muted); font-size:13.5px;">${selectedCategory === 'TÜMÜ' ? 'Sistemde henüz ürün bulunmuyor.' : `"${selectedCategory}" kategorisinde ürün bulunamadı.`}</div>
+      <div class="flex gap-2 justify-center mt-3">
+        <button class="btn btn-outline btn-sm" onclick="filterCategory('TÜMÜ')">Tüm Ürünleri Göster</button>
+        <button class="btn btn-primary btn-sm" onclick="openAddProductModal()">+ Yeni Ürün Ekle</button>
+      </div>
+    </div>`;
     return;
   }
 
   filtered.forEach(p => {
     const card = document.createElement("div");
     card.className = "product-card";
+    const curStock = (p.stock !== undefined && p.stock !== null) ? Number(p.stock) : 0;
+    const curPrice = (p.price !== undefined && p.price !== null) ? Number(p.price) : 0;
     card.innerHTML = `
-      <div class="p-name">${p.name}</div>
+      <div class="p-name" title="${p.name}">${p.name}</div>
       <div class="p-footer">
-        <span class="p-stock ${p.stock <= 2 ? 'critical' : ''}">Stok: ${p.stock}</span>
-        <span class="p-price">${Number(p.price).toFixed(2)} ₺</span>
+        <span class="p-stock ${curStock <= 2 ? 'critical' : ''}">Stok: ${curStock}</span>
+        <span class="p-price">${curPrice.toFixed(2)} ₺</span>
       </div>`;
     card.onclick = () => addToCart(p);
     grid.appendChild(card);

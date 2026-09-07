@@ -5,6 +5,11 @@
 // Global variables for universal compatibility
 var defaultCategories = ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum / Kozmetik", "Kampanyalar"];
 var categories = [...defaultCategories];
+var selectedCategory = "TÜMÜ";
+window.defaultCategories = defaultCategories;
+window.categories = categories;
+window.selectedCategory = selectedCategory;
+
 var products = [];
 var suppliers = [];
 var customers = [];
@@ -194,15 +199,25 @@ function loadState() {
   };
 
   let cats = raw("ps_categories");
-  window.categories = (Array.isArray(cats) && cats.length > 0) ? cats : [...defaultCategories];
+  if (!Array.isArray(cats) || cats.length === 0) {
+    cats = [...defaultCategories];
+  }
+  window.categories = cats;
+  categories = window.categories;
 
-  const CURRENT_CATALOG_VERSION = "2026_09_v9_stock0_ready";
+  const CURRENT_CATALOG_VERSION = "2026_09_v10_stock0_ready";
   const savedVer = localStorage.getItem("ps_catalog_version");
   let prods = raw("ps_products");
 
+  const catalogSource = (window.catalogProducts && Array.isArray(window.catalogProducts) && window.catalogProducts.length > 0)
+    ? window.catalogProducts
+    : ((typeof catalogProducts !== "undefined" && Array.isArray(catalogProducts) && catalogProducts.length > 0)
+      ? catalogProducts
+      : (typeof sampleProducts !== "undefined" && Array.isArray(sampleProducts) ? sampleProducts : []));
+
   if (savedVer !== CURRENT_CATALOG_VERSION || !Array.isArray(prods) || prods.length < 50) {
     // 222 ürünü 0 stok ile yükle
-    window.products = JSON.parse(JSON.stringify(sampleProducts));
+    window.products = JSON.parse(JSON.stringify(catalogSource));
     window.products.forEach(p => {
       p.stock = (p.stock !== undefined && !isNaN(Number(p.stock))) ? Number(p.stock) : 0;
       p.vatRate = 20;
@@ -213,7 +228,7 @@ function loadState() {
     localStorage.setItem("ps_products", JSON.stringify(window.products));
     localStorage.setItem("ps_catalog_version", CURRENT_CATALOG_VERSION);
   } else {
-    window.products = (prods && prods.length > 0) ? prods : JSON.parse(JSON.stringify(sampleProducts));
+    window.products = (prods && prods.length > 0) ? prods : JSON.parse(JSON.stringify(catalogSource));
   }
   
   // Ensure product integrity & default values
@@ -228,6 +243,7 @@ function loadState() {
     if (p.stock === undefined || p.stock === null || isNaN(Number(p.stock))) p.stock = 0;
     else p.stock = Number(p.stock);
   });
+  products = window.products;
 
   let sups = raw("ps_suppliers");
   window.suppliers = (sups && sups.length > 0) ? sups : [...sampleSuppliers];
