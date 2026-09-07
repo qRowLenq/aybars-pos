@@ -145,7 +145,7 @@ function scrollToCart() {
 }
 
 // ── Complete Sale ──
-function completeSale(payType, splitDetails = null, splitData = null) {
+function completeSale(payType, splitDetails = null) {
   if (cart.length === 0) return toast("Sepet boş!", "warning");
   const total = cart.reduce((sum, i) => sum + (i.qty * i.customPrice), 0);
   const vatTotal = cart.reduce((sum, item) => {
@@ -155,7 +155,7 @@ function completeSale(payType, splitDetails = null, splitData = null) {
   }, 0);
 
   const custId = document.getElementById("cartCustomerSelect")?.value;
-  const cust = (typeof customers !== "undefined" && Array.isArray(customers)) ? customers.find(c => c.id == custId) : null;
+  const cust = customers.find(c => c.id == custId);
   const custName = cust ? cust.name : "Tezgâh";
   const itemsSummary = cart.map(i => `${i.qty}x ${i.name} (${i.customPrice.toFixed(2)} ₺)`).join(", ");
 
@@ -218,28 +218,11 @@ function deductProductStockFIFO(prod, qtyNeeded) {
     isOfficial = true;
   }
 
-  let splitCash = 0;
-  let splitCard = 0;
-  if (splitData) {
-    splitCash = Number(splitData.splitCash) || 0;
-    splitCard = Number(splitData.splitCard) || 0;
-  } else if (payType === "Nakit") {
-    splitCash = total;
-    splitCard = 0;
-  } else if (payType.includes("Kart") || payType.includes("Kredi")) {
-    splitCash = 0;
-    splitCard = total;
-  } else {
-    splitCard = total;
-  }
-
   const saleRecord = {
     id: Date.now(), date: nowDate(), time: nowTime(),
     customerName: custName, itemsSummary, soldItems: [...cart],
     total, vatTotal: Number(vatTotal.toFixed(2)),
     paymentType: splitDetails ? `Parçalı (${splitDetails})` : payType,
-    splitCash: Number(splitCash.toFixed(2)),
-    splitCard: Number(splitCard.toFixed(2)),
     isOfficial: Boolean(isOfficial)
   };
   salesHistory.unshift(saleRecord);
@@ -292,93 +275,27 @@ function deductProductStockFIFO(prod, qtyNeeded) {
 
 // ── Recent Sales & Refund ──
 function renderPosSalesHistory() {
-  const tableBody = document.getElementById("posSalesTableBody");
+  const container = document.getElementById("posRecentSalesList");
+  if (!container) return;
+  container.innerHTML = "";
+
   const todaySales = salesHistory.filter(s => s.date === nowDate());
-
-  let totalCard = 0;
-  let totalCash = 0;
-  let totalAll = 0;
-  let cardCount = 0;
-  let cashCount = 0;
-
-  todaySales.forEach(s => {
-    const { cash, card } = getSaleCashAndCard(s);
-    totalCash += cash;
-    totalCard += card;
-    totalAll += (Number(s.total) || 0);
-    if (card > 0) cardCount++;
-    if (cash > 0) cashCount++;
-  });
-
-  const cardSalesEl = document.getElementById("posSummaryCardSales");
-  if (cardSalesEl) cardSalesEl.innerText = totalCard.toFixed(2) + " ₺";
-
-  const cardCountEl = document.getElementById("posSummaryCardCount");
-  if (cardCountEl) cardCountEl.innerText = `${cardCount} işlemde kart çekildi`;
-
-  const cashSalesEl = document.getElementById("posSummaryCashSales");
-  if (cashSalesEl) cashSalesEl.innerText = totalCash.toFixed(2) + " ₺";
-
-  const cashCountEl = document.getElementById("posSummaryCashCount");
-  if (cashCountEl) cashCountEl.innerText = `${cashCount} işlemde nakit alındı`;
-
-  const totalSalesEl = document.getElementById("posSummaryTotalSales");
-  if (totalSalesEl) totalSalesEl.innerText = totalAll.toFixed(2) + " ₺";
-
-  const totalCountEl = document.getElementById("posSummaryTotalCount");
-  if (totalCountEl) totalCountEl.innerText = `Toplam ${todaySales.length} satış`;
-
-  // Legacy list fallback if element exists
-  const legacyContainer = document.getElementById("posRecentSalesList");
-  if (legacyContainer) {
-    legacyContainer.innerHTML = "";
-    if (todaySales.length === 0) {
-      legacyContainer.innerHTML = `<span class="text-sm text-muted">Bugün henüz satış yok.</span>`;
-    } else {
-      todaySales.forEach(s => {
-        legacyContainer.innerHTML += `
-          <div class="flex items-center justify-between" style="background:var(--bg); padding:6px 10px; border-radius:var(--radius-sm); border:1px solid var(--border); font-size:12px;">
-            <span><b>${s.time}</b> — ${s.customerName}: ${s.itemsSummary} (<b>${Number(s.total).toFixed(2)} ₺</b> · ${s.paymentType})</span>
-            <button class="btn btn-danger btn-xs" onclick="refundSale(${s.id})">↩️ İade</button>
-          </div>`;
-      });
-    }
-  }
-
-  if (!tableBody) return;
-  tableBody.innerHTML = "";
-
   if (todaySales.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:20px 10px;">Bugün henüz satış yapılmadı.</td></tr>`;
+    container.innerHTML = `<span class="text-sm text-muted">Bugün henüz satış yok.</span>`;
     return;
   }
 
   todaySales.forEach(s => {
-    let badgeStyle = "background:#f1f5f9; color:#334155; border:1px solid #cbd5e1;";
-    let badgeIcon = "💳";
-    const pType = (s.paymentType || "").toLowerCase();
-    if (pType.includes("nakit") && !pType.includes("parçalı")) {
-      badgeStyle = "background:#f0fdf4; color:#166534; border:1px solid #bbf7d0;";
-      badgeIcon = "💵";
-    } else if (pType.includes("kart") && !pType.includes("parçalı")) {
-      badgeStyle = "background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe;";
-      badgeIcon = "💳";
-    } else if (pType.includes("parçalı")) {
-      badgeStyle = "background:#faf5ff; color:#7e22ce; border:1px solid #e9d5ff;";
-      badgeIcon = "✂️";
-    }
+    const isOff = s.isOfficial !== undefined ? s.isOfficial : (!s.paymentType.includes("Veresiye"));
+    const officialBadge = isOff
+      ? `<span class="badge" style="font-size:10px; background:#f0fdf4; color:#166534; border:1px solid #bbf7d0;">🧾 Fişli</span>`
+      : `<span class="badge" style="font-size:10px; background:#fef2f2; color:#b91c1c; border:1px solid #fecaca;">📝 Fişsiz</span>`;
 
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td style="font-weight:600; color:#64748b;">${s.time || "-"}</td>
-      <td><span class="badge" style="font-size:11px; font-weight:600; ${badgeStyle}">${badgeIcon} ${s.paymentType}</span></td>
-      <td style="max-width:320px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${s.itemsSummary || ''}">${s.itemsSummary || '-'}</td>
-      <td style="text-align:right; font-weight:700; color:#0f172a;">${Number(s.total).toFixed(2)} ₺</td>
-      <td style="text-align:center;">
-        <button class="btn btn-danger btn-xs" style="padding:2px 6px; font-size:11px;" onclick="refundSale(${s.id})" title="Satışı İptal Et / İade Al">↩️ İade</button>
-      </td>
-    `;
-    tableBody.appendChild(tr);
+    container.innerHTML += `
+      <div class="flex items-center justify-between" style="background:var(--bg); padding:6px 10px; border-radius:var(--radius-sm); border:1px solid var(--border); font-size:12px;">
+        <span><b>${s.time}</b> — ${s.customerName}: ${s.itemsSummary} (<b>${s.total.toFixed(2)} ₺</b> · ${s.paymentType}${s.vatTotal ? ` · KDV: ${s.vatTotal.toFixed(2)} ₺` : ''}) ${officialBadge}</span>
+        <button class="btn btn-danger btn-xs" onclick="refundSale(${s.id})">↩️ İade</button>
+      </div>`;
   });
 }
 
@@ -447,7 +364,7 @@ function completeSplitSale() {
   const cash = Number(document.getElementById("splitCashInput").value) || 0;
   const card = Number(document.getElementById("splitCardInput").value) || 0;
   closeModal("splitModal");
-  completeSale("Parçalı", `${cash.toFixed(2)} ₺ Nakit + ${card.toFixed(2)} ₺ Kart`, { splitCash: cash, splitCard: card });
+  completeSale("Parçalı", `${cash.toFixed(2)} ₺ Nakit + ${card.toFixed(2)} ₺ Kart`);
 }
 
 // ── Veresiye (Charge to Credit) ──

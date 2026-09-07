@@ -395,34 +395,4 @@ function resetToDefaultCatalog() {
   }
 }
 
-// ── Helper to calculate Cash & Card portions of any sale ──
-function getSaleCashAndCard(sale) {
-  if (!sale) return { cash: 0, card: 0 };
-  let cash = 0;
-  let card = 0;
-  if (typeof sale.splitCash === "number" && typeof sale.splitCard === "number") {
-    cash = sale.splitCash;
-    card = sale.splitCard;
-  } else {
-    const pType = (sale.paymentType || "").toLowerCase();
-    if (pType.includes("nakit") && !pType.includes("parçalı")) {
-      cash = Number(sale.total) || 0;
-    } else if (pType.includes("kart") && !pType.includes("parçalı")) {
-      card = Number(sale.total) || 0;
-    } else if (pType.includes("parçalı")) {
-      const cashMatch = (sale.paymentType || "").match(/([\d.,]+)\s*₺\s*Nakit/i);
-      const cardMatch = (sale.paymentType || "").match(/([\d.,]+)\s*₺\s*Kart/i);
-      if (cashMatch && cardMatch) {
-        cash = parseFloat(cashMatch[1].replace(",", ".")) || 0;
-        card = parseFloat(cardMatch[1].replace(",", ".")) || 0;
-      } else {
-        card = Number(sale.total) || 0;
-      }
-    } else {
-      card = Number(sale.total) || 0;
-    }
-  }
-  return { cash, card };
-}
-
 
