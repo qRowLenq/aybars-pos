@@ -4,7 +4,7 @@ Modern esnaf ihtiyaçları ile bulut mimarisini harmanlayan, istemci tarafında 
 
 ## 🚀 Canlı Demo
 
-**[https://budakhuseyin.github.io/aybars/](https://budakhuseyin.github.io/aybars/)**
+**[https://qrowlenq.github.io/bluepetshop/](https://qrowlenq.github.io/bluepetshop/)**
 
 ## ✨ Özellikler
 
@@ -81,7 +81,7 @@ Modern esnaf ihtiyaçları ile bulut mimarisini harmanlayan, istemci tarafında 
 3. **Source** olarak `Deploy from a branch` seçin
 4. **Branch** olarak `main` ve `/ (root)` seçin
 5. **Save** butonuna basın
-6. Site birkaç dakika içinde GitHub Pages adresinizde (`https://qrowlenq.github.io/aybars-pos/` veya `https://budakhuseyin.github.io/aybars/`) yayına alınır.
+6. Site birkaç dakika içinde GitHub Pages adresinizde (`https://qrowlenq.github.io/bluepetshop/`) yayına alınır.
 
 ## 📞 İletişim
 
