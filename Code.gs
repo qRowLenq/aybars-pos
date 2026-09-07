@@ -819,15 +819,15 @@ function handleSyncTaxReport(ss, data) {
 }
 
 // ===================================================================
-// 6. GÜN SONU KASA MUTABAKATI (BEKLENEN KASA HESABI)
+// 6. GÜN SONU KASA MUTABAKATI & GELİR DÖKÜMÜ
 // ===================================================================
 
 function handleDailyClose(ss, data) {
   var sheetName = "Gün Sonu Kasa";
   var sheet = ss.getSheetByName(sheetName);
   var headers = [
-    "Tarih", "Kapanış Saati", "Günün Nakit Satışları (TL)",
-    "Günün Nakit Giderleri (TL)", "Beklenen Kasa (TL)", "Sayılan Nakit (TL)",
+    "Tarih", "Kapanış Saati", "Kredi Kartı (TL)", "Nakit Satış (TL)", "Havale / IBAN (TL)",
+    "Günlük Toplam Ciro (TL)", "Nakit Giderler (TL)", "Beklenen Kasa Nakdi (TL)", "Sayılan Kasa (TL)",
     "Kasa Farkı (TL)", "Mutabakat Durumu", "Açıklama / Not"
   ];
 
@@ -839,11 +839,21 @@ function handleDailyClose(ss, data) {
   } else if (sheet.getLastRow() === 0) {
     sheet.appendRow(headers);
     formatHeaderRow(sheet, headers.length);
+  } else {
+    // Sütun başlıkları eski formatta ise 12 sütunlu yeni formata güncelle
+    var firstRow = sheet.getRange(1, 1, 1, Math.min(sheet.getLastColumn(), headers.length)).getValues()[0];
+    if (firstRow.length < 12 || firstRow[2] !== "Kredi Kartı (TL)") {
+      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+      formatHeaderRow(sheet, headers.length);
+    }
   }
 
+  var cardSales = Number(data.cardSales || 0);
   var cashSales = Number(data.cashSales || 0);
+  var transferSales = Number(data.transferSales || 0);
+  var totalSales = Number(data.totalSales !== undefined ? data.totalSales : (cardSales + cashSales + transferSales));
   var cashExpenses = Number(data.cashExpenses || 0);
-  var expectedCash = Number(data.expectedCash !== undefined ? data.expectedCash : (cashSales - cashExpenses));
+  var expectedCash = Number(data.expectedCash !== undefined ? data.expectedCash : Math.max(0, cashSales - cashExpenses));
   var actualCash = Number(data.actualCash || 0);
   var diff = Number(data.difference !== undefined ? data.difference : (actualCash - expectedCash));
 
@@ -865,12 +875,15 @@ function handleDailyClose(ss, data) {
   var row = [
     data.date || getTodayFormatted(),
     data.time || getTimeFormatted(),
+    cardSales,
     cashSales,
+    transferSales,
+    totalSales,
     cashExpenses,
-    "=C" + targetRow + "-D" + targetRow,
+    expectedCash,
     actualCash,
-    "=F" + targetRow + "-E" + targetRow,
-    '=IF(ROUND(G' + targetRow + ',2)=0,"✅ Tam Mutabakat",IF(G' + targetRow + '>0,"📈 Kasa Fazlası","⚠️ Kasa Açığı"))',
+    "=I" + targetRow + "-H" + targetRow,
+    '=IF(ROUND(J' + targetRow + ',2)=0,"✅ Tam Mutabakat",IF(J' + targetRow + '>0,"📈 Kasa Fazlası","⚠️ Kasa Açığı"))',
     noteText
   ];
 
@@ -879,15 +892,16 @@ function handleDailyClose(ss, data) {
     .setVerticalAlignment("middle");
 
   sheet.getRange(targetRow, 1, 1, 2).setHorizontalAlignment("center");
-  sheet.getRange(targetRow, 3, 1, 5).setNumberFormat("₺#,##0.00").setFontWeight("bold").setHorizontalAlignment("right");
-  sheet.getRange(targetRow, 8).setHorizontalAlignment("center").setFontWeight("bold");
+  sheet.getRange(targetRow, 3, 1, 8).setNumberFormat("₺#,##0.00").setFontWeight("bold").setHorizontalAlignment("right");
+  sheet.getRange(targetRow, 6).setBackground("#f3e8ff").setFontColor("#6b21a8"); // Ciro sütunu vurgusu
+  sheet.getRange(targetRow, 11).setHorizontalAlignment("center").setFontWeight("bold");
 
   if (Math.abs(diff) < 0.01) {
-    sheet.getRange(targetRow, 8).setBackground("#dcfce7").setFontColor("#166534");
+    sheet.getRange(targetRow, 11).setBackground("#dcfce7").setFontColor("#166534");
   } else if (diff > 0) {
-    sheet.getRange(targetRow, 8).setBackground("#dbeafe").setFontColor("#1e40af");
+    sheet.getRange(targetRow, 11).setBackground("#dbeafe").setFontColor("#1e40af");
   } else {
-    sheet.getRange(targetRow, 8).setBackground("#fee2e2").setFontColor("#991b1b");
+    sheet.getRange(targetRow, 11).setBackground("#fee2e2").setFontColor("#991b1b");
   }
 
   sheet.setRowHeight(targetRow, 26);
