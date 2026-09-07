@@ -234,5 +234,11 @@ function updateCustomerDropdown() {
 }
 
 // ── Date/Time Helpers ──
-function nowDate() { return new Date().toLocaleDateString("tr-TR"); }
+function nowDate() {
+  const d = new Date();
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}.${month}.${year}`;
+}
 function nowTime() { return new Date().toLocaleTimeString("tr-TR", { hour: '2-digit', minute: '2-digit' }); }
