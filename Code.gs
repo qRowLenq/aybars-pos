@@ -81,6 +81,9 @@ function doPost(e) {
       case "save_sale":
       case "sale":
       case "sync_sale":
+      case "refund":
+      case "refund_sale":
+      case "sale_refund":
         handleSaveSale(ss, data);
         break;
 
@@ -235,8 +238,8 @@ function getOrCreateMonthlySalesSheet(ss, monthYearStr) {
   var mName = (parts[0] || "EYLÜL").toUpperCase();
   var yName = parts[1] || String(new Date().getFullYear());
 
-  // Büyük/küçük harf veya Türkçe karakter (Eylül vs EYLÜL) fark etmeksizin mevcut sekmeyi bul
   var sheet = null;
+  // 1. Önce hem GELİR hem Ay/Yıl içeren sekmeyi ara
   for (var i = 0; i < sheets.length; i++) {
     var sNameUpper = sheets[i].getName().toUpperCase();
     if ((sNameUpper.indexOf("GELİR") !== -1 || sNameUpper.indexOf("GELIR") !== -1) &&
@@ -244,6 +247,29 @@ function getOrCreateMonthlySalesSheet(ss, monthYearStr) {
         sNameUpper.indexOf(yName) !== -1) {
       sheet = sheets[i];
       break;
+    }
+  }
+
+  // 2. Bulunamazsa sadece Ay içeren GELİR sekmesini ara
+  if (!sheet) {
+    for (var i = 0; i < sheets.length; i++) {
+      var sNameUpper = sheets[i].getName().toUpperCase();
+      if ((sNameUpper.indexOf("GELİR") !== -1 || sNameUpper.indexOf("GELIR") !== -1) &&
+          (sNameUpper.indexOf(mName) !== -1 || sNameUpper.indexOf("EYLÜL") !== -1 || sNameUpper.indexOf("EYLUL") !== -1)) {
+        sheet = sheets[i];
+        break;
+      }
+    }
+  }
+
+  // 3. Bulunamazsa ismi doğrudan "GELİR" veya "GELIR" olan veya içinde geçen ilk sekmeyi al
+  if (!sheet) {
+    for (var i = 0; i < sheets.length; i++) {
+      var sNameUpper = sheets[i].getName().toUpperCase().trim();
+      if (sNameUpper === "GELİR" || sNameUpper === "GELIR" || sNameUpper.indexOf("GELİR") !== -1 || sNameUpper.indexOf("GELIR") !== -1) {
+        sheet = sheets[i];
+        break;
+      }
     }
   }
 
@@ -438,6 +464,7 @@ function handleSaveSale(ss, data) {
 
   var colLetter = getColumnLetter(targetCol);
   sheet.getRange(5, targetCol).setFormula("=SUM(" + colLetter + "6:" + colLetter + "9)");
+  SpreadsheetApp.flush();
 
   if (data.officialSales !== undefined || data.taxBase !== undefined) {
     handleSyncTaxReport(ss, data);
