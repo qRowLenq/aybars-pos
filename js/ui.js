@@ -19,7 +19,9 @@ function switchTab(tabId) {
 
   const fab = document.getElementById("mobileCartFab");
   if (fab) {
-    fab.style.display = (tabId === "pos" && window.cart && window.cart.length > 0) ? "inline-flex" : "none";
+    const shouldShow = (tabId === "pos" && window.cart && window.cart.length > 0 && window.innerWidth <= 992);
+    fab.classList.toggle("is-mobile-active", shouldShow);
+    fab.style.display = shouldShow ? "inline-flex" : "none";
   }
 
   if (tabId === "pos") {

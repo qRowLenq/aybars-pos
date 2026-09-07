@@ -210,11 +210,13 @@ function renderCart() {
 
   const fab = document.getElementById("mobileCartFab");
   if (fab) {
-    if (cart.length > 0) {
+    if (cart.length > 0 && window.innerWidth <= 992) {
+      fab.classList.add("is-mobile-active");
       fab.style.display = "inline-flex";
       const fabTotal = document.getElementById("mobileFabTotal");
       if (fabTotal) fabTotal.innerText = total.toFixed(2) + " ₺";
     } else {
+      fab.classList.remove("is-mobile-active");
       fab.style.display = "none";
     }
   }

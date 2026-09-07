@@ -1856,11 +1856,19 @@ textarea.fc { resize: vertical; min-height: 60px; }
 
 /* ─── MOBILE QUICK CART FLOATING ACTION BUTTON ─── */
 .mobile-cart-fab {
-  display: none;
+  display: none !important;
+}
+@media (min-width: 993px) {
+  #mobileCartFab,
+  .mobile-cart-fab {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
 }
 @media (max-width: 992px) {
-  .mobile-cart-fab {
-    display: inline-flex;
+  .mobile-cart-fab.is-mobile-active {
+    display: inline-flex !important;
     align-items: center;
     justify-content: center;
     gap: 8px;
@@ -1880,10 +1888,10 @@ textarea.fc { resize: vertical; min-height: 60px; }
     transition: transform var(--duration) var(--ease);
     animation: bounceIn 0.3s var(--ease);
   }
-  .mobile-cart-fab:hover {
+  .mobile-cart-fab.is-mobile-active:hover {
     transform: scale(1.04);
   }
-  .mobile-cart-fab:active {
+  .mobile-cart-fab.is-mobile-active:active {
     transform: scale(0.96);
   }
 }
