@@ -94,12 +94,19 @@ function switchProcSubtab(subId) {
 // ── Modals ──
 function openModal(id) {
   const el = document.getElementById(id);
-  if (el) el.classList.add("show");
+  if (el) {
+    el.classList.add("show");
+  }
 }
 function closeModal(id) {
   const el = document.getElementById(id);
-  if (el) el.classList.remove("show");
+  if (el) {
+    el.classList.remove("show");
+  }
 }
+
+window.openModal = openModal;
+window.closeModal = closeModal;
 
 // ── Toast Notifications ──
 function toast(msg, type = "success", duration = 3000) {
@@ -120,15 +127,17 @@ function toast(msg, type = "success", duration = 3000) {
 function updateAllBadges() {
   const el = (id, val) => { const e = document.getElementById(id); if (e) e.innerText = val; };
 
-  el("pendingOrdersCount", orders.length);
-  el("ordersPendingBadge", orders.length);
-  el("platformPendingBadge", platformPendingOrders.length);
-  el("holdCountBadge", heldCarts.length);
+  el("pendingOrdersCount", (window.orders || orders || []).length);
+  el("ordersPendingBadge", (window.orders || orders || []).length);
+  el("platformPendingBadge", (window.platformPendingOrders || platformPendingOrders || []).length);
+  el("holdCountBadge", (window.heldCarts || heldCarts || []).length);
 
-  const creditTotal = customers.reduce((s, c) => s + (c.balance || 0), 0);
+  const custs = window.customers || customers || [];
+  const creditTotal = custs.reduce((s, c) => s + (c.balance || 0), 0);
   el("creditTotalBadge", creditTotal.toFixed(2) + " TL");
 
-  const supplierDebt = suppliers.reduce((s, sup) => s + (sup.balance || 0), 0);
+  const sups = window.suppliers || suppliers || [];
+  const supplierDebt = sups.reduce((s, sup) => s + (sup.balance || 0), 0);
   el("supplierDebtBadge", supplierDebt.toFixed(2) + " TL");
 
   if (typeof renderDualFinancialOverviewCard === "function") {
@@ -140,46 +149,64 @@ function updateAllBadges() {
 
 // ── Populate Datalists ──
 function populateAllProductDatalists() {
-  const rawProds = (window.products || []).filter(p => !p.isBundle);
-  const escapeAttr = s => String(s || "").replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  
-  const opts = rawProds.map(p => {
-    const safeName = escapeAttr(p.name);
-    const details = [p.barcode ? `Barkod: ${p.barcode}` : '', p.category ? `[${p.category}]` : '', `Stok: ${p.stock || 0}`].filter(Boolean).join(" · ");
-    return `<option value="${safeName}">${escapeAttr(details)}</option>`;
-  }).join("");
+  try {
+    const rawProds = (window.products || products || []).filter(p => p && !p.isBundle);
+    const escapeAttr = s => String(s || "").replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    
+    const opts = rawProds.map(p => {
+      const safeName = escapeAttr(p.name);
+      const details = [p.barcode ? `Barkod: ${p.barcode}` : '', p.category ? `[${p.category}]` : '', `Stok: ${p.stock || 0}`].filter(Boolean).join(" · ");
+      return `<option value="${safeName}">${escapeAttr(details)}</option>`;
+    }).join("");
 
-  ["existingProductsSearchList", "bundleProductsSearchList", "wasteProductsSearchList", "existingProductsForDeficitList", "existingProductsList"]
-    .forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = opts; });
+    ["existingProductsSearchList", "bundleProductsSearchList", "wasteProductsSearchList", "existingProductsForDeficitList", "existingProductsList"]
+      .forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = opts; });
+  } catch (e) {
+    console.error("populateAllProductDatalists error:", e);
+  }
 }
 
 function populateCategoryDropdowns() {
-  const invSel = document.getElementById("invCatFilter");
-  if (invSel) {
-    const prev = invSel.value || "TÜMÜ";
-    invSel.innerHTML = `<option value="TÜMÜ">Tüm Kategoriler</option>` + categories.map(c => `<option value="${c}">${c}</option>`).join("");
-    if ([...invSel.options].some(o => o.value === prev)) {
-      invSel.value = prev;
+  try {
+    let catList = Array.isArray(window.categories) ? window.categories : (typeof categories !== "undefined" && Array.isArray(categories) ? categories : []);
+    if (!catList || catList.length === 0) {
+      catList = ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum / Kozmetik", "Kampanyalar"];
     }
-  }
 
-  const npSel = document.getElementById("npCategory");
-  if (npSel) {
-    const prevNp = npSel.value;
-    npSel.innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join("");
-    if (prevNp && [...npSel.options].some(o => o.value === prevNp)) {
-      npSel.value = prevNp;
+    const invSel = document.getElementById("invCatFilter");
+    if (invSel) {
+      const prev = invSel.value || "TÜMÜ";
+      invSel.innerHTML = `<option value="TÜMÜ">Tüm Kategoriler</option>` + catList.map(c => `<option value="${c}">${c}</option>`).join("");
+      if ([...invSel.options].some(o => o.value === prev)) {
+        invSel.value = prev;
+      }
     }
+
+    const npSel = document.getElementById("npCategory");
+    if (npSel) {
+      const prevNp = npSel.value;
+      npSel.innerHTML = catList.map(c => `<option value="${c}">${c}</option>`).join("");
+      if (prevNp && [...npSel.options].some(o => o.value === prevNp)) {
+        npSel.value = prevNp;
+      }
+    }
+  } catch (e) {
+    console.error("populateCategoryDropdowns error:", e);
   }
 }
 
 function populateSupplierDropdowns() {
-  const opts = `<option value="-">Seçilmedi</option>` + suppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join("");
-  const pSel = document.getElementById("npSupplierSelect");
-  if (pSel) pSel.innerHTML = opts;
+  try {
+    const sups = Array.isArray(window.suppliers) ? window.suppliers : (typeof suppliers !== "undefined" && Array.isArray(suppliers) ? suppliers : []);
+    const opts = `<option value="-">Seçilmedi</option>` + sups.filter(s => s && s.name).map(s => `<option value="${s.name}">${s.name}</option>`).join("");
+    const pSel = document.getElementById("npSupplierSelect");
+    if (pSel) pSel.innerHTML = opts;
 
-  const iSel = document.getElementById("intakeSupSelect");
-  if (iSel) iSel.innerHTML = suppliers.map(s => `<option value="${s.name}">${s.name}</option>`).join("");
+    const iSel = document.getElementById("intakeSupSelect");
+    if (iSel) iSel.innerHTML = sups.filter(s => s && s.name).map(s => `<option value="${s.name}">${s.name}</option>`).join("");
+  } catch (e) {
+    console.error("populateSupplierDropdowns error:", e);
+  }
 }
 
 function updateCustomerDropdown() {

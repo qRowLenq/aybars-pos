@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <title>🐾 Petshop Kasa Sistemi</title>
-  <link rel="stylesheet" href="css/styles.css?v=20260907_6">
+  <link rel="stylesheet" href="css/styles.css?v=20260907_7">
 </head>
 <body>
 
@@ -50,9 +50,10 @@
     <!-- 1. KASA (POS) -->
     <section id="tab-pos" class="tab-pane active pos-container">
       <div class="catalog-area">
-        <div class="catalog-toolbar">
+        <div class="catalog-toolbar flex gap-2 items-center">
           <input type="text" id="catalogSearch" class="search-input" placeholder="🔍 Barkod okut veya ürün ara..." oninput="renderCatalog()">
           <div id="categoryFilterBar" class="category-bar flex-1"></div>
+          <button class="btn btn-primary btn-sm" onclick="openAddProductModal()" style="white-space:nowrap;">+ Yeni Ürün</button>
         </div>
         <div id="productGrid" class="product-grid"></div>
 
@@ -264,6 +265,7 @@
           </div>
 
           <div class="flex items-center gap-2 flex-wrap">
+            <button class="btn btn-primary btn-sm" onclick="openAddProductModal()">+ Yeni Ürün Ekle</button>
             <button class="btn btn-outline btn-sm" onclick="bulkSetDefaultStock()" title="Stoğu 0 olan ürünlere toplu adet ata">📦 Toplu Stok Ata</button>
             <button class="btn btn-outline btn-sm" onclick="bulkApplyMargin()" title="Alış fiyatına göre kâr marjı ile satış fiyatı hesapla">⚡ Toplu Kâr Ekle</button>
             <button class="btn btn-success btn-sm" onclick="saveQuickPricingAll()">💾 Tümünü Kaydet</button>
@@ -1196,15 +1198,15 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/products_catalog.js?v=20260907_6"></script>
-  <script src="js/state.js?v=20260907_6"></script>
-  <script src="js/ui.js?v=20260907_6"></script>
-  <script src="js/pos.js?v=20260907_6"></script>
-  <script src="js/orders.js?v=20260907_6"></script>
-  <script src="js/inventory.js?v=20260907_6"></script>
-  <script src="js/crm.js?v=20260907_6"></script>
-  <script src="js/procurement.js?v=20260907_6"></script>
-  <script src="js/expenses.js?v=20260907_6"></script>
-  <script src="js/app.js?v=20260907_6"></script>
+  <script src="js/products_catalog.js?v=20260907_7"></script>
+  <script src="js/state.js?v=20260907_7"></script>
+  <script src="js/ui.js?v=20260907_7"></script>
+  <script src="js/pos.js?v=20260907_7"></script>
+  <script src="js/orders.js?v=20260907_7"></script>
+  <script src="js/inventory.js?v=20260907_7"></script>
+  <script src="js/crm.js?v=20260907_7"></script>
+  <script src="js/procurement.js?v=20260907_7"></script>
+  <script src="js/expenses.js?v=20260907_7"></script>
+  <script src="js/app.js?v=20260907_7"></script>
 </body>
 </html>

@@ -4,93 +4,163 @@
 
 // ── Add/Edit Product Modal ──
 function openAddProductModal(preSelectedSupplier = null) {
-  populateCategoryDropdowns();
-  populateSupplierDropdowns();
-  populateAllProductDatalists();
+  try {
+    if (typeof populateCategoryDropdowns === "function") populateCategoryDropdowns();
+    if (typeof populateSupplierDropdowns === "function") populateSupplierDropdowns();
+    if (typeof populateAllProductDatalists === "function") populateAllProductDatalists();
 
-  document.getElementById("quickProductSearch").value = "";
-  document.getElementById("npName").value = "";
-  document.getElementById("npPrice").value = "";
-  document.getElementById("npCost").value = "";
-  document.getElementById("npStock").value = "10";
-  const vatEl = document.getElementById("npVatRate");
-  if (vatEl) vatEl.value = "20";
+    const qSearch = document.getElementById("quickProductSearch");
+    if (qSearch) qSearch.value = "";
+    const npName = document.getElementById("npName");
+    if (npName) npName.value = "";
+    const npPrice = document.getElementById("npPrice");
+    if (npPrice) npPrice.value = "";
+    const npCost = document.getElementById("npCost");
+    if (npCost) npCost.value = "";
+    const npStock = document.getElementById("npStock");
+    if (npStock) npStock.value = "10";
+    const vatEl = document.getElementById("npVatRate");
+    if (vatEl) vatEl.value = "20";
 
-  const titleEl = document.getElementById("addProductModalTitle");
-  if (preSelectedSupplier) {
-    titleEl.innerText = `+ "${preSelectedSupplier}" İçin Ürün Ekle`;
-    document.getElementById("npSupplierSelect").value = preSelectedSupplier;
-  } else {
-    titleEl.innerText = "+ Yeni Ürün Tanımla";
+    const titleEl = document.getElementById("addProductModalTitle");
+    if (titleEl) {
+      if (preSelectedSupplier) {
+        titleEl.innerText = `+ "${preSelectedSupplier}" İçin Ürün Ekle`;
+      } else {
+        titleEl.innerText = "+ Yeni Ürün Tanımla";
+      }
+    }
+    const supSelect = document.getElementById("npSupplierSelect");
+    if (supSelect && preSelectedSupplier) {
+      supSelect.value = preSelectedSupplier;
+    }
+  } catch (err) {
+    console.error("openAddProductModal error:", err);
   }
   openModal("addProductModal");
 }
 
 function openEditProductModal(id) {
-  const p = products.find(prod => prod.id === id);
-  if (!p) return;
-  populateCategoryDropdowns();
-  populateSupplierDropdowns();
-  populateAllProductDatalists();
+  try {
+    const pList = window.products || products || [];
+    const p = pList.find(prod => Number(prod.id) === Number(id));
+    if (!p) return toast("Ürün bulunamadı!", "error");
 
-  document.getElementById("quickProductSearch").value = "";
-  document.getElementById("npName").value = p.name || "";
-  document.getElementById("npCategory").value = p.category || categories[0];
-  document.getElementById("npPrice").value = p.price > 0 ? p.price : "";
-  document.getElementById("npCost").value = p.cost > 0 ? p.cost : "";
-  document.getElementById("npStock").value = p.stock !== undefined ? p.stock : 0;
-  const vatEl = document.getElementById("npVatRate");
-  if (vatEl) vatEl.value = String(p.vatRate !== undefined ? p.vatRate : 20);
-  if (p.supplier && p.supplier !== "-") document.getElementById("npSupplierSelect").value = p.supplier;
+    if (typeof populateCategoryDropdowns === "function") populateCategoryDropdowns();
+    if (typeof populateSupplierDropdowns === "function") populateSupplierDropdowns();
+    if (typeof populateAllProductDatalists === "function") populateAllProductDatalists();
 
-  const titleEl = document.getElementById("addProductModalTitle");
-  if (titleEl) titleEl.innerText = `✏️ Ürünü Düzenle: ${p.name}`;
+    const qSearch = document.getElementById("quickProductSearch");
+    if (qSearch) qSearch.value = "";
+    const npName = document.getElementById("npName");
+    if (npName) npName.value = p.name || "";
+    const npCat = document.getElementById("npCategory");
+    if (npCat) npCat.value = p.category || (categories && categories[0]) || "Genel";
+    const npPrice = document.getElementById("npPrice");
+    if (npPrice) npPrice.value = p.price > 0 ? p.price : "";
+    const npCost = document.getElementById("npCost");
+    if (npCost) npCost.value = p.cost > 0 ? p.cost : "";
+    const npStock = document.getElementById("npStock");
+    if (npStock) npStock.value = p.stock !== undefined ? p.stock : 0;
+    const vatEl = document.getElementById("npVatRate");
+    if (vatEl) vatEl.value = String(p.vatRate !== undefined ? p.vatRate : 20);
+    const supSelect = document.getElementById("npSupplierSelect");
+    if (supSelect && p.supplier && p.supplier !== "-") supSelect.value = p.supplier;
+
+    const titleEl = document.getElementById("addProductModalTitle");
+    if (titleEl) titleEl.innerText = `✏️ Ürünü Düzenle: ${p.name}`;
+  } catch (err) {
+    console.error("openEditProductModal error:", err);
+  }
   openModal("addProductModal");
 }
 
 function handleAutoFillExistingProduct(val) {
   if (!val) return;
-  const p = (typeof findMatchingProduct === "function") ? findMatchingProduct(val) : products.find(prod => prod.name.toLowerCase() === val.trim().toLowerCase());
+  const pList = window.products || products || [];
+  const p = (typeof findMatchingProduct === "function") ? findMatchingProduct(val) : pList.find(prod => prod && prod.name && prod.name.toLowerCase() === val.trim().toLowerCase());
   if (p) {
-    document.getElementById("npName").value = p.name;
-    document.getElementById("npCategory").value = p.category || categories[0];
-    document.getElementById("npPrice").value = p.price || "";
-    document.getElementById("npCost").value = p.cost || "";
-    document.getElementById("npStock").value = p.stock || 10;
+    const npName = document.getElementById("npName");
+    if (npName) npName.value = p.name || "";
+    const npCat = document.getElementById("npCategory");
+    if (npCat) npCat.value = p.category || (categories && categories[0]) || "Genel";
+    const npPrice = document.getElementById("npPrice");
+    if (npPrice) npPrice.value = p.price || "";
+    const npCost = document.getElementById("npCost");
+    if (npCost) npCost.value = p.cost || "";
+    const npStock = document.getElementById("npStock");
+    if (npStock) npStock.value = p.stock || 10;
     const vatEl = document.getElementById("npVatRate");
     if (vatEl) vatEl.value = String(p.vatRate !== undefined ? p.vatRate : 20);
-    if (p.supplier && p.supplier !== "-") document.getElementById("npSupplierSelect").value = p.supplier;
+    const supSelect = document.getElementById("npSupplierSelect");
+    if (supSelect && p.supplier && p.supplier !== "-") supSelect.value = p.supplier;
   }
 }
 
 function saveNewProduct() {
-  const name = document.getElementById("npName").value.trim();
-  const price = Number(document.getElementById("npPrice").value) || 0;
-  let cat = document.getElementById("npCategory").value;
-  let sup = document.getElementById("npSupplierSelect").value;
-  const stock = Number(document.getElementById("npStock").value) || 0;
-  const cost = Number(document.getElementById("npCost").value) || 0;
-  const vatRate = Number(document.getElementById("npVatRate")?.value) || 20;
+  try {
+    const nameEl = document.getElementById("npName");
+    const name = nameEl ? nameEl.value.trim() : "";
+    const priceEl = document.getElementById("npPrice");
+    const price = priceEl ? (Number(priceEl.value) || 0) : 0;
+    const catEl = document.getElementById("npCategory");
+    let cat = catEl ? catEl.value : "Genel";
+    const supEl = document.getElementById("npSupplierSelect");
+    let sup = supEl ? supEl.value : "-";
+    const stockEl = document.getElementById("npStock");
+    const stock = stockEl ? (Number(stockEl.value) || 0) : 0;
+    const costEl = document.getElementById("npCost");
+    const cost = costEl ? (Number(costEl.value) || 0) : 0;
+    const vatEl = document.getElementById("npVatRate");
+    const vatRate = vatEl ? (Number(vatEl.value) || 20) : 20;
 
-  if (!name) return toast("Lütfen ürün adını yazın!", "error");
-  if (!cat) cat = categories[0] || "Genel";
+    if (!name) return toast("Lütfen ürün adını yazın!", "error");
+    if (!cat) cat = (categories && categories[0]) || "Genel";
 
-  let existing = products.find(p => p.name.toLowerCase() === name.toLowerCase());
-  if (existing) {
-    existing.price = price; existing.cost = cost; existing.stock = stock;
-    existing.category = cat; existing.supplier = sup || "-";
-    existing.vatRate = vatRate;
-    toast(`✅ "${name}" güncellendi!`);
-  } else {
-    products.push({ id: Date.now(), name, category: cat, price, cost, stock, supplier: sup || "-", vatRate, batches: [] });
-    toast(`✅ "${name}" stoğa eklendi!`);
+    let pList = window.products || products || [];
+    let existing = pList.find(p => p && p.name && p.name.toLowerCase() === name.toLowerCase());
+    if (existing) {
+      existing.price = price;
+      existing.cost = cost;
+      existing.stock = stock;
+      existing.category = cat;
+      existing.supplier = sup || "-";
+      existing.vatRate = vatRate;
+      toast(`✅ "${name}" güncellendi!`);
+    } else {
+      const newProd = {
+        id: Date.now(),
+        name,
+        category: cat,
+        price,
+        cost,
+        stock,
+        supplier: sup || "-",
+        vatRate,
+        batches: []
+      };
+      pList.unshift(newProd); // En başa ekle
+      window.products = pList;
+      products = pList;
+      toast(`✅ "${name}" stoğa eklendi!`);
+    }
+
+    saveData();
+    closeModal("addProductModal");
+    if (typeof renderCatalog === "function") renderCatalog();
+    if (typeof renderInventoryTable === "function") renderInventoryTable();
+    if (typeof renderQuickPricingTable === "function") renderQuickPricingTable();
+    if (typeof populateAllProductDatalists === "function") populateAllProductDatalists();
+  } catch (err) {
+    console.error("saveNewProduct error:", err);
+    toast("Kaydedilirken hata oluştu!", "error");
   }
-
-  saveData(); closeModal("addProductModal");
-  renderCatalog(); renderInventoryTable();
-  if (typeof renderQuickPricingTable === "function") renderQuickPricingTable();
-  populateAllProductDatalists();
 }
+
+window.openAddProductModal = openAddProductModal;
+window.openEditProductModal = openEditProductModal;
+window.handleAutoFillExistingProduct = handleAutoFillExistingProduct;
+window.saveNewProduct = saveNewProduct;
 
 // ── SKT (FIFO Expiry) Radar Calculation Engine ──
 function getDaysUntilExpiry(expiryStr) {
