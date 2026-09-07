@@ -124,6 +124,22 @@ function exportData() {
   toast("💾 Yedek başarıyla indirildi!");
 }
 
+function downloadAybars222Backup() {
+  try {
+    const a = document.createElement("a");
+    a.href = "aybars_yedek_222_urun.json";
+    a.download = "aybars_yedek_222_urun.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    toast("📥 222 Ürünlük yedek dosyası indiriliyor!");
+  } catch (err) {
+    console.error("downloadAybars222Backup error:", err);
+    window.open("aybars_yedek_222_urun.json", "_blank");
+  }
+}
+window.downloadAybars222Backup = downloadAybars222Backup;
+
 function importData(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -132,26 +148,43 @@ function importData(event) {
   reader.onload = e => {
     try {
       const data = JSON.parse(e.target.result);
-      if (data.categories) categories = data.categories;
-      if (data.products) products = data.products;
-      if (data.customers) customers = data.customers;
-      if (data.orders) orders = data.orders;
-      if (data.platformPendingOrders) platformPendingOrders = data.platformPendingOrders;
-      if (data.deliveredOrders) deliveredOrders = data.deliveredOrders;
-      if (data.salesHistory) salesHistory = data.salesHistory;
-      if (data.expenses) expenses = data.expenses;
-      if (data.manualDeficits) manualDeficits = data.manualDeficits;
-      if (data.suppliers) suppliers = data.suppliers;
-      if (data.heldCarts) heldCarts = data.heldCarts;
-      if (data.bundles) bundles = data.bundles;
-      if (data.wasteRecords) wasteRecords = data.wasteRecords;
+      if (Array.isArray(data.categories) && data.categories.length > 0) {
+        categories = data.categories;
+        window.categories = data.categories;
+      }
+      if (Array.isArray(data.products) && data.products.length > 0) {
+        // Her ürüne en az 1 stok garantisi ver
+        data.products.forEach(p => {
+          if (p.stock === undefined || p.stock === null || Number(p.stock) <= 0) p.stock = 1;
+          else p.stock = Number(p.stock);
+          if (p.cost === undefined) p.cost = 0;
+          if (p.price === undefined) p.price = 0;
+          if (p.vatRate === undefined) p.vatRate = 20;
+          if (!Array.isArray(p.batches)) p.batches = [];
+        });
+        products = data.products;
+        window.products = data.products;
+      }
+      if (data.customers) { customers = data.customers; window.customers = data.customers; }
+      if (data.orders) { orders = data.orders; window.orders = data.orders; }
+      if (data.platformPendingOrders) { platformPendingOrders = data.platformPendingOrders; window.platformPendingOrders = data.platformPendingOrders; }
+      if (data.deliveredOrders) { deliveredOrders = data.deliveredOrders; window.deliveredOrders = data.deliveredOrders; }
+      if (data.salesHistory) { salesHistory = data.salesHistory; window.salesHistory = data.salesHistory; }
+      if (data.expenses) { expenses = data.expenses; window.expenses = data.expenses; }
+      if (data.manualDeficits) { manualDeficits = data.manualDeficits; window.manualDeficits = data.manualDeficits; }
+      if (data.suppliers) { suppliers = data.suppliers; window.suppliers = data.suppliers; }
+      if (data.heldCarts) { heldCarts = data.heldCarts; window.heldCarts = data.heldCarts; }
+      if (data.bundles) { bundles = data.bundles; window.bundles = data.bundles; }
+      if (data.wasteRecords) { wasteRecords = data.wasteRecords; window.wasteRecords = data.wasteRecords; }
       
       saveData();
       initializeApp();
-      toast("📥 Yedek başarıyla yüklendi!");
+      toast(`📥 Yedek başarıyla yüklendi! (${products.length} ürün)`, "success");
+      event.target.value = "";
     } catch(err) {
-      toast("Hatalı yedek dosyası!", "error");
-      console.error(err);
+      toast("Hatalı yedek dosyası! Lütfen geçerli bir JSON dosyası seçin.", "error");
+      console.error("importData error:", err);
+      event.target.value = "";
     }
   };
   reader.readAsText(file);

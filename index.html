@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <title>🐾 Petshop Kasa Sistemi</title>
-  <link rel="stylesheet" href="css/styles.css?v=20260907_7">
+  <link rel="stylesheet" href="css/styles.css?v=20260907_8">
 </head>
 <body>
 
@@ -37,10 +37,12 @@
     <div class="header-actions">
       <button class="btn btn-warning btn-sm" onclick="openDailyCloseModal()">🏁 Gün Sonu</button>
       <button class="btn btn-ghost btn-sm" onclick="exportData()">💾 Yedek Al</button>
-      <label class="btn btn-ghost btn-sm" style="cursor:pointer; margin:0;">
+      <label class="btn btn-ghost btn-sm" style="cursor:pointer; margin:0;" title="İndirdiğiniz veya mevcut yedek JSON dosyasını sisteme yükleyin">
         📥 Yükle <input type="file" style="display:none;" accept=".json" onchange="importData(event)">
       </label>
-      <button class="btn btn-outline btn-sm" onclick="forceReload222Products()" title="Önbelleği temizleyip 222 ürünü zorla yükler" style="border-color:rgba(255,255,255,0.25); color:#cbd5e1;">🔄 222 Ürünü Yenile</button>
+      <button class="btn btn-outline btn-sm" onclick="downloadAybars222Backup()" title="222 Ürünün hazır JSON yedek dosyasını bilgisayarınıza veya telefonunuza indirir. 'Yükle' seçeneğinden yükleyebilirsiniz." style="border-color:rgba(255,255,255,0.3); color:#f8fafc; font-weight:600;">
+        📥 222 Ürün Dosyasını İndir
+      </button>
     </div>
   </header>
 
@@ -183,7 +185,6 @@
           <select id="invCatFilter" class="fc" style="width:200px;" onchange="renderInventoryTable()"></select>
           <button class="btn btn-primary" onclick="openAddProductModal()">+ Yeni Ürün Ekle</button>
           <button class="btn btn-warning" onclick="switchInvSubtab('quick-pricing'); if (window.renderQuickPricingTable) window.renderQuickPricingTable();">⚡ Toplu / Hızlı Düzenle</button>
-          <button class="btn btn-ghost btn-xs text-muted" onclick="resetToDefaultCatalog()" title="Kataloğu 222 ürünlük varsayılana sıfırla">🔄 Kataloğu Sıfırla</button>
         </div>
         <table class="data-table">
           <thead><tr><th>Ürün Adı</th><th>Kategori</th><th>Tedarikçi</th><th>Alış Maliyeti</th><th>Satış Fiyatı</th><th>KDV</th><th>Kâr Marjı</th><th>Stok</th><th>İşlemler</th></tr></thead>
@@ -253,14 +254,16 @@
         <div class="quick-pricing-toolbar flex justify-between items-center gap-2 mb-3 flex-wrap">
           <div class="flex items-center gap-2 flex-wrap">
             <input type="text" id="qpSearchInput" class="search-input" placeholder="🔍 Ürün Ara (örn: Felicia, Canin, Kum)..." oninput="renderQuickPricingTable()">
-            <select id="qpCategoryFilter" class="fc" style="width:180px;" onchange="renderQuickPricingTable()"></select>
+            <select id="qpCategoryFilter" class="fc" style="width:180px;" onchange="renderQuickPricingTable()">
+              <option value="TÜMÜ">Tüm Kategoriler (222)</option>
+            </select>
             
             <div class="qp-filter-chips flex gap-1">
-              <button class="btn btn-xs btn-ghost active qp-filter-btn" data-filter="all" onclick="setQpFilter('all')">Tümü</button>
-              <button class="btn btn-xs btn-ghost qp-filter-btn" data-filter="missing-price" onclick="setQpFilter('missing-price')">Fiyatı Eksikler</button>
-              <button class="btn btn-xs btn-ghost qp-filter-btn" data-filter="missing-cost" onclick="setQpFilter('missing-cost')">Maliyeti Eksikler</button>
-              <button class="btn btn-xs btn-ghost qp-filter-btn" data-filter="zero-stock" onclick="setQpFilter('zero-stock')">Stoğu 0 Olanlar</button>
-              <button class="btn btn-xs btn-ghost qp-filter-btn" data-filter="ready" onclick="setQpFilter('ready')">Tamamlananlar</button>
+              <button class="btn btn-xs qp-filter-btn active" data-filter="all" onclick="setQpFilter('all')">Tümü</button>
+              <button class="btn btn-xs qp-filter-btn" data-filter="missing-price" onclick="setQpFilter('missing-price')">Fiyatı Eksikler</button>
+              <button class="btn btn-xs qp-filter-btn" data-filter="missing-cost" onclick="setQpFilter('missing-cost')">Maliyeti Eksikler</button>
+              <button class="btn btn-xs qp-filter-btn" data-filter="zero-stock" onclick="setQpFilter('zero-stock')">Stoğu 0 Olanlar</button>
+              <button class="btn btn-xs qp-filter-btn" data-filter="ready" onclick="setQpFilter('ready')">Tamamlananlar</button>
             </div>
           </div>
 
@@ -269,7 +272,6 @@
             <button class="btn btn-outline btn-sm" onclick="bulkSetDefaultStock()" title="Stoğu 0 olan ürünlere toplu adet ata">📦 Toplu Stok Ata</button>
             <button class="btn btn-outline btn-sm" onclick="bulkApplyMargin()" title="Alış fiyatına göre kâr marjı ile satış fiyatı hesapla">⚡ Toplu Kâr Ekle</button>
             <button class="btn btn-success btn-sm" onclick="saveQuickPricingAll()">💾 Tümünü Kaydet</button>
-            <button class="btn btn-warning btn-sm" onclick="resetToDefaultCatalog()" title="222 Ürünü Yeniden Yükle">🔄 222 Ürünü Yeniden Yükle</button>
           </div>
         </div>
 
@@ -1198,15 +1200,15 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/products_catalog.js?v=20260907_7"></script>
-  <script src="js/state.js?v=20260907_7"></script>
-  <script src="js/ui.js?v=20260907_7"></script>
-  <script src="js/pos.js?v=20260907_7"></script>
-  <script src="js/orders.js?v=20260907_7"></script>
-  <script src="js/inventory.js?v=20260907_7"></script>
-  <script src="js/crm.js?v=20260907_7"></script>
-  <script src="js/procurement.js?v=20260907_7"></script>
-  <script src="js/expenses.js?v=20260907_7"></script>
-  <script src="js/app.js?v=20260907_7"></script>
+  <script src="js/products_catalog.js?v=20260907_8"></script>
+  <script src="js/state.js?v=20260907_8"></script>
+  <script src="js/ui.js?v=20260907_8"></script>
+  <script src="js/pos.js?v=20260907_8"></script>
+  <script src="js/orders.js?v=20260907_8"></script>
+  <script src="js/inventory.js?v=20260907_8"></script>
+  <script src="js/crm.js?v=20260907_8"></script>
+  <script src="js/procurement.js?v=20260907_8"></script>
+  <script src="js/expenses.js?v=20260907_8"></script>
+  <script src="js/app.js?v=20260907_8"></script>
 </body>
 </html>

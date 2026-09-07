@@ -316,7 +316,8 @@ function renderInventoryTable() {
   if (!tbody) return;
   tbody.innerHTML = "";
 
-  const filtered = products.filter(p => {
+  const pList = window.products || products || [];
+  const filtered = pList.filter(p => {
     if (p.isBundle) return false;
     const prodCat = (p.category || "").trim();
     const catMatch = (cat === "TÜMÜ" || !cat || prodCat.toLowerCase() === cat.toLowerCase());
@@ -503,13 +504,15 @@ function renderQuickPricingTable() {
     // Populate category filter if empty
     const catSelect = document.getElementById("qpCategoryFilter");
     if (catSelect && catSelect.options.length <= 1) {
-      const currentVal = catSelect.value || "TÜMÜ";
       let catList = Array.isArray(window.categories) ? window.categories : (Array.isArray(categories) ? categories : []);
       if (!catList || catList.length === 0) {
         catList = ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum / Kozmetik", "Kampanyalar"];
       }
-      catSelect.innerHTML = `<option value="TÜMÜ">Tüm Kategoriler</option>` + catList.map(c => `<option value="${c}">${c}</option>`).join("");
-      catSelect.value = currentVal;
+      catSelect.innerHTML = `<option value="TÜMÜ">Tüm Kategoriler (${pList.length})</option>` + catList.map(c => {
+        const count = pList.filter(p => (p.category || "").toLowerCase() === c.toLowerCase()).length;
+        return `<option value="${c}">${c} (${count})</option>`;
+      }).join("");
+      catSelect.value = "TÜMÜ";
     }
 
     const searchInput = document.getElementById("qpSearchInput");
@@ -519,6 +522,12 @@ function renderQuickPricingTable() {
     if (!tbody) return;
 
     const filterType = window.qpCurrentFilter || "all";
+
+    // Sync filter button active states
+    document.querySelectorAll(".qp-filter-btn").forEach(btn => {
+      if (btn.dataset.filter === filterType) btn.classList.add("active");
+      else btn.classList.remove("active");
+    });
 
     const filtered = pList.filter(p => {
       if (!p || p.isBundle) return false;
@@ -551,7 +560,7 @@ function renderQuickPricingTable() {
     if (filtered.length === 0) {
       tbody.innerHTML = `<tr><td colspan="9" class="empty-state" style="text-align:center; padding:35px 20px; color:var(--text-muted);">
         Filtreye uygun ürün bulunamadı.
-        <div class="mt-2"><button class="btn btn-primary btn-sm" onclick="resetToDefaultCatalog()">🔄 222 Ürünlük Kataloğu Yükle</button></div>
+        <div class="mt-2"><button class="btn btn-primary btn-sm" onclick="setQpFilter('all')">👁️ Tüm 222 Ürünü Göster</button></div>
       </td></tr>`;
       return;
     }
