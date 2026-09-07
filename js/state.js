@@ -2,9 +2,24 @@
    STATE MANAGEMENT — localStorage + Sample Data
    =================================================================== */
 
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_l1PLYUVmHL6dqnholoKke2JsTx56FScjd4qa6veqcoK49ztzLqggwp9M7uze10sU/exec";
+// Global variables for universal compatibility
+var defaultCategories = ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum / Kozmetik", "Kampanyalar"];
+var categories = [...defaultCategories];
+var products = [];
+var suppliers = [];
+var customers = [];
+var bundles = [];
+var wasteRecords = [];
+var orders = [];
+var platformPendingOrders = [];
+var deliveredOrders = [];
+var salesHistory = [];
+var expenses = [];
+var manualDeficits = [];
+var heldCarts = [];
+var cart = [];
 
-const defaultCategories = ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum / Kozmetik", "Kampanyalar"];
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_l1PLYUVmHL6dqnholoKke2JsTx56FScjd4qa6veqcoK49ztzLqggwp9M7uze10sU/exec";
 
 // ── Products Database (222 Ürünlük Güncel Liste) ──
 const catalogProducts = [
@@ -390,12 +405,20 @@ function getMonthYearHeader(dateStr) {
 
 // ── Load from localStorage or use samples ──
 function loadState() {
-  const raw = k => JSON.parse(localStorage.getItem(k));
+  const raw = k => {
+    try {
+      const v = localStorage.getItem(k);
+      return (v && v !== "undefined" && v !== "null") ? JSON.parse(v) : null;
+    } catch (e) {
+      console.warn("Storage parse error:", k, e);
+      return null;
+    }
+  };
 
   let cats = raw("ps_categories");
   window.categories = (Array.isArray(cats) && cats.length > 0) ? cats : [...defaultCategories];
 
-  const CURRENT_CATALOG_VERSION = "2026_09_v5_222_catalog";
+  const CURRENT_CATALOG_VERSION = "2026_09_v6_222_products";
   const savedVer = localStorage.getItem("ps_catalog_version");
   let prods = raw("ps_products");
 
@@ -448,22 +471,67 @@ function loadState() {
   window.activeHistorySupplierId = null;
   window.currentInvoiceBase64 = null;
   window.tempBundleItems = [];
+
+  // Synchronize global variables
+  categories = window.categories;
+  products = window.products;
+  suppliers = window.suppliers;
+  customers = window.customers;
+  bundles = window.bundles;
+  wasteRecords = window.wasteRecords;
+  orders = window.orders;
+  platformPendingOrders = window.platformPendingOrders;
+  deliveredOrders = window.deliveredOrders;
+  salesHistory = window.salesHistory;
+  expenses = window.expenses;
+  manualDeficits = window.manualDeficits;
+  heldCarts = window.heldCarts;
+  cart = window.cart;
 }
 
 function saveData() {
-  localStorage.setItem("ps_categories", JSON.stringify(categories));
-  localStorage.setItem("ps_products", JSON.stringify(products));
-  localStorage.setItem("ps_customers", JSON.stringify(customers));
-  localStorage.setItem("ps_orders", JSON.stringify(orders));
-  localStorage.setItem("ps_platform_pending", JSON.stringify(platformPendingOrders));
-  localStorage.setItem("ps_delivered_orders", JSON.stringify(deliveredOrders));
-  localStorage.setItem("ps_sales_history", JSON.stringify(salesHistory));
-  localStorage.setItem("ps_expenses", JSON.stringify(expenses));
-  localStorage.setItem("ps_deficits", JSON.stringify(manualDeficits));
-  localStorage.setItem("ps_suppliers", JSON.stringify(suppliers));
-  localStorage.setItem("ps_held_carts", JSON.stringify(heldCarts));
-  localStorage.setItem("ps_bundles", JSON.stringify(bundles));
-  localStorage.setItem("ps_waste_records", JSON.stringify(wasteRecords));
+  const pList = window.products || products || [];
+  const cList = window.categories || categories || defaultCategories;
+  const supList = window.suppliers || suppliers || [];
+  const custList = window.customers || customers || [];
+  const bndList = window.bundles || bundles || [];
+  const wstList = window.wasteRecords || wasteRecords || [];
+  const ordList = window.orders || orders || [];
+  const pltList = window.platformPendingOrders || platformPendingOrders || [];
+  const dlvList = window.deliveredOrders || deliveredOrders || [];
+  const slsList = window.salesHistory || salesHistory || [];
+  const expList = window.expenses || expenses || [];
+  const defList = window.manualDeficits || manualDeficits || [];
+  const hldList = window.heldCarts || heldCarts || [];
+
+  // Keep global sync
+  products = pList;
+  categories = cList;
+  suppliers = supList;
+  customers = custList;
+  bundles = bndList;
+  wasteRecords = wstList;
+  orders = ordList;
+  platformPendingOrders = pltList;
+  deliveredOrders = dlvList;
+  salesHistory = slsList;
+  expenses = expList;
+  manualDeficits = defList;
+  heldCarts = hldList;
+
+  localStorage.setItem("ps_categories", JSON.stringify(cList));
+  localStorage.setItem("ps_products", JSON.stringify(pList));
+  localStorage.setItem("ps_customers", JSON.stringify(custList));
+  localStorage.setItem("ps_orders", JSON.stringify(ordList));
+  localStorage.setItem("ps_platform_pending", JSON.stringify(pltList));
+  localStorage.setItem("ps_delivered_orders", JSON.stringify(dlvList));
+  localStorage.setItem("ps_sales_history", JSON.stringify(slsList));
+  localStorage.setItem("ps_expenses", JSON.stringify(expList));
+  localStorage.setItem("ps_deficits", JSON.stringify(defList));
+  localStorage.setItem("ps_suppliers", JSON.stringify(supList));
+  localStorage.setItem("ps_held_carts", JSON.stringify(hldList));
+  localStorage.setItem("ps_bundles", JSON.stringify(bndList));
+  localStorage.setItem("ps_waste_records", JSON.stringify(wstList));
 }
 
 function sendToGoogleSheets(payload) {

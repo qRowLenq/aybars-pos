@@ -313,7 +313,8 @@ function renderInventoryTable() {
 }
 
 function updateProductCostFast(id, val) {
-  const p = products.find(prod => prod.id === id);
+  const pList = window.products || products || [];
+  const p = pList.find(prod => Number(prod.id) === Number(id));
   if (p) {
     p.cost = Math.max(0, parseFloat(val) || 0);
     saveData();
@@ -323,29 +324,32 @@ function updateProductCostFast(id, val) {
 }
 
 function updateProductPriceFast(id, val) {
-  const p = products.find(prod => prod.id === id);
+  const pList = window.products || products || [];
+  const p = pList.find(prod => Number(prod.id) === Number(id));
   if (p) {
     p.price = Math.max(0, parseFloat(val) || 0);
     saveData();
-    renderCatalog();
+    if (typeof renderCatalog === "function") renderCatalog();
     refreshInventoryRowMargin(id);
     updateQuickPricingStats();
   }
 }
 
 function updateStockFast(id, val) {
-  const p = products.find(prod => prod.id === id);
+  const pList = window.products || products || [];
+  const p = pList.find(prod => Number(prod.id) === Number(id));
   if (p) {
     p.stock = Math.max(0, parseInt(val, 10) || 0);
     saveData();
-    renderCatalog();
-    renderSktRadarWidget();
+    if (typeof renderCatalog === "function") renderCatalog();
+    if (typeof renderSktRadarWidget === "function") renderSktRadarWidget();
     updateQuickPricingStats();
   }
 }
 
 function refreshInventoryRowMargin(id) {
-  const p = products.find(prod => prod.id === id);
+  const pList = window.products || products || [];
+  const p = pList.find(prod => Number(prod.id) === Number(id));
   if (!p) return;
   const numCost = Number(p.cost) || 0;
   const numPrice = Number(p.price) || 0;
@@ -378,149 +382,176 @@ function filterQuickPricing(filter) {
 }
 
 function updateQuickPricingStats() {
-  const validProds = products.filter(p => !p.isBundle);
-  const total = validProds.length;
-  const missingPrice = validProds.filter(p => !p.price || Number(p.price) <= 0).length;
-  const missingCost = validProds.filter(p => !p.cost || Number(p.cost) <= 0).length;
-  const zeroStock = validProds.filter(p => !p.stock || Number(p.stock) <= 0).length;
-  const ready = validProds.filter(p => Number(p.price) > 0 && Number(p.cost) > 0 && Number(p.stock) > 0).length;
+  try {
+    const pList = window.products || products || [];
+    const validProds = pList.filter(p => p && !p.isBundle);
+    const total = validProds.length;
+    const missingPrice = validProds.filter(p => !p.price || Number(p.price) <= 0).length;
+    const missingCost = validProds.filter(p => !p.cost || Number(p.cost) <= 0).length;
+    const zeroStock = validProds.filter(p => !p.stock || Number(p.stock) <= 0).length;
+    const ready = validProds.filter(p => Number(p.price) > 0 && Number(p.cost) > 0 && Number(p.stock) > 0).length;
 
-  const pct = total > 0 ? Math.round((ready / total) * 100) : 0;
+    const pct = total > 0 ? Math.round((ready / total) * 100) : 0;
 
-  const fillEl = document.getElementById("qpProgressBarFill");
-  if (fillEl) fillEl.style.width = `${pct}%`;
-  const pctEl = document.getElementById("qpProgressPercent");
-  if (pctEl) pctEl.innerText = `${pct}%`;
-  const txtEl = document.getElementById("qpProgressText");
-  if (txtEl) txtEl.innerText = `${total} üründen ${ready} tanesi tam tanımlandı (%${pct})`;
+    const fillEl = document.getElementById("qpProgressBarFill");
+    if (fillEl) fillEl.style.width = `${pct}%`;
+    const pctEl = document.getElementById("qpProgressPercent");
+    if (pctEl) pctEl.innerText = `${pct}%`;
+    const txtEl = document.getElementById("qpProgressText");
+    if (txtEl) txtEl.innerText = `${total} üründen ${ready} tanesi hazır (%${pct})`;
 
-  const elTotal = document.getElementById("qpTotalProducts");
-  if (elTotal) elTotal.innerText = total;
-  const elMissP = document.getElementById("qpMissingPrice");
-  if (elMissP) elMissP.innerText = missingPrice;
-  const elMissC = document.getElementById("qpMissingCost");
-  if (elMissC) elMissC.innerText = missingCost;
-  const elZeroS = document.getElementById("qpZeroStock");
-  if (elZeroS) elZeroS.innerText = zeroStock;
-  const elReady = document.getElementById("qpReadyCount");
-  if (elReady) elReady.innerText = ready;
+    const elTotal = document.getElementById("qpTotalProducts");
+    if (elTotal) elTotal.innerText = total;
+    const elMissP = document.getElementById("qpMissingPrice");
+    if (elMissP) elMissP.innerText = missingPrice;
+    const elMissC = document.getElementById("qpMissingCost");
+    if (elMissC) elMissC.innerText = missingCost;
+    const elZeroS = document.getElementById("qpZeroStock");
+    if (elZeroS) elZeroS.innerText = zeroStock;
+    const elReady = document.getElementById("qpReadyCount");
+    if (elReady) elReady.innerText = ready;
+  } catch (err) {
+    console.error("updateQuickPricingStats error:", err);
+  }
 }
 
 function renderQuickPricingTable() {
-  updateQuickPricingStats();
-
-  // Populate category filter if empty
-  const catSelect = document.getElementById("qpCategoryFilter");
-  if (catSelect && catSelect.options.length <= 1) {
-    const currentVal = catSelect.value || "TÜMÜ";
-    catSelect.innerHTML = `<option value="TÜMÜ">Tüm Kategoriler</option>`;
-    if (Array.isArray(categories)) {
-      categories.forEach(c => {
-        catSelect.innerHTML += `<option value="${c}">${c}</option>`;
-      });
+  try {
+    // Make sure state is loaded
+    let pList = window.products || products || [];
+    if (!Array.isArray(pList) || pList.length < 50) {
+      if (typeof catalogProducts !== "undefined" && Array.isArray(catalogProducts) && catalogProducts.length > 0) {
+        window.products = JSON.parse(JSON.stringify(catalogProducts));
+        products = window.products;
+        pList = window.products;
+        if (typeof saveData === "function") saveData();
+      }
     }
-    catSelect.value = currentVal;
+
+    updateQuickPricingStats();
+
+    // Populate category filter if empty
+    const catSelect = document.getElementById("qpCategoryFilter");
+    if (catSelect && catSelect.options.length <= 1) {
+      const currentVal = catSelect.value || "TÜMÜ";
+      let catList = Array.isArray(window.categories) ? window.categories : (Array.isArray(categories) ? categories : []);
+      if (!catList || catList.length === 0) {
+        catList = ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum / Kozmetik", "Kampanyalar"];
+      }
+      catSelect.innerHTML = `<option value="TÜMÜ">Tüm Kategoriler</option>` + catList.map(c => `<option value="${c}">${c}</option>`).join("");
+      catSelect.value = currentVal;
+    }
+
+    const searchInput = document.getElementById("qpSearchInput");
+    const search = (searchInput ? searchInput.value : "").trim().toLowerCase();
+    const selCat = (catSelect ? catSelect.value : "TÜMÜ") || "TÜMÜ";
+    const tbody = document.getElementById("quickPricingTableBody");
+    if (!tbody) return;
+
+    const filterType = window.qpCurrentFilter || "all";
+
+    const filtered = pList.filter(p => {
+      if (!p || p.isBundle) return false;
+      
+      // Category match
+      if (selCat !== "TÜMÜ" && selCat && (p.category || "").toLowerCase() !== selCat.toLowerCase()) {
+        return false;
+      }
+      
+      // Search match
+      if (search) {
+        const matchName = (p.name || "").toLowerCase().includes(search);
+        const matchId = String(p.id).includes(search);
+        if (!matchName && !matchId) return false;
+      }
+
+      // Filter type match
+      const pCost = Number(p.cost) || 0;
+      const pPrice = Number(p.price) || 0;
+      const pStock = Number(p.stock) || 0;
+
+      if (filterType === "missing-price") return pPrice <= 0;
+      if (filterType === "missing-cost") return pCost <= 0;
+      if (filterType === "zero-stock") return pStock <= 0;
+      if (filterType === "ready") return pPrice > 0 && pCost > 0 && pStock > 0;
+
+      return true;
+    });
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="9" class="empty-state" style="text-align:center; padding:35px 20px; color:var(--text-muted);">
+        Filtreye uygun ürün bulunamadı.
+        <div class="mt-2"><button class="btn btn-primary btn-sm" onclick="resetToDefaultCatalog()">🔄 222 Ürünlük Kataloğu Yükle</button></div>
+      </td></tr>`;
+      return;
+    }
+
+    const rowsHtml = filtered.map(p => {
+      const numCost = Number(p.cost) || 0;
+      const numPrice = Number(p.price) || 0;
+      const stockVal = isNaN(Number(p.stock)) ? 0 : Number(p.stock);
+      
+      let marginStr = "-";
+      let marginClass = "badge-ghost";
+      if (numCost > 0 && numPrice > 0) {
+        const mVal = (((numPrice - numCost) / numCost) * 100).toFixed(0);
+        marginStr = `%${mVal}`;
+        marginClass = numPrice >= numCost ? "badge-success" : "badge-danger";
+      }
+
+      let statusBadge = "";
+      if (numPrice > 0 && numCost > 0 && stockVal > 0) {
+        statusBadge = `<span class="badge badge-success" style="font-size:11px;">✅ Hazır</span>`;
+      } else if (numPrice <= 0) {
+        statusBadge = `<span class="badge badge-warning" style="font-size:11px;">🏷️ Fiyat Bekliyor</span>`;
+      } else if (stockVal <= 0) {
+        statusBadge = `<span class="badge badge-danger" style="font-size:11px;">⚠️ Stoksuz (0)</span>`;
+      } else {
+        statusBadge = `<span class="badge badge-ghost" style="font-size:11px;">📥 Maliyet Yok</span>`;
+      }
+
+      const safeName = String(p.name || "").replace(/"/g, '&quot;');
+      const safeCat = String(p.category || '-');
+
+      return `
+        <tr id="qp-row-${p.id}">
+          <td style="text-align:center; color:var(--text-muted); font-size:12px; font-weight:600;">${p.id}</td>
+          <td>
+            <div style="font-weight:600; font-size:13px; color:var(--text);">${safeName}</div>
+          </td>
+          <td><span class="badge badge-ghost" style="font-size:11px;">${safeCat}</span></td>
+          <td style="text-align:right;">
+            <input type="number" step="any" min="0" value="${numCost > 0 ? numCost : ''}" placeholder="0.00" 
+              class="qp-bulk-input" data-id="${p.id}" data-field="cost"
+              onchange="handleQpCostChange(${p.id}, this.value)"
+              onfocus="this.select()"> ₺
+          </td>
+          <td style="text-align:right;">
+            <input type="number" step="any" min="0" value="${numPrice > 0 ? numPrice : ''}" placeholder="0.00" 
+              class="qp-bulk-input font-bold text-primary" data-id="${p.id}" data-field="price"
+              onchange="handleQpPriceChange(${p.id}, this.value)"
+              onfocus="this.select()"> ₺
+          </td>
+          <td style="text-align:center;">
+            <input type="number" step="1" min="0" value="${stockVal}" 
+              class="qp-bulk-input text-center" style="width:75px;" data-id="${p.id}" data-field="stock"
+              onchange="handleQpStockChange(${p.id}, this.value)"
+              onfocus="this.select()">
+          </td>
+          <td style="text-align:center;" id="qp-margin-${p.id}">
+            <span class="badge ${marginClass}">${marginStr}</span>
+          </td>
+          <td style="text-align:center;" id="qp-status-${p.id}">${statusBadge}</td>
+          <td style="text-align:center;">
+            <button class="btn btn-ghost btn-xs" onclick="openEditProductModal(${p.id})" title="Detaylı Düzenle">✏️</button>
+          </td>
+        </tr>`;
+    }).join("");
+
+    tbody.innerHTML = rowsHtml;
+  } catch (err) {
+    console.error("renderQuickPricingTable error:", err);
   }
-
-  const search = (document.getElementById("qpSearchInput")?.value || "").trim().toLowerCase();
-  const selCat = (document.getElementById("qpCategoryFilter")?.value || "TÜMÜ").trim();
-  const tbody = document.getElementById("quickPricingTableBody");
-  if (!tbody) return;
-  tbody.innerHTML = "";
-
-  const filterType = window.qpCurrentFilter || "all";
-
-  const filtered = products.filter(p => {
-    if (p.isBundle) return false;
-    
-    // Category match
-    if (selCat !== "TÜMÜ" && selCat && (p.category || "").toLowerCase() !== selCat.toLowerCase()) {
-      return false;
-    }
-    
-    // Search match
-    if (search) {
-      const matchName = (p.name || "").toLowerCase().includes(search);
-      const matchId = String(p.id).includes(search);
-      if (!matchName && !matchId) return false;
-    }
-
-    // Filter type match
-    const pCost = Number(p.cost) || 0;
-    const pPrice = Number(p.price) || 0;
-    const pStock = Number(p.stock) || 0;
-
-    if (filterType === "missing-price") return pPrice <= 0;
-    if (filterType === "missing-cost") return pCost <= 0;
-    if (filterType === "zero-stock") return pStock <= 0;
-    if (filterType === "ready") return pPrice > 0 && pCost > 0 && pStock > 0;
-
-    return true;
-  });
-
-  if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="9" class="empty-state">Filtreye uygun ürün bulunamadı.</td></tr>`;
-    return;
-  }
-
-  filtered.forEach(p => {
-    const numCost = Number(p.cost) || 0;
-    const numPrice = Number(p.price) || 0;
-    const stockVal = isNaN(Number(p.stock)) ? 0 : Number(p.stock);
-    
-    let marginStr = "-";
-    let marginClass = "badge-ghost";
-    if (numCost > 0 && numPrice > 0) {
-      const mVal = (((numPrice - numCost) / numCost) * 100).toFixed(0);
-      marginStr = `%${mVal}`;
-      marginClass = numPrice >= numCost ? "badge-success" : "badge-danger";
-    }
-
-    let statusBadge = "";
-    if (numPrice > 0 && numCost > 0 && stockVal > 0) {
-      statusBadge = `<span class="badge badge-success" style="font-size:11px;">✅ Hazır</span>`;
-    } else if (numPrice <= 0) {
-      statusBadge = `<span class="badge badge-warning" style="font-size:11px;">🏷️ Fiyat Bekliyor</span>`;
-    } else if (stockVal <= 0) {
-      statusBadge = `<span class="badge badge-danger" style="font-size:11px;">⚠️ Stoksuz (0)</span>`;
-    } else {
-      statusBadge = `<span class="badge badge-ghost" style="font-size:11px;">📥 Maliyet Yok</span>`;
-    }
-
-    tbody.innerHTML += `
-      <tr id="qp-row-${p.id}">
-        <td style="text-align:center; color:var(--text-muted); font-size:12px; font-weight:600;">${p.id}</td>
-        <td>
-          <div style="font-weight:600; font-size:13px; color:var(--text);">${p.name}</div>
-        </td>
-        <td><span class="badge badge-ghost" style="font-size:11px;">${p.category || '-'}</span></td>
-        <td style="text-align:right;">
-          <input type="number" step="any" min="0" value="${numCost > 0 ? numCost : ''}" placeholder="0.00" 
-            class="qp-bulk-input" data-id="${p.id}" data-field="cost"
-            onchange="handleQpCostChange(${p.id}, this.value)"
-            onfocus="this.select()"> ₺
-        </td>
-        <td style="text-align:right;">
-          <input type="number" step="any" min="0" value="${numPrice > 0 ? numPrice : ''}" placeholder="0.00" 
-            class="qp-bulk-input font-bold text-primary" data-id="${p.id}" data-field="price"
-            onchange="handleQpPriceChange(${p.id}, this.value)"
-            onfocus="this.select()"> ₺
-        </td>
-        <td style="text-align:center;">
-          <input type="number" step="1" min="0" value="${stockVal}" 
-            class="qp-bulk-input text-center" style="width:75px;" data-id="${p.id}" data-field="stock"
-            onchange="handleQpStockChange(${p.id}, this.value)"
-            onfocus="this.select()">
-        </td>
-        <td style="text-align:center;" id="qp-margin-${p.id}">
-          <span class="badge ${marginClass}">${marginStr}</span>
-        </td>
-        <td style="text-align:center;" id="qp-status-${p.id}">${statusBadge}</td>
-        <td style="text-align:center;">
-          <button class="btn btn-ghost btn-xs" onclick="openEditProductModal(${p.id})" title="Detaylı Düzenle">✏️</button>
-        </td>
-      </tr>`;
-  });
 }
 
 function handleQpCostChange(id, val) {
@@ -539,7 +570,8 @@ function handleQpStockChange(id, val) {
 }
 
 function refreshQpRow(id) {
-  const p = products.find(prod => prod.id === id);
+  const pList = window.products || products || [];
+  const p = pList.find(prod => Number(prod.id) === Number(id));
   if (!p) return;
   const numCost = Number(p.cost) || 0;
   const numPrice = Number(p.price) || 0;
@@ -578,7 +610,8 @@ function bulkSetDefaultStock() {
   if (isNaN(val) || val < 0) return toast("Geçerli bir sayı girin!", "error");
 
   let count = 0;
-  products.forEach(p => {
+  const pList = window.products || products || [];
+  pList.forEach(p => {
     if (!p.isBundle && (!p.stock || Number(p.stock) === 0)) {
       p.stock = val;
       count++;
@@ -588,7 +621,7 @@ function bulkSetDefaultStock() {
   saveData();
   renderQuickPricingTable();
   renderInventoryTable();
-  renderCatalog();
+  if (typeof renderCatalog === "function") renderCatalog();
   toast(`✅ ${count} adet ürüne ${val} adet stok atandı!`);
 }
 
@@ -599,7 +632,8 @@ function bulkApplyMargin() {
   if (isNaN(marginPct) || marginPct <= 0) return toast("Geçerli bir yüzde girin!", "error");
 
   let count = 0;
-  products.forEach(p => {
+  const pList = window.products || products || [];
+  pList.forEach(p => {
     if (!p.isBundle && Number(p.cost) > 0) {
       const calculated = Math.round(Number(p.cost) * (1 + marginPct / 100));
       p.price = calculated;
@@ -610,17 +644,29 @@ function bulkApplyMargin() {
   saveData();
   renderQuickPricingTable();
   renderInventoryTable();
-  renderCatalog();
+  if (typeof renderCatalog === "function") renderCatalog();
   toast(`✅ ${count} adet ürüne %${marginPct} kâr marjı uygulanarak satış fiyatları güncellendi!`);
 }
 
 function saveQuickPricingAll() {
   saveData();
-  renderCatalog();
-  renderInventoryTable();
+  if (typeof renderCatalog === "function") renderCatalog();
+  if (typeof renderInventoryTable === "function") renderInventoryTable();
   updateQuickPricingStats();
   toast("💾 Tüm fiyat ve stok değişiklikleri başarıyla kaydedildi!", "success");
 }
+
+// Attach all functions to window for global access
+window.renderQuickPricingTable = renderQuickPricingTable;
+window.updateQuickPricingStats = updateQuickPricingStats;
+window.setQpFilter = setQpFilter;
+window.filterQuickPricing = filterQuickPricing;
+window.handleQpCostChange = handleQpCostChange;
+window.handleQpPriceChange = handleQpPriceChange;
+window.handleQpStockChange = handleQpStockChange;
+window.bulkSetDefaultStock = bulkSetDefaultStock;
+window.bulkApplyMargin = bulkApplyMargin;
+window.saveQuickPricingAll = saveQuickPricingAll;
 
 function deleteProduct(id) {
   if (confirm("Ürünü silmek istiyor musunuz?")) {

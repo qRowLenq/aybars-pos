@@ -29,9 +29,11 @@ function switchTab(tabId) {
     if (!activeSub) {
       switchInvSubtab("stock");
     } else {
-      renderInventoryTable();
-      renderBundlesTable();
-      renderWasteTable();
+      if (typeof renderInventoryTable === "function") renderInventoryTable();
+      if (typeof renderQuickPricingTable === "function") renderQuickPricingTable();
+      else if (typeof window.renderQuickPricingTable === "function") window.renderQuickPricingTable();
+      if (typeof renderBundlesTable === "function") renderBundlesTable();
+      if (typeof renderWasteTable === "function") renderWasteTable();
     }
   }
   if (tabId === "crm") renderCRM();
@@ -50,18 +52,31 @@ function switchSubtab(container, prefix, subId, renderFn) {
     if (b.dataset.sub === subId) b.classList.add("active");
   });
 
-  if (renderFn) renderFn();
+  if (typeof renderFn === "function") {
+    try { renderFn(); } catch(e) { console.error("renderFn error:", e); }
+  }
 }
 
 // Convenience wrappers for each section's subtabs
 function switchInvSubtab(subId) {
-  const fns = {
-    stock: renderInventoryTable,
-    "quick-pricing": renderQuickPricingTable,
-    bundles: renderBundlesTable,
-    waste: renderWasteTable
-  };
-  switchSubtab("tab-inventory", "subtab-inv-", subId, fns[subId]);
+  let fn = null;
+  if (subId === "stock") {
+    fn = typeof renderInventoryTable === "function" ? renderInventoryTable : window.renderInventoryTable;
+  } else if (subId === "quick-pricing") {
+    fn = typeof renderQuickPricingTable === "function" ? renderQuickPricingTable : window.renderQuickPricingTable;
+  } else if (subId === "bundles") {
+    fn = typeof renderBundlesTable === "function" ? renderBundlesTable : window.renderBundlesTable;
+  } else if (subId === "waste") {
+    fn = typeof renderWasteTable === "function" ? renderWasteTable : window.renderWasteTable;
+  }
+  
+  switchSubtab("tab-inventory", "subtab-inv-", subId, fn);
+
+  if (subId === "quick-pricing") {
+    if (typeof window.renderQuickPricingTable === "function") {
+      try { window.renderQuickPricingTable(); } catch(e) { console.error(e); }
+    }
+  }
 }
 function switchOrdersSubtab(subId) {
   const fns = { pending: renderSingleOrdersList, platform: renderPlatformOrdersGrouped, delivered: renderDeliveredOrdersList };

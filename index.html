@@ -2,6 +2,9 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Petshop Kasa & Envanter Yönetim Sistemi - Modern POS, stok takibi, cari hesap, tedarik ve gider yönetimi.">
   <meta name="theme-color" content="#0f172a">
@@ -10,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <title>🐾 Petshop Kasa Sistemi</title>
-  <link rel="stylesheet" href="css/styles.css?v=20260907_5">
+  <link rel="stylesheet" href="css/styles.css?v=20260907_6">
 </head>
 <body>
 
@@ -140,7 +143,7 @@
     <section id="tab-inventory" class="tab-pane subtabs-container">
       <div class="subtabs-header">
         <button class="subtab-btn active" data-sub="stock" onclick="switchInvSubtab('stock')">📦 Stok & Fiyat Listesi</button>
-        <button class="subtab-btn" data-sub="quick-pricing" onclick="switchInvSubtab('quick-pricing')">⚡ Hızlı Fiyat & Stok Girişi</button>
+        <button class="subtab-btn" data-sub="quick-pricing" onclick="switchInvSubtab('quick-pricing'); if (window.renderQuickPricingTable) window.renderQuickPricingTable();">⚡ Hızlı Fiyat & Stok Girişi</button>
         <button class="subtab-btn" data-sub="bundles" onclick="switchInvSubtab('bundles')">🎁 Kampanya / Paket</button>
         <button class="subtab-btn" data-sub="waste" onclick="switchInvSubtab('waste')">🗑️ Fire / Zayi</button>
       </div>
@@ -178,7 +181,7 @@
           <input type="text" id="invSearchInput" class="search-input" placeholder="🔍 Ürün Ara..." oninput="renderInventoryTable()">
           <select id="invCatFilter" class="fc" style="width:200px;" onchange="renderInventoryTable()"></select>
           <button class="btn btn-primary" onclick="openAddProductModal()">+ Yeni Ürün Ekle</button>
-          <button class="btn btn-warning" onclick="switchInvSubtab('quick-pricing')">⚡ Toplu / Hızlı Düzenle</button>
+          <button class="btn btn-warning" onclick="switchInvSubtab('quick-pricing'); if (window.renderQuickPricingTable) window.renderQuickPricingTable();">⚡ Toplu / Hızlı Düzenle</button>
           <button class="btn btn-ghost btn-xs text-muted" onclick="resetToDefaultCatalog()" title="Kataloğu 222 ürünlük varsayılana sıfırla">🔄 Kataloğu Sıfırla</button>
         </div>
         <table class="data-table">
@@ -260,10 +263,11 @@
             </div>
           </div>
 
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
             <button class="btn btn-outline btn-sm" onclick="bulkSetDefaultStock()" title="Stoğu 0 olan ürünlere toplu adet ata">📦 Toplu Stok Ata</button>
             <button class="btn btn-outline btn-sm" onclick="bulkApplyMargin()" title="Alış fiyatına göre kâr marjı ile satış fiyatı hesapla">⚡ Toplu Kâr Ekle</button>
             <button class="btn btn-success btn-sm" onclick="saveQuickPricingAll()">💾 Tümünü Kaydet</button>
+            <button class="btn btn-warning btn-sm" onclick="resetToDefaultCatalog()" title="222 Ürünü Yeniden Yükle">🔄 222 Ürünü Yeniden Yükle</button>
           </div>
         </div>
 
@@ -1192,15 +1196,15 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/products_catalog.js?v=20260907_5"></script>
-  <script src="js/state.js?v=20260907_5"></script>
-  <script src="js/ui.js?v=20260907_5"></script>
-  <script src="js/pos.js?v=20260907_5"></script>
-  <script src="js/orders.js?v=20260907_5"></script>
-  <script src="js/inventory.js?v=20260907_5"></script>
-  <script src="js/crm.js?v=20260907_5"></script>
-  <script src="js/procurement.js?v=20260907_5"></script>
-  <script src="js/expenses.js?v=20260907_5"></script>
-  <script src="js/app.js?v=20260907_5"></script>
+  <script src="js/products_catalog.js?v=20260907_6"></script>
+  <script src="js/state.js?v=20260907_6"></script>
+  <script src="js/ui.js?v=20260907_6"></script>
+  <script src="js/pos.js?v=20260907_6"></script>
+  <script src="js/orders.js?v=20260907_6"></script>
+  <script src="js/inventory.js?v=20260907_6"></script>
+  <script src="js/crm.js?v=20260907_6"></script>
+  <script src="js/procurement.js?v=20260907_6"></script>
+  <script src="js/expenses.js?v=20260907_6"></script>
+  <script src="js/app.js?v=20260907_6"></script>
 </body>
 </html>
