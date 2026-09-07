@@ -269,8 +269,6 @@
 
           <div class="flex items-center gap-2 flex-wrap">
             <button class="btn btn-primary btn-sm" onclick="openAddProductModal()">+ Yeni Ürün Ekle</button>
-            <button class="btn btn-outline btn-sm" onclick="bulkSetDefaultStock()" title="Stoğu 0 olan ürünlere toplu adet ata">📦 Toplu Stok Ata</button>
-            <button class="btn btn-outline btn-sm" onclick="bulkApplyMargin()" title="Alış fiyatına göre kâr marjı ile satış fiyatı hesapla">⚡ Toplu Kâr Ekle</button>
             <button class="btn btn-success btn-sm" onclick="saveQuickPricingAll()">💾 Tümünü Kaydet</button>
           </div>
         </div>
@@ -715,10 +713,16 @@
   <!-- Add Product -->
   <div class="modal-overlay" id="addProductModal">
     <div class="modal-box">
-      <div class="modal-title" id="addProductModalTitle">+ Yeni Ürün Tanımla</div>
+      <div class="modal-title" id="addProductModalTitle">+ Yeni Ürün Tanımla / Düzenle</div>
       <div class="fg">
-        <label>Hızlı Doldur (Var olan ürünü güncelle)</label>
-        <input type="text" id="quickProductSearch" class="fc" list="existingProductsSearchList" placeholder="🔍 Ürün ara..." onchange="handleAutoFillExistingProduct(this.value)">
+        <label>📦 222 Ürünlük Katalogdan Hızlı Seç (Bilgileri Otomatik Dolar)</label>
+        <select id="quickProductSelect" class="fc" onchange="handleSelectCatalogProductForEdit(this.value)">
+          <option value="">-- Katalogdaki 222 Üründen Birini Seçin --</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>veya İsimle / Barkodla Ara</label>
+        <input type="text" id="quickProductSearch" class="fc" list="existingProductsSearchList" placeholder="🔍 Ürün ara..." oninput="handleAutoFillExistingProduct(this.value)" onchange="handleAutoFillExistingProduct(this.value)">
         <datalist id="existingProductsSearchList"></datalist>
       </div>
       <hr style="margin:15px 0; border:0; border-top:1px dashed var(--border);">
@@ -728,9 +732,9 @@
         <div class="fg"><label>Varsayılan Tedarikçi</label><select id="npSupplierSelect" class="fc"></select></div>
       </div>
       <div class="form-row form-row-4">
-        <div class="fg"><label>Satış Fiyatı (₺)</label><input type="number" id="npPrice" class="fc"></div>
-        <div class="fg"><label>Alış Maliyeti (₺)</label><input type="number" id="npCost" class="fc"></div>
-        <div class="fg"><label>Mevcut Stok</label><input type="number" id="npStock" class="fc"></div>
+        <div class="fg"><label>Satış Fiyatı (₺)</label><input type="number" id="npPrice" class="fc" placeholder="0.00" onfocus="this.select()"></div>
+        <div class="fg"><label>Alış Maliyeti (₺)</label><input type="number" id="npCost" class="fc" placeholder="0.00" onfocus="this.select()"></div>
+        <div class="fg"><label>Mevcut Stok</label><input type="number" id="npStock" class="fc" placeholder="0" onfocus="this.select()"></div>
         <div class="fg">
           <label>KDV Oranı</label>
           <select id="npVatRate" class="fc">
@@ -742,7 +746,48 @@
       </div>
       <div class="modal-actions">
         <button class="btn btn-ghost" onclick="closeModal('addProductModal')">Vazgeç</button>
-        <button class="btn btn-primary" onclick="saveNewProduct()">Kaydet</button>
+        <button class="btn btn-primary" onclick="saveNewProduct()">💾 Ürünü Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dedicated Stock & Price Entry Modal (Stok Ekle Modalı) -->
+  <div class="modal-overlay" id="stockEntryModal">
+    <div class="modal-box" style="max-width:480px;">
+      <div class="modal-title" id="stockEntryModalTitle">📦 Stok & Fiyat Ekle</div>
+      <input type="hidden" id="seProductId">
+      <div class="fg">
+        <label>Ürün Adı</label>
+        <input type="text" id="seProductNameDisplay" class="fc" readonly style="background:var(--bg); font-weight:600;">
+        <div id="seProductCatDisplay" class="text-xs text-muted mt-1"></div>
+      </div>
+      <div class="form-row form-row-2">
+        <div class="fg">
+          <label>Alış Maliyeti (₺)</label>
+          <input type="number" step="any" min="0" id="seCost" class="fc" placeholder="0.00" onfocus="this.select()">
+        </div>
+        <div class="fg">
+          <label>Satış Fiyatı (₺)</label>
+          <input type="number" step="any" min="0" id="sePrice" class="fc font-bold text-primary" placeholder="0.00" onfocus="this.select()">
+        </div>
+      </div>
+      <div class="form-row form-row-2">
+        <div class="fg">
+          <label>Mevcut / Yeni Stok Sayısı (Adet)</label>
+          <input type="number" step="1" min="0" id="seStock" class="fc font-bold" placeholder="0" onfocus="this.select()">
+        </div>
+        <div class="fg">
+          <label>KDV Oranı</label>
+          <select id="seVatRate" class="fc">
+            <option value="20" selected>%20</option>
+            <option value="10">%10</option>
+            <option value="1">%1</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-actions mt-3">
+        <button class="btn btn-ghost" onclick="closeModal('stockEntryModal')">Vazgeç</button>
+        <button class="btn btn-primary" onclick="saveStockEntry()">💾 Stok & Fiyatı Kaydet</button>
       </div>
     </div>
   </div>
@@ -1200,15 +1245,15 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/products_catalog.js?v=20260907_8"></script>
-  <script src="js/state.js?v=20260907_8"></script>
-  <script src="js/ui.js?v=20260907_8"></script>
-  <script src="js/pos.js?v=20260907_8"></script>
-  <script src="js/orders.js?v=20260907_8"></script>
-  <script src="js/inventory.js?v=20260907_8"></script>
-  <script src="js/crm.js?v=20260907_8"></script>
-  <script src="js/procurement.js?v=20260907_8"></script>
-  <script src="js/expenses.js?v=20260907_8"></script>
-  <script src="js/app.js?v=20260907_8"></script>
+  <script src="js/products_catalog.js?v=20260907_9"></script>
+  <script src="js/state.js?v=20260907_9"></script>
+  <script src="js/ui.js?v=20260907_9"></script>
+  <script src="js/pos.js?v=20260907_9"></script>
+  <script src="js/orders.js?v=20260907_9"></script>
+  <script src="js/inventory.js?v=20260907_9"></script>
+  <script src="js/crm.js?v=20260907_9"></script>
+  <script src="js/procurement.js?v=20260907_9"></script>
+  <script src="js/expenses.js?v=20260907_9"></script>
+  <script src="js/app.js?v=20260907_9"></script>
 </body>
 </html>

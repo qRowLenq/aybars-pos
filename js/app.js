@@ -126,40 +126,85 @@ function exportData() {
 
 function downloadAybars222Backup() {
   try {
+    const rawCatalog = (typeof window !== "undefined" && window.catalogProducts && window.catalogProducts.length > 0)
+      ? window.catalogProducts
+      : ((typeof catalogProducts !== "undefined" && Array.isArray(catalogProducts)) ? catalogProducts : []);
+
+    const prods = rawCatalog.map(p => ({
+      id: p.id,
+      name: p.name,
+      category: p.category || "Genel",
+      price: Number(p.price) || 0,
+      cost: Number(p.cost) || 0,
+      vatRate: Number(p.vatRate) || 20,
+      stock: 0,
+      supplier: p.supplier || "-",
+      batches: []
+    }));
+
+    const backupData = {
+      version: "2026_09_v9_stock0_ready",
+      exportDate: new Date().toISOString(),
+      categories: window.categories || categories || defaultCategories,
+      products: prods,
+      suppliers: window.suppliers || suppliers || sampleSuppliers,
+      customers: [],
+      orders: [],
+      platformPendingOrders: [],
+      deliveredOrders: [],
+      salesHistory: [],
+      expenses: [],
+      manualDeficits: [],
+      heldCarts: [],
+      bundles: [],
+      wasteRecords: []
+    };
+
+    const jsonStr = JSON.stringify(backupData, null, 2);
+    const blob = new Blob([jsonStr], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = "aybars_yedek_222_urun.json";
+    a.href = url;
     a.download = "aybars_yedek_222_urun.json";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    toast("📥 222 Ürünlük yedek dosyası indiriliyor!");
+    URL.revokeObjectURL(url);
+    toast("📥 222 Ürünlük yedek dosyası başarıyla hazırlandı ve indirildi!", "success");
   } catch (err) {
     console.error("downloadAybars222Backup error:", err);
-    window.open("aybars_yedek_222_urun.json", "_blank");
+    toast("İndirme sırasında hata: " + err.message, "error");
   }
 }
 window.downloadAybars222Backup = downloadAybars222Backup;
 
 function importData(event) {
-  const file = event.target.files[0];
+  const file = event.target.files && event.target.files[0];
   if (!file) return;
 
   const reader = new FileReader();
   reader.onload = e => {
+    let data;
     try {
-      const data = JSON.parse(e.target.result);
+      data = JSON.parse(e.target.result);
+    } catch (parseErr) {
+      console.error("JSON parse error:", parseErr);
+      toast("Seçilen dosya geçerli bir JSON dosyası değil!", "error");
+      event.target.value = "";
+      return;
+    }
+
+    try {
       if (Array.isArray(data.categories) && data.categories.length > 0) {
         categories = data.categories;
         window.categories = data.categories;
       }
       if (Array.isArray(data.products) && data.products.length > 0) {
-        // Her ürüne en az 1 stok garantisi ver
         data.products.forEach(p => {
-          if (p.stock === undefined || p.stock === null || Number(p.stock) <= 0) p.stock = 1;
-          else p.stock = Number(p.stock);
-          if (p.cost === undefined) p.cost = 0;
-          if (p.price === undefined) p.price = 0;
-          if (p.vatRate === undefined) p.vatRate = 20;
+          p.stock = (p.stock !== undefined && p.stock !== null && !isNaN(Number(p.stock))) ? Number(p.stock) : 0;
+          p.cost = Number(p.cost) || 0;
+          p.price = Number(p.price) || 0;
+          p.vatRate = Number(p.vatRate) || 20;
           if (!Array.isArray(p.batches)) p.batches = [];
         });
         products = data.products;
@@ -179,11 +224,11 @@ function importData(event) {
       
       saveData();
       initializeApp();
-      toast(`📥 Yedek başarıyla yüklendi! (${products.length} ürün)`, "success");
+      toast(`📥 Yedek başarıyla yüklendi! (${(window.products || []).length} ürün)`, "success");
       event.target.value = "";
     } catch(err) {
-      toast("Hatalı yedek dosyası! Lütfen geçerli bir JSON dosyası seçin.", "error");
-      console.error("importData error:", err);
+      toast("Yedek verisi işlenirken hata: " + err.message, "error");
+      console.error("importData application error:", err);
       event.target.value = "";
     }
   };

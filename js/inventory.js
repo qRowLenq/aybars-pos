@@ -2,13 +2,144 @@
    INVENTORY MODULE — Products, Bundles, Waste
    =================================================================== */
 
+// ── Catalog Select & Quick Stock Entry ──
+function populateCatalogProductSelect() {
+  try {
+    const sel = document.getElementById("quickProductSelect");
+    if (!sel) return;
+    const pList = window.products || products || [];
+    let html = '<option value="">-- Katalogdaki 222 Üründen Birini Seçin --</option>';
+    pList.forEach(p => {
+      if (p && !p.isBundle) {
+        const stockStr = `Stok: ${p.stock !== undefined ? p.stock : 0}`;
+        const costStr = p.cost > 0 ? `Alış: ${p.cost}₺` : 'Alış: Yok';
+        const priceStr = p.price > 0 ? `Satış: ${p.price}₺` : 'Satış: Yok';
+        html += `<option value="${p.id}">${p.id}. ${p.name} (${stockStr} · ${costStr} · ${priceStr})</option>`;
+      }
+    });
+    sel.innerHTML = html;
+  } catch (err) {
+    console.error("populateCatalogProductSelect error:", err);
+  }
+}
+
+function handleSelectCatalogProductForEdit(id) {
+  if (!id) return;
+  const pList = window.products || products || [];
+  const p = pList.find(prod => Number(prod.id) === Number(id));
+  if (!p) return;
+
+  const npName = document.getElementById("npName");
+  if (npName) npName.value = p.name || "";
+  const npCat = document.getElementById("npCategory");
+  if (npCat) npCat.value = p.category || (categories && categories[0]) || "Genel";
+  const npPrice = document.getElementById("npPrice");
+  if (npPrice) npPrice.value = p.price > 0 ? p.price : "";
+  const npCost = document.getElementById("npCost");
+  if (npCost) npCost.value = p.cost > 0 ? p.cost : "";
+  const npStock = document.getElementById("npStock");
+  if (npStock) npStock.value = (p.stock !== undefined && p.stock !== null) ? p.stock : 0;
+  const vatEl = document.getElementById("npVatRate");
+  if (vatEl) vatEl.value = String(p.vatRate !== undefined ? p.vatRate : 20);
+  const supSelect = document.getElementById("npSupplierSelect");
+  if (supSelect && p.supplier && p.supplier !== "-") supSelect.value = p.supplier;
+
+  const titleEl = document.getElementById("addProductModalTitle");
+  if (titleEl) titleEl.innerText = `✏️ Ürünü Düzenle / Stok Ekle: ${p.name}`;
+}
+
+// ── Dedicated Stock Entry Modal ──
+function openStockEntryModal(id) {
+  try {
+    const pList = window.products || products || [];
+    const p = pList.find(prod => Number(prod.id) === Number(id));
+    if (!p) return toast("Ürün bulunamadı!", "error");
+
+    const idInput = document.getElementById("seProductId");
+    if (idInput) idInput.value = p.id;
+
+    const nameInput = document.getElementById("seProductNameDisplay");
+    if (nameInput) nameInput.value = p.name || "";
+
+    const catDisplay = document.getElementById("seProductCatDisplay");
+    if (catDisplay) catDisplay.innerText = `Kategori: ${p.category || 'Genel'} | Mevcut Stok: ${p.stock !== undefined ? p.stock : 0} Adet`;
+
+    const costInput = document.getElementById("seCost");
+    if (costInput) costInput.value = p.cost > 0 ? p.cost : "";
+
+    const priceInput = document.getElementById("sePrice");
+    if (priceInput) priceInput.value = p.price > 0 ? p.price : "";
+
+    const stockInput = document.getElementById("seStock");
+    if (stockInput) stockInput.value = (p.stock !== undefined && p.stock !== null) ? p.stock : 0;
+
+    const vatInput = document.getElementById("seVatRate");
+    if (vatInput) vatInput.value = String(p.vatRate !== undefined ? p.vatRate : 20);
+
+    const titleEl = document.getElementById("stockEntryModalTitle");
+    if (titleEl) titleEl.innerText = `📦 Stok & Fiyat Ekle: ${p.name}`;
+
+    openModal("stockEntryModal");
+    setTimeout(() => {
+      if (costInput && (!p.cost || p.cost <= 0)) costInput.focus();
+      else if (stockInput) stockInput.focus();
+    }, 100);
+  } catch (err) {
+    console.error("openStockEntryModal error:", err);
+  }
+}
+
+function saveStockEntry() {
+  try {
+    const idInput = document.getElementById("seProductId");
+    const id = idInput ? idInput.value : null;
+    if (!id) return toast("Geçersiz ürün!", "error");
+
+    const pList = window.products || products || [];
+    const p = pList.find(prod => Number(prod.id) === Number(id));
+    if (!p) return toast("Ürün bulunamadı!", "error");
+
+    const costInput = document.getElementById("seCost");
+    const priceInput = document.getElementById("sePrice");
+    const stockInput = document.getElementById("seStock");
+    const vatInput = document.getElementById("seVatRate");
+
+    const cost = costInput ? (parseFloat(costInput.value) || 0) : 0;
+    const price = priceInput ? (parseFloat(priceInput.value) || 0) : 0;
+    const stock = stockInput ? (parseInt(stockInput.value, 10) || 0) : 0;
+    const vatRate = vatInput ? (parseInt(vatInput.value, 10) || 20) : 20;
+
+    p.cost = Math.max(0, cost);
+    p.price = Math.max(0, price);
+    p.stock = Math.max(0, stock);
+    p.vatRate = vatRate;
+
+    saveData();
+    closeModal("stockEntryModal");
+
+    if (typeof renderCatalog === "function") renderCatalog();
+    if (typeof renderInventoryTable === "function") renderInventoryTable();
+    if (typeof renderQuickPricingTable === "function") renderQuickPricingTable();
+    if (typeof updateQuickPricingStats === "function") updateQuickPricingStats();
+    if (typeof updateAllBadges === "function") updateAllBadges();
+
+    toast(`✅ "${p.name}" güncellendi! Stok: ${p.stock}, Alış: ${p.cost}₺, Satış: ${p.price}₺`, "success");
+  } catch (err) {
+    console.error("saveStockEntry error:", err);
+    toast("Kaydedilirken hata oluştu!", "error");
+  }
+}
+
 // ── Add/Edit Product Modal ──
 function openAddProductModal(preSelectedSupplier = null) {
   try {
     if (typeof populateCategoryDropdowns === "function") populateCategoryDropdowns();
     if (typeof populateSupplierDropdowns === "function") populateSupplierDropdowns();
     if (typeof populateAllProductDatalists === "function") populateAllProductDatalists();
+    if (typeof populateCatalogProductSelect === "function") populateCatalogProductSelect();
 
+    const qSelect = document.getElementById("quickProductSelect");
+    if (qSelect) qSelect.value = "";
     const qSearch = document.getElementById("quickProductSearch");
     if (qSearch) qSearch.value = "";
     const npName = document.getElementById("npName");
@@ -18,7 +149,7 @@ function openAddProductModal(preSelectedSupplier = null) {
     const npCost = document.getElementById("npCost");
     if (npCost) npCost.value = "";
     const npStock = document.getElementById("npStock");
-    if (npStock) npStock.value = "10";
+    if (npStock) npStock.value = "0";
     const vatEl = document.getElementById("npVatRate");
     if (vatEl) vatEl.value = "20";
 
@@ -27,7 +158,7 @@ function openAddProductModal(preSelectedSupplier = null) {
       if (preSelectedSupplier) {
         titleEl.innerText = `+ "${preSelectedSupplier}" İçin Ürün Ekle`;
       } else {
-        titleEl.innerText = "+ Yeni Ürün Tanımla";
+        titleEl.innerText = "+ Yeni Ürün Tanımla / Düzenle";
       }
     }
     const supSelect = document.getElementById("npSupplierSelect");
@@ -49,9 +180,12 @@ function openEditProductModal(id) {
     if (typeof populateCategoryDropdowns === "function") populateCategoryDropdowns();
     if (typeof populateSupplierDropdowns === "function") populateSupplierDropdowns();
     if (typeof populateAllProductDatalists === "function") populateAllProductDatalists();
+    if (typeof populateCatalogProductSelect === "function") populateCatalogProductSelect();
 
+    const qSelect = document.getElementById("quickProductSelect");
+    if (qSelect) qSelect.value = p.id;
     const qSearch = document.getElementById("quickProductSearch");
-    if (qSearch) qSearch.value = "";
+    if (qSearch) qSearch.value = p.name || "";
     const npName = document.getElementById("npName");
     if (npName) npName.value = p.name || "";
     const npCat = document.getElementById("npCategory");
@@ -80,6 +214,8 @@ function handleAutoFillExistingProduct(val) {
   const pList = window.products || products || [];
   const p = (typeof findMatchingProduct === "function") ? findMatchingProduct(val) : pList.find(prod => prod && prod.name && prod.name.toLowerCase() === val.trim().toLowerCase());
   if (p) {
+    const qSelect = document.getElementById("quickProductSelect");
+    if (qSelect) qSelect.value = p.id;
     const npName = document.getElementById("npName");
     if (npName) npName.value = p.name || "";
     const npCat = document.getElementById("npCategory");
@@ -89,7 +225,7 @@ function handleAutoFillExistingProduct(val) {
     const npCost = document.getElementById("npCost");
     if (npCost) npCost.value = p.cost || "";
     const npStock = document.getElementById("npStock");
-    if (npStock) npStock.value = p.stock || 10;
+    if (npStock) npStock.value = (p.stock !== undefined && p.stock !== null) ? p.stock : 0;
     const vatEl = document.getElementById("npVatRate");
     if (vatEl) vatEl.value = String(p.vatRate !== undefined ? p.vatRate : 20);
     const supSelect = document.getElementById("npSupplierSelect");
@@ -151,6 +287,7 @@ function saveNewProduct() {
     if (typeof renderInventoryTable === "function") renderInventoryTable();
     if (typeof renderQuickPricingTable === "function") renderQuickPricingTable();
     if (typeof populateAllProductDatalists === "function") populateAllProductDatalists();
+    if (typeof updateAllBadges === "function") updateAllBadges();
   } catch (err) {
     console.error("saveNewProduct error:", err);
     toast("Kaydedilirken hata oluştu!", "error");
@@ -161,6 +298,10 @@ window.openAddProductModal = openAddProductModal;
 window.openEditProductModal = openEditProductModal;
 window.handleAutoFillExistingProduct = handleAutoFillExistingProduct;
 window.saveNewProduct = saveNewProduct;
+window.populateCatalogProductSelect = populateCatalogProductSelect;
+window.handleSelectCatalogProductForEdit = handleSelectCatalogProductForEdit;
+window.openStockEntryModal = openStockEntryModal;
+window.saveStockEntry = saveStockEntry;
 
 // ── SKT (FIFO Expiry) Radar Calculation Engine ──
 function getDaysUntilExpiry(expiryStr) {
@@ -374,7 +515,8 @@ function renderInventoryTable() {
         <td><span class="badge" style="background:#f1f5f9; color:#334155; font-weight:600;">%${vatRate}</span></td>
         <td id="inv-margin-${p.id}"><span class="badge ${numCost > 0 && numPrice >= numCost ? 'badge-success' : 'badge-ghost'}">${margin}</span></td>
         <td><input type="number" value="${stockVal}" class="inv-quick-input text-center" style="width:65px;" onchange="updateStockFast(${p.id}, this.value)"></td>
-        <td class="flex gap-1">
+        <td class="flex gap-1 items-center">
+          <button class="btn btn-primary btn-xs" onclick="openStockEntryModal(${p.id})" title="Alış/Satış Fiyatı ve Stok Ekle">📦 Stok Ekle</button>
           <button class="btn btn-ghost btn-xs" onclick="openEditProductModal(${p.id})" title="Detaylı Düzenle">✏️ Düzenle</button>
           <button class="btn btn-ghost btn-xs" onclick="openProductPurchaseHistory(${p.id})" title="Geçmiş">📜</button>
           <button class="btn btn-danger btn-xs" onclick="deleteProduct(${p.id})" title="Sil">Sil</button>
@@ -622,7 +764,10 @@ function renderQuickPricingTable() {
           </td>
           <td style="text-align:center;" id="qp-status-${p.id}">${statusBadge}</td>
           <td style="text-align:center;">
-            <button class="btn btn-ghost btn-xs" onclick="openEditProductModal(${p.id})" title="Detaylı Düzenle">✏️</button>
+            <div class="flex gap-1 justify-center">
+              <button class="btn btn-primary btn-xs" onclick="openStockEntryModal(${p.id})" title="Alış/Satış Fiyatı ve Stok Ekle">📦 Stok Ekle</button>
+              <button class="btn btn-ghost btn-xs" onclick="openEditProductModal(${p.id})" title="Detaylı Düzenle">✏️</button>
+            </div>
           </td>
         </tr>`;
     }).join("");
@@ -683,48 +828,11 @@ function refreshQpRow(id) {
 }
 
 function bulkSetDefaultStock() {
-  const input = prompt("Stoğu 0 olan ürünlere kaç adet stok atamak istiyorsunuz?", "10");
-  if (input === null) return;
-  const val = parseInt(input, 10);
-  if (isNaN(val) || val < 0) return toast("Geçerli bir sayı girin!", "error");
-
-  let count = 0;
-  const pList = window.products || products || [];
-  pList.forEach(p => {
-    if (!p.isBundle && (!p.stock || Number(p.stock) === 0)) {
-      p.stock = val;
-      count++;
-    }
-  });
-
-  saveData();
-  renderQuickPricingTable();
-  renderInventoryTable();
-  if (typeof renderCatalog === "function") renderCatalog();
-  toast(`✅ ${count} adet ürüne ${val} adet stok atandı!`);
+  // Kaldırıldı
 }
 
 function bulkApplyMargin() {
-  const input = prompt("Alış maliyeti girilmiş ürünlere % kaç kâr marjı uygulanarak satış fiyatı hesaplansın?\n(Örn: 40 girerseniz maliyetin üzerine %40 kâr eklenir)", "40");
-  if (input === null) return;
-  const marginPct = parseFloat(input);
-  if (isNaN(marginPct) || marginPct <= 0) return toast("Geçerli bir yüzde girin!", "error");
-
-  let count = 0;
-  const pList = window.products || products || [];
-  pList.forEach(p => {
-    if (!p.isBundle && Number(p.cost) > 0) {
-      const calculated = Math.round(Number(p.cost) * (1 + marginPct / 100));
-      p.price = calculated;
-      count++;
-    }
-  });
-
-  saveData();
-  renderQuickPricingTable();
-  renderInventoryTable();
-  if (typeof renderCatalog === "function") renderCatalog();
-  toast(`✅ ${count} adet ürüne %${marginPct} kâr marjı uygulanarak satış fiyatları güncellendi!`);
+  // Kaldırıldı
 }
 
 function saveQuickPricingAll() {

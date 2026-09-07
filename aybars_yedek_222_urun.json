@@ -1,5 +1,5 @@
 {
-    "version":  "2026_09_v8_stock1",
+    "version":  "2026_09_v9_stock0_ready",
     "exportDate":  "2026-09-07T12:21:21",
         "categories": [
         "Kedi",
@@ -17,7 +17,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -30,7 +30,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -43,7 +43,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -56,7 +56,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -69,7 +69,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -82,7 +82,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -95,7 +95,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -108,7 +108,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -121,7 +121,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -134,7 +134,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -147,7 +147,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -160,7 +160,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -173,7 +173,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -186,7 +186,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -199,7 +199,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -212,7 +212,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -225,7 +225,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -238,7 +238,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -251,7 +251,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -264,7 +264,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -277,7 +277,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -290,7 +290,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -303,7 +303,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -316,7 +316,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -329,7 +329,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -342,7 +342,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -355,7 +355,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -368,7 +368,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -381,7 +381,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -394,7 +394,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -407,7 +407,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -420,7 +420,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -433,7 +433,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -446,7 +446,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -459,7 +459,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -472,7 +472,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -485,7 +485,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -498,7 +498,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -511,7 +511,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -524,7 +524,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -537,7 +537,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -550,7 +550,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -563,7 +563,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -576,7 +576,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -589,7 +589,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -602,7 +602,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -615,7 +615,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -628,7 +628,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -641,7 +641,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -654,7 +654,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -667,7 +667,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -680,7 +680,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -693,7 +693,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -706,7 +706,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -719,7 +719,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -732,7 +732,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -745,7 +745,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -758,7 +758,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -771,7 +771,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -784,7 +784,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -797,7 +797,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -810,7 +810,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -823,7 +823,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -836,7 +836,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -849,7 +849,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -862,7 +862,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -875,7 +875,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -888,7 +888,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -901,7 +901,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -914,7 +914,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -927,7 +927,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -940,7 +940,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -953,7 +953,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -966,7 +966,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -979,7 +979,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -992,7 +992,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1005,7 +1005,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1018,7 +1018,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1031,7 +1031,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1044,7 +1044,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1057,7 +1057,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1070,7 +1070,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1083,7 +1083,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1096,7 +1096,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1109,7 +1109,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1122,7 +1122,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1135,7 +1135,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1148,7 +1148,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1161,7 +1161,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1174,7 +1174,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1187,7 +1187,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1200,7 +1200,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1213,7 +1213,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1226,7 +1226,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1239,7 +1239,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1252,7 +1252,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1265,7 +1265,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1278,7 +1278,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1291,7 +1291,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1304,7 +1304,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1317,7 +1317,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1330,7 +1330,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1343,7 +1343,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1356,7 +1356,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1369,7 +1369,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1382,7 +1382,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1395,7 +1395,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1408,7 +1408,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1421,7 +1421,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1434,7 +1434,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1447,7 +1447,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1460,7 +1460,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1473,7 +1473,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1486,7 +1486,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1499,7 +1499,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1512,7 +1512,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1525,7 +1525,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1538,7 +1538,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1551,7 +1551,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1564,7 +1564,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1577,7 +1577,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1590,7 +1590,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1603,7 +1603,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1616,7 +1616,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1629,7 +1629,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1642,7 +1642,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1655,7 +1655,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1668,7 +1668,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1681,7 +1681,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1694,7 +1694,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1707,7 +1707,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1720,7 +1720,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1733,7 +1733,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1746,7 +1746,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1759,7 +1759,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1772,7 +1772,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1785,7 +1785,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1798,7 +1798,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1811,7 +1811,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1824,7 +1824,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1837,7 +1837,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1850,7 +1850,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1863,7 +1863,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1876,7 +1876,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1889,7 +1889,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1902,7 +1902,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1915,7 +1915,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1928,7 +1928,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1941,7 +1941,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1954,7 +1954,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1967,7 +1967,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1980,7 +1980,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1993,7 +1993,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2006,7 +2006,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2019,7 +2019,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2032,7 +2032,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2045,7 +2045,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2058,7 +2058,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2071,7 +2071,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2084,7 +2084,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2097,7 +2097,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2110,7 +2110,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2123,7 +2123,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2136,7 +2136,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2149,7 +2149,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2162,7 +2162,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2175,7 +2175,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2188,7 +2188,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2201,7 +2201,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2214,7 +2214,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2227,7 +2227,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2240,7 +2240,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2253,7 +2253,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2266,7 +2266,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2279,7 +2279,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2292,7 +2292,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2305,7 +2305,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2318,7 +2318,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2331,7 +2331,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2344,7 +2344,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2357,7 +2357,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2370,7 +2370,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2383,7 +2383,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2396,7 +2396,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2409,7 +2409,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2422,7 +2422,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2435,7 +2435,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2448,7 +2448,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2461,7 +2461,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2474,7 +2474,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2487,7 +2487,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2500,7 +2500,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2513,7 +2513,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2526,7 +2526,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2539,7 +2539,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2552,7 +2552,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2565,7 +2565,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2578,7 +2578,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2591,7 +2591,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2604,7 +2604,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2617,7 +2617,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2630,7 +2630,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2643,7 +2643,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2656,7 +2656,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2669,7 +2669,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2682,7 +2682,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2695,7 +2695,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2708,7 +2708,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2721,7 +2721,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2734,7 +2734,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2747,7 +2747,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2760,7 +2760,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2773,7 +2773,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2786,7 +2786,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2799,7 +2799,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2812,7 +2812,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2825,7 +2825,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2838,7 +2838,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2851,7 +2851,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2864,7 +2864,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2877,7 +2877,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2890,7 +2890,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock":  1,
+                         "stock": 0,
                          "supplier":  "-",
                          "batches":  [
 
