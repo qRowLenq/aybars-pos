@@ -26,7 +26,7 @@ var cart = [];
 var dailyCloseRecords = [];
 window.dailyCloseRecords = dailyCloseRecords;
 
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_l1PLYUVmHL6dqnholoKke2JsTx56FScjd4qa6veqcoK49ztzLqggwp9M7uze10sU/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVo_f31p2ys12zv8aXEOtIrwyRnHCtsN_rrGLReUjL0U5I_lktxDUW4ixM6i50Bvwi/exec";
 
 var catalogProducts = (typeof window !== "undefined" && window.catalogProducts && window.catalogProducts.length > 0)
   ? window.catalogProducts
