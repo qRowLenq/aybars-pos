@@ -358,6 +358,9 @@ function deductProductStockFIFO(prod, qtyNeeded) {
     itemsSummary,
     paymentType: saleRecord.paymentType,
     total,
+    cardSales: splitCard,
+    cashSales: splitCash,
+    transferSales: splitTransfer,
     vatTotal: Number(vatTotal.toFixed(2)),
     isOfficial: saleRecord.isOfficial,
     // Google E-Tablo Mali Rapor gün satırını anında güncellemek için dual data
