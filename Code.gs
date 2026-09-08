@@ -1156,6 +1156,14 @@ function handleDailyClose(ss, data) {
       diffColor = "#991b1b";
     }
 
+    // Gün sonu verildiğinde günün nihai kategori toplamlarını doğrudan ilgili satırlara mühürle
+    if (data.officialCash !== undefined) salesSheet.getRange(rowMap.officialCash, targetCol).setValue(Number(data.officialCash || 0));
+    if (data.unoffCash !== undefined) salesSheet.getRange(rowMap.unoffCash, targetCol).setValue(Number(data.unoffCash || 0));
+    if (data.cardSales !== undefined) salesSheet.getRange(rowMap.card, targetCol).setValue(Number(data.cardSales || 0));
+    if (data.officialTransfer !== undefined) salesSheet.getRange(rowMap.officialTransfer, targetCol).setValue(Number(data.officialTransfer || 0));
+    if (data.unoffTransfer !== undefined) salesSheet.getRange(rowMap.unoffTransfer, targetCol).setValue(Number(data.unoffTransfer || 0));
+    if (data.platformSales !== undefined) salesSheet.getRange(rowMap.platform, targetCol).setValue(Number(data.platformSales || 0));
+
     // Row 14: Kapanış Saati
     salesSheet.getRange(rowMap.closeTime, targetCol)
       .setValue(closeTime)
