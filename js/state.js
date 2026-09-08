@@ -207,7 +207,7 @@ function loadState() {
   window.categories = cats;
   categories = window.categories;
 
-  const CURRENT_CATALOG_VERSION = "2026_09_v10_stock0_ready";
+  const CURRENT_CATALOG_VERSION = "2026_09_v11_tr_catalog";
   const savedVer = localStorage.getItem("ps_catalog_version");
   let prods = raw("ps_products");
 
@@ -218,15 +218,42 @@ function loadState() {
       : (typeof sampleProducts !== "undefined" && Array.isArray(sampleProducts) ? sampleProducts : []));
 
   if (savedVer !== CURRENT_CATALOG_VERSION || !Array.isArray(prods) || prods.length < 50) {
-    // 222 ürünü 0 stok ile yükle
+    // Mevcut ürünlerin haritası (özel girilmiş fiyat, maliyet veya stokları korumak için)
+    const existingMap = new Map();
+    if (Array.isArray(prods)) {
+      prods.forEach(p => {
+        if (p.id) existingMap.set(String(p.id), p);
+        if (p.barcode) existingMap.set(String(p.barcode), p);
+      });
+    }
+
+    // 222 Türkçe ürünü yükle, varsa kullanıcının daha önce girdiği fiyat/stok bilgilerini koru
     window.products = JSON.parse(JSON.stringify(catalogSource));
     window.products.forEach(p => {
+      const old = existingMap.get(String(p.id)) || (p.barcode ? existingMap.get(String(p.barcode)) : null);
+      if (old) {
+        if (old.stock !== undefined && !isNaN(Number(old.stock))) p.stock = Number(old.stock);
+        if (old.price !== undefined && !isNaN(Number(old.price)) && Number(old.price) > 0) p.price = Number(old.price);
+        if (old.cost !== undefined && !isNaN(Number(old.cost)) && Number(old.cost) > 0) p.cost = Number(old.cost);
+        if (Array.isArray(old.batches) && old.batches.length > 0) p.batches = old.batches;
+      }
       p.stock = (p.stock !== undefined && !isNaN(Number(p.stock))) ? Number(p.stock) : 0;
-      p.vatRate = 20;
+      p.vatRate = (p.vatRate !== undefined && !isNaN(Number(p.vatRate))) ? Number(p.vatRate) : 20;
       p.cost = Number(p.cost) || 0;
       p.price = Number(p.price) || 0;
       if (!Array.isArray(p.batches)) p.batches = [];
     });
+
+    // Kullanıcının manuel eklediği ekstra ürünler varsa kaybetme
+    const catalogIds = new Set(window.products.map(p => String(p.id)));
+    if (Array.isArray(prods)) {
+      prods.forEach(oldP => {
+        if (oldP && oldP.id && !catalogIds.has(String(oldP.id))) {
+          window.products.push(oldP);
+        }
+      });
+    }
+
     localStorage.setItem("ps_products", JSON.stringify(window.products));
     localStorage.setItem("ps_catalog_version", CURRENT_CATALOG_VERSION);
   } else {
