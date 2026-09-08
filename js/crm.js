@@ -117,7 +117,25 @@ function openDebtCollectModal(custId) {
   document.getElementById("cdCustName").innerText = c.name;
   document.getElementById("cdTotalDebt").innerText = (c.balance || 0).toFixed(2) + " ₺";
   document.getElementById("cdAmount").value = c.balance;
+  if (document.getElementById("cdMethod")) document.getElementById("cdMethod").value = "Nakit";
+  if (document.getElementById("cdReceiptOfficial")) document.getElementById("cdReceiptOfficial").checked = true;
+  toggleCdReceiptBox();
   openModal("collectDebtModal");
+}
+
+function toggleCdReceiptBox() {
+  const method = document.getElementById("cdMethod")?.value || "";
+  const hint = document.getElementById("cdReceiptHint");
+  const officialRadio = document.getElementById("cdReceiptOfficial");
+  const unofficialRadio = document.getElementById("cdReceiptUnofficial");
+  if (method.includes("Kart")) {
+    if (officialRadio) officialRadio.checked = true;
+    if (unofficialRadio) unofficialRadio.disabled = true;
+    if (hint) hint.innerText = "(Kart her zaman resmi fişlidir)";
+  } else {
+    if (unofficialRadio) unofficialRadio.disabled = false;
+    if (hint) hint.innerText = "(Fiş/fatura kesildi mi?)";
+  }
 }
 
 function confirmDebtCollection() {
@@ -127,14 +145,33 @@ function confirmDebtCollection() {
   const method = document.getElementById("cdMethod").value;
   if (!amt || amt <= 0) return toast("Geçerli bir tutar girin!", "error");
 
+  const isOfficialRadio = document.getElementById("cdReceiptOfficial");
+  const isOfficial = method.includes("Kart") ? true : (isOfficialRadio ? isOfficialRadio.checked : true);
+  const receiptLabel = isOfficial ? "Fişli" : "Fişsiz";
+
   c.balance = Math.max(0, c.balance - amt);
   if (!c.purchaseHistory) c.purchaseHistory = [];
-  c.purchaseHistory.unshift({ date: nowDate(), time: nowTime(), items: "Veresiye Borç Kapatma Tahsilatı", total: amt, payment: `${method} Tahsil Edildi` });
+  c.purchaseHistory.unshift({ 
+    date: nowDate(), 
+    time: nowTime(), 
+    items: `Veresiye Borç Kapatma Tahsilatı (${receiptLabel})`, 
+    total: amt, 
+    payment: `${method} (${receiptLabel}) Tahsil Edildi` 
+  });
 
   let dualData = null;
   if (typeof calculateDualFinancialOverview === "function") {
     dualData = calculateDualFinancialOverview();
   }
+
+  const isCard = method.includes("Kart") && !method.includes("Havale");
+  const isCash = method.includes("Nakit");
+  const isTransfer = method.includes("Havale") || method.includes("IBAN") || method.includes("Banka") || method.includes("EFT");
+
+  const offCash = (isCash && isOfficial) ? amt : 0;
+  const unoffCash = (isCash && !isOfficial) ? amt : 0;
+  const offTransfer = (isTransfer && isOfficial) ? amt : 0;
+  const unoffTransfer = (isTransfer && !isOfficial) ? amt : 0;
 
   sendToGoogleSheets({
     action: "save_sale",
@@ -142,18 +179,18 @@ function confirmDebtCollection() {
     time: nowTime(),
     customerName: c.name,
     channel: "Veresiye Tahsilatı",
-    itemsSummary: "Borç Kapatma",
-    paymentType: method,
+    itemsSummary: `Borç Kapatma (${receiptLabel} ${method})`,
+    paymentType: `${method} (${receiptLabel})`,
     total: amt,
-    cardSales: (method.includes("Kart") && !method.includes("Havale")) ? amt : 0,
-    cashSales: method.includes("Nakit") ? amt : 0,
-    transferSales: (method.includes("Havale") || method.includes("IBAN") || method.includes("Banka") || method.includes("EFT")) ? amt : 0,
-    officialCash: 0,
-    unoffCash: method.includes("Nakit") ? amt : 0,
-    officialTransfer: (method.includes("Havale") || method.includes("IBAN") || method.includes("Banka") || method.includes("EFT")) ? amt : 0,
-    unoffTransfer: 0,
-    vatTotal: 0,
-    isOfficial: method.includes("Kart") || method.includes("Havale") || method.includes("Banka") || method.includes("EFT"),
+    cardSales: isCard ? amt : 0,
+    cashSales: isCash ? amt : 0,
+    transferSales: isTransfer ? amt : 0,
+    officialCash: offCash,
+    unoffCash: unoffCash,
+    officialTransfer: offTransfer,
+    unoffTransfer: unoffTransfer,
+    vatTotal: isOfficial ? Number((amt * 0.20).toFixed(2)) : 0,
+    isOfficial: isOfficial,
     officialSales: dualData ? Number(dualData.officialSales.toFixed(2)) : undefined,
     invoicedPurchases: dualData ? Number(dualData.invoicedPurchases.toFixed(2)) : undefined,
     expensesTotal: dualData ? Number(dualData.totalInvoicedDeductions.toFixed(2)) : undefined,
@@ -170,7 +207,7 @@ function confirmDebtCollection() {
   }
 
   closeModal("collectDebtModal"); renderCRM(); renderCreditBook(); saveData();
-  toast(`💰 ${amt.toFixed(2)} ₺ tahsil edildi!`);
+  toast(`💰 ${amt.toFixed(2)} ₺ (${receiptLabel}) tahsil edildi!`);
 }
 
 // ── Manual Debt ──
