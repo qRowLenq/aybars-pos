@@ -465,11 +465,11 @@ function ensureSalesSheetStructure(sheet) {
       sheet.getRange(rowMap.officialTransfer, colIdx).setNumberFormat("₺#,##0.00").setFontWeight("bold").setHorizontalAlignment("right");
       sheet.getRange(rowMap.unoffTransfer, colIdx).setNumberFormat("₺#,##0.00").setFontWeight("bold").setHorizontalAlignment("right");
 
-      // Gün sonu kasa alanları
-      sheet.getRange(rowMap.closeTime, colIdx).setHorizontalAlignment("center").setFontSize(8.5);
+      // Gün sonu kasa alanları formatları
+      sheet.getRange(rowMap.closeTime, colIdx).setNumberFormat("@").setHorizontalAlignment("center").setFontSize(8.5);
       sheet.getRange(rowMap.countedCash, colIdx).setNumberFormat("₺#,##0.00").setFontWeight("bold").setHorizontalAlignment("right");
       sheet.getRange(rowMap.cashDiff, colIdx).setNumberFormat("₺#,##0.00").setFontWeight("bold").setHorizontalAlignment("right");
-      sheet.getRange(rowMap.reconcileStatus, colIdx).setHorizontalAlignment("center").setFontSize(8.5);
+      sheet.getRange(rowMap.reconcileStatus, colIdx).setNumberFormat("@").setHorizontalAlignment("center").setFontSize(8.5);
     }
   }
 
@@ -479,10 +479,22 @@ function ensureSalesSheetStructure(sheet) {
   applyDayFormulas(26, 7);
   applyDayFormulas(34, 7);
 
-  // Varsa bozuk hata hücrelerini sıfırla
+  // Varsa bozuk hata hücrelerini ve Kapanış Saati'ndeki eski test kalıntılarını temizle
   try {
     for (var col = 2; col <= 40; col++) {
       if (col === 9 || col === 17 || col === 25 || col === 33) continue;
+
+      // Kapanış Saati satırında (Row 14) eski tablodan kalan para kalıntısı varsa temizle
+      var cTimeVal = sheet.getRange(rowMap.closeTime, col).getValue();
+      if (typeof cTimeVal === "number" || (typeof cTimeVal === "string" && (cTimeVal.indexOf("₺") !== -1 || cTimeVal.indexOf("TL") !== -1))) {
+        sheet.getRange(rowMap.closeTime, col).clearContent();
+        var recVal = sheet.getRange(rowMap.reconcileStatus, col).getValue();
+        if (!recVal || String(recVal).trim() === "") {
+          sheet.getRange(rowMap.countedCash, col).clearContent();
+          sheet.getRange(rowMap.cashDiff, col).clearContent();
+        }
+      }
+
       var vals = sheet.getRange(5, col, 13, 1).getValues();
       for (var r = 0; r < vals.length; r++) {
         var vStr = String(vals[r][0] || "");
@@ -1147,6 +1159,7 @@ function handleDailyClose(ss, data) {
     // Row 14: Kapanış Saati
     salesSheet.getRange(rowMap.closeTime, targetCol)
       .setValue(closeTime)
+      .setNumberFormat("@")
       .setFontSize(8.5)
       .setHorizontalAlignment("center")
       .setFontColor("#0f172a")
@@ -1173,6 +1186,7 @@ function handleDailyClose(ss, data) {
     // Row 17: Mutabakat Durumu
     salesSheet.getRange(rowMap.reconcileStatus, targetCol)
       .setValue(diffStatus)
+      .setNumberFormat("@")
       .setFontSize(8.5)
       .setFontWeight("bold")
       .setHorizontalAlignment("center")
