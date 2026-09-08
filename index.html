@@ -1007,7 +1007,11 @@
       <div class="hint-box mb-3">Müşteri: <b id="cdCustName"></b><br>Kalan Toplam Borç: <b id="cdTotalDebt" class="text-danger"></b></div>
       <div class="fg"><label>Tahsil Edilecek Tutar (₺)</label><input type="number" id="cdAmount" class="fc"></div>
       <div class="fg"><label>Tahsilat Yöntemi</label>
-        <select id="cdMethod" class="fc"><option>Nakit</option><option>Kredi Kartı / Havale</option></select>
+        <select id="cdMethod" class="fc">
+          <option value="Nakit">💵 Nakit</option>
+          <option value="Kredi Kartı">💳 Kredi Kartı</option>
+          <option value="Havale / IBAN">📲 Havale / EFT / IBAN</option>
+        </select>
       </div>
       <div class="modal-actions">
         <button class="btn btn-ghost" onclick="closeModal('collectDebtModal')">İptal</button>
@@ -1473,15 +1477,15 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/products_catalog.js?v=20260909_deploy_fix"></script>
-  <script src="js/state.js?v=20260909_deploy_fix"></script>
-  <script src="js/ui.js?v=20260909_deploy_fix"></script>
-  <script src="js/pos.js?v=20260909_deploy_fix"></script>
-  <script src="js/orders.js?v=20260909_deploy_fix"></script>
-  <script src="js/inventory.js?v=20260909_deploy_fix"></script>
-  <script src="js/crm.js?v=20260909_deploy_fix"></script>
-  <script src="js/procurement.js?v=20260909_deploy_fix"></script>
-  <script src="js/expenses.js?v=20260909_deploy_fix"></script>
-  <script src="js/app.js?v=20260909_deploy_fix"></script>
+  <script src="js/products_catalog.js?v=20260909_debt_transfer"></script>
+  <script src="js/state.js?v=20260909_debt_transfer"></script>
+  <script src="js/ui.js?v=20260909_debt_transfer"></script>
+  <script src="js/pos.js?v=20260909_debt_transfer"></script>
+  <script src="js/orders.js?v=20260909_debt_transfer"></script>
+  <script src="js/inventory.js?v=20260909_debt_transfer"></script>
+  <script src="js/crm.js?v=20260909_debt_transfer"></script>
+  <script src="js/procurement.js?v=20260909_debt_transfer"></script>
+  <script src="js/expenses.js?v=20260909_debt_transfer"></script>
+  <script src="js/app.js?v=20260909_debt_transfer"></script>
 </body>
 </html>
