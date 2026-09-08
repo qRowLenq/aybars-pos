@@ -287,21 +287,13 @@ function deductProductStockFIFO(prod, qtyNeeded) {
     }
   });
 
-  let isOfficial = true;
-  const payUpper = (payType || "").toUpperCase();
-  const isCardOrBank = payUpper.includes("KREDİ KARTI") || payUpper.includes("KART") || payUpper.includes("BANKA") || payUpper.includes("HAVALE") || payUpper.includes("PLATFORM");
+  const isReceiptOfficial = document.getElementById("posReceiptOfficial") 
+    ? document.getElementById("posReceiptOfficial").checked 
+    : (document.getElementById("posCashIsOfficial") ? document.getElementById("posCashIsOfficial").checked : true);
 
-  if (isCardOrBank) {
-    isOfficial = true; // Kredi Kartı / Banka zorunlu resmi
-  } else if (payUpper.includes("NAKİT")) {
-    const cashOfficialToggle = document.getElementById("posCashIsOfficial");
-    isOfficial = cashOfficialToggle ? cashOfficialToggle.checked : true;
-  } else if (payType === "Parçalı") {
-    // Parçalı ödemede kart çekimi varsa veya nakit toggle açıksa resmi sayılır
-    isOfficial = true;
-  } else {
-    isOfficial = true;
-  }
+  const payUpper = (payType || "").toUpperCase();
+  const isCard = payUpper.includes("KREDİ KARTI") || payUpper.includes("KART");
+  const isOfficial = isCard ? true : Boolean(isReceiptOfficial);
 
   let splitCash = 0;
   let splitCard = 0;
@@ -314,7 +306,7 @@ function deductProductStockFIFO(prod, qtyNeeded) {
     splitTransfer = Number(splitData.splitTransfer) || 0;
     splitCredit = Number(splitData.splitCredit) || 0;
   } else {
-    if (payUpper.includes("NAKİT")) {
+    if (payUpper.includes("NAKİT") || payUpper.includes("NAKIT")) {
       splitCash = total;
     } else if (payUpper.includes("HAVALE") || payUpper.includes("IBAN") || payUpper.includes("EFT") || payUpper.includes("BANKA")) {
       splitTransfer = total;
@@ -361,6 +353,10 @@ function deductProductStockFIFO(prod, qtyNeeded) {
     cardSales: splitCard,
     cashSales: splitCash,
     transferSales: splitTransfer,
+    officialCash: isOfficial ? splitCash : 0,
+    unoffCash: !isOfficial ? splitCash : 0,
+    officialTransfer: isOfficial ? splitTransfer : 0,
+    unoffTransfer: !isOfficial ? splitTransfer : 0,
     vatTotal: Number(vatTotal.toFixed(2)),
     isOfficial: saleRecord.isOfficial,
     // Google E-Tablo Mali Rapor gün satırını anında güncellemek için dual data
@@ -384,33 +380,64 @@ function deductProductStockFIFO(prod, qtyNeeded) {
   if (document.getElementById("cartCustomerSelect")) document.getElementById("cartCustomerSelect").value = "";
   renderCart(); renderCatalog(); renderPosSalesHistory(); saveData(); updateAllBadges();
   if (typeof renderSktRadarWidget === "function") renderSktRadarWidget();
-  toast(`✅ ${total.toFixed(2)} ₺ satış tamamlandı! ${isOfficial ? '(🧾 Resmi)' : '(📝 Fişsiz)'}`);
+  toast(`✅ ${total.toFixed(2)} ₺ satış tamamlandı! ${isOfficial ? '(🧾 Fişli)' : '(📝 Fişsiz)'}`);
+}
+
+function toggleRecentSalesBox() {
+  const body = document.getElementById("posRecentSalesBody");
+  const icon = document.getElementById("posRecentSalesToggleIcon");
+  const btn = document.getElementById("btnToggleRecentSales");
+  if (!body) return;
+  const isHidden = body.style.display === "none";
+  body.style.display = isHidden ? "block" : "none";
+  if (icon) icon.innerText = isHidden ? "▼" : "▲";
+  if (btn) btn.innerText = isHidden ? "▲ Daralt" : "▼ Göster";
+}
+
+function syncPosReceiptToggle() {
+  const isOfficial = document.getElementById("posReceiptOfficial")?.checked;
+  const legacyCheckbox = document.getElementById("posCashIsOfficial");
+  if (legacyCheckbox) legacyCheckbox.checked = Boolean(isOfficial);
 }
 
 // ── Recent Sales & Refund ──
 function renderPosSalesHistory() {
   const container = document.getElementById("posRecentSalesList");
-  const todaySales = salesHistory.filter(s => s.date === nowDate());
+  const currentWorkingDay = nowDate();
+  const todaySales = salesHistory.filter(s => s.date === currentWorkingDay);
 
   let totalCard = 0;
   let totalCash = 0;
   let totalTransfer = 0;
   let totalAll = 0;
-  let cardCount = 0;
-  let cashCount = 0;
-  let transferCount = 0;
 
   todaySales.forEach(s => {
     const bk = getSalePaymentBreakdown(s);
-    totalCash += bk.cash;
-    totalCard += bk.card;
-    totalTransfer += bk.transfer;
+    totalCash += (Number(bk.cash) || 0);
+    totalCard += (Number(bk.card) || 0);
+    totalTransfer += (Number(bk.transfer) || 0);
     totalAll += (Number(s.total) || 0);
-
-    if (bk.card > 0) cardCount++;
-    if (bk.cash > 0) cashCount++;
-    if (bk.transfer > 0) transferCount++;
   });
+
+  // + Müşteri veresiye tahsilatları (Nakit / Kart / Havale)
+  if (Array.isArray(window.customers || customers)) {
+    (window.customers || customers).forEach(c => {
+      (c.purchaseHistory || []).filter(h => h.date === currentWorkingDay && (h.payment || "").includes("Tahsilat")).forEach(h => {
+        const p = (h.payment || "").toLowerCase();
+        const amt = Number(h.total) || 0;
+        if (p.includes("nakit")) {
+          totalCash += amt;
+          totalAll += amt;
+        } else if (p.includes("kart")) {
+          totalCard += amt;
+          totalAll += amt;
+        } else if (p.includes("havale") || p.includes("iban") || p.includes("eft") || p.includes("banka")) {
+          totalTransfer += amt;
+          totalAll += amt;
+        }
+      });
+    });
+  }
 
   const cardEl = document.getElementById("posSummaryCardSales");
   if (cardEl) cardEl.innerText = totalCard.toFixed(2) + " ₺";

@@ -533,6 +533,7 @@ function confirmSupplierPayment() {
   if (!s) return;
   const amt = Number(document.getElementById("psAmount").value);
   const src = document.getElementById("psSource").value;
+  const hasInvoice = document.getElementById("psHasInvoice") ? document.getElementById("psHasInvoice").checked : true;
   if (!amt || amt <= 0) return toast("Geçerli ödeme tutarı girin!", "error");
 
   s.balance = Math.max(0, (s.balance || 0) - amt);
@@ -546,8 +547,8 @@ function confirmSupplierPayment() {
     id: Date.now(), date: nowDate(), time: nowTime(),
     expenseType: "procurement", category: "Toptancı Borç Ödemesi",
     supplierName: s.name, status: `Ödendi (${src})`,
-    amount: amt, desc: "Geçmiş Borç Ödemesi",
-    hasInvoice: false, isInvoice: false, vatRate: 0, vatAmount: 0
+    amount: amt, desc: hasInvoice ? "Faturalı Toptancı Ödemesi" : "Faturasız Toptancı Ödemesi",
+    hasInvoice: hasInvoice, isInvoice: hasInvoice, vatRate: hasInvoice ? 20 : 0, vatAmount: 0
   });
 
   sendToGoogleSheets({
@@ -557,11 +558,11 @@ function confirmSupplierPayment() {
     expenseType: "Borç Ödemesi",
     category: s.name,
     paymentSource: src,
-    description: "Toptancı Geçmiş Borç Ödemesi",
+    description: hasInvoice ? "Faturalı Toptancı Ödemesi" : "Faturasız Toptancı Ödemesi",
     amount: amt,
-    hasInvoice: false,
-    isInvoice: false,
-    vatRate: 0,
+    hasInvoice: hasInvoice,
+    isInvoice: hasInvoice,
+    vatRate: hasInvoice ? 20 : 0,
     vatAmount: 0,
     status: "Ödendi"
   });

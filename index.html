@@ -58,41 +58,46 @@
         </div>
         <div id="productGrid" class="product-grid"></div>
 
-        <div class="recent-sales-box mt-2">
-          <div class="rs-header flex justify-between items-center mb-2 flex-wrap gap-2">
+        <div class="recent-sales-box mt-2" id="posRecentSalesContainer">
+          <div class="rs-header flex justify-between items-center mb-2 flex-wrap gap-2" style="cursor:pointer;" onclick="toggleRecentSalesBox()">
             <div class="flex items-center gap-2">
+              <span id="posRecentSalesToggleIcon" style="font-size:12px; transition:transform 0.2s;">▼</span>
               <b>📜 Son Satışlar & Günlük Gelir (Bugün)</b>
               <span id="posDayStatusBadge" class="badge" style="font-size:10.5px; background:#dcfce7; color:#166534; border:1px solid #bbf7d0;">🟢 Gün Açık</span>
             </div>
-            <div class="flex gap-1" id="posDayActionsContainer">
+            <div class="flex gap-1 items-center" id="posDayActionsContainer" onclick="event.stopPropagation()">
+              <button class="btn btn-outline btn-xs" id="btnToggleRecentSales" onclick="toggleRecentSalesBox()">▲ Daralt</button>
               <button class="btn btn-warning btn-xs" onclick="openDailyCloseModal()">🏁 Gün Sonu Sayımı Yap</button>
             </div>
           </div>
 
-          <!-- Gün Sonu Kapatıldı Bildirimi (Kapatıldığında Görünür ve Geri Aç Butonu Sunar) -->
-          <div id="posClosedNoticeBox" style="display:none; margin-bottom:10px;"></div>
+          <div id="posRecentSalesBody">
+            <!-- Gün Sonu Kapatıldı Bildirimi (Kapatıldığında Görünür ve Geri Aç Butonu Sunar) -->
+            <div id="posClosedNoticeBox" style="display:none; margin-bottom:10px;"></div>
 
-          <!-- Günlük Hızlı Gelir Özeti Kartları (Kart, Nakit, Havale, Toplam) -->
-          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:8px; margin-bottom:10px;">
-            <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:var(--radius-sm); padding:8px 10px;">
-              <div style="font-size:10.5px; font-weight:700; color:#1d4ed8;">💳 KREDİ KARTI</div>
-              <div id="posSummaryCardSales" style="font-size:16px; font-weight:800; color:#1e40af;">0.00 ₺</div>
+            <!-- Günlük Hızlı Gelir Özeti Kartları (Kart, Nakit, Havale, Toplam) -->
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:8px; margin-bottom:10px;">
+              <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:var(--radius-sm); padding:8px 10px;">
+                <div style="font-size:10.5px; font-weight:700; color:#1d4ed8;">💳 KREDİ KARTI</div>
+                <div id="posSummaryCardSales" style="font-size:16px; font-weight:800; color:#1e40af;">0.00 ₺</div>
+              </div>
+              <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:var(--radius-sm); padding:8px 10px;">
+                <div style="font-size:10.5px; font-weight:700; color:#166534;">💵 NAKİT</div>
+                <div id="posSummaryCashSales" style="font-size:16px; font-weight:800; color:#15803d;">0.00 ₺</div>
+              </div>
+              <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:var(--radius-sm); padding:8px 10px;">
+                <div style="font-size:10.5px; font-weight:700; color:#0369a1;">📲 HAVALE / IBAN</div>
+                <div id="posSummaryTransferSales" style="font-size:16px; font-weight:800; color:#0284c7;">0.00 ₺</div>
+              </div>
+              <div style="background:#faf5ff; border:1px solid #e9d5ff; border-radius:var(--radius-sm); padding:8px 10px;">
+                <div style="font-size:10.5px; font-weight:700; color:#7e22ce;">💰 TOPLAM GELİR</div>
+                <div id="posSummaryTotalSales" style="font-size:16px; font-weight:800; color:#9333ea;">0.00 ₺</div>
+              </div>
             </div>
-            <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:var(--radius-sm); padding:8px 10px;">
-              <div style="font-size:10.5px; font-weight:700; color:#166534;">💵 NAKİT</div>
-              <div id="posSummaryCashSales" style="font-size:16px; font-weight:800; color:#15803d;">0.00 ₺</div>
-            </div>
-            <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:var(--radius-sm); padding:8px 10px;">
-              <div style="font-size:10.5px; font-weight:700; color:#0369a1;">📲 HAVALE / IBAN</div>
-              <div id="posSummaryTransferSales" style="font-size:16px; font-weight:800; color:#0284c7;">0.00 ₺</div>
-            </div>
-            <div style="background:#faf5ff; border:1px solid #e9d5ff; border-radius:var(--radius-sm); padding:8px 10px;">
-              <div style="font-size:10.5px; font-weight:700; color:#7e22ce;">💰 TOPLAM GELİR</div>
-              <div id="posSummaryTotalSales" style="font-size:16px; font-weight:800; color:#9333ea;">0.00 ₺</div>
-            </div>
+
+            <!-- Kaydırılabilir ve sınırlandırılmış satış listesi (iade butonuyla birlikte ekranı kaplamaz) -->
+            <div id="posRecentSalesList" class="flex-col gap-2" style="max-height:220px; overflow-y:auto; padding-right:4px;"></div>
           </div>
-
-          <div id="posRecentSalesList" class="flex-col gap-2"></div>
         </div>
       </div>
 
@@ -119,13 +124,24 @@
             <b id="cartVatDisplay" style="color:var(--warning-dark);">0.00 ₺</b>
           </div>
           
-          <!-- Nakit Satış Fiş/Fatura Hızlı Toggle -->
-          <div class="pos-official-toggle-box mb-2">
-            <label class="pos-official-label" title="Nakit satışlarda fiş veya fatura kesildiğini işaretler. İşaret kaldırılırsa iç kasa takibinde kalır.">
-              <input type="checkbox" id="posCashIsOfficial" checked>
-              <span class="pos-toggle-text">🧾 Fiş / Fatura Kesildi (Nakit Satış)</span>
-            </label>
-            <span class="text-xs text-muted" style="font-size:10.5px; opacity:0.8;">(Kartlı satışlar her zaman resmidir)</span>
+          <!-- Fişli / Fişsiz Hızlı Seçim Butonları (Nakit & Havale için) -->
+          <div class="pos-official-toggle-box mb-2" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:var(--radius-sm); padding:7px 9px;">
+            <div class="flex justify-between items-center mb-1.5">
+              <span style="font-size:11px; font-weight:700; color:#334155;">🧾 Belge / Fiş Durumu:</span>
+              <span class="text-xs text-muted" style="font-size:10px; color:#64748b;">(Kart her zaman fişlidir)</span>
+            </div>
+            <div class="flex gap-2">
+              <label class="flex items-center gap-1.5 flex-1" style="cursor:pointer; background:#fff; padding:5px 8px; border-radius:4px; border:1px solid #bbf7d0; font-size:11.5px; font-weight:700;">
+                <input type="radio" name="posReceiptOption" id="posReceiptOfficial" value="official" checked onchange="syncPosReceiptToggle()">
+                <span style="color:#166534;">🧾 FİŞLİ (Resmi)</span>
+              </label>
+              <label class="flex items-center gap-1.5 flex-1" style="cursor:pointer; background:#fff; padding:5px 8px; border-radius:4px; border:1px solid #fde68a; font-size:11.5px; font-weight:700;">
+                <input type="radio" name="posReceiptOption" id="posReceiptUnofficial" value="unofficial" onchange="syncPosReceiptToggle()">
+                <span style="color:#b45309;">📝 FİŞSİZ</span>
+              </label>
+            </div>
+            <!-- Gizli tutulan eski checkbox uyumluluğu -->
+            <input type="checkbox" id="posCashIsOfficial" checked style="display:none;">
           </div>
 
           <div class="pay-grid">
@@ -1172,6 +1188,12 @@
       <div class="fg"><label>Ödenecek Tutar (₺)</label><input type="number" id="psAmount" class="fc"></div>
       <div class="fg"><label>Ödeme Kaynağı</label>
         <select id="psSource" class="fc"><option>Banka / Havale</option><option>Kasa (Nakit)</option><option>Şahsi Hesap</option></select>
+      </div>
+      <div class="fg mt-2" style="background:#f8fafc; padding:8px 10px; border-radius:4px; border:1px solid #e2e8f0;">
+        <label class="flex items-center gap-2" style="cursor:pointer; font-weight:600; font-size:12px; color:#1e293b; margin:0;">
+          <input type="checkbox" id="psHasInvoice" checked>
+          <span>🧾 Fatura / Resmi Evrak Var (Gidere Faturalı Yansısın)</span>
+        </label>
       </div>
       <div class="modal-actions">
         <button class="btn btn-ghost" onclick="closeModal('paySupplierModal')">İptal</button>
