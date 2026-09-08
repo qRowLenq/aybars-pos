@@ -1,23 +1,23 @@
 {
     "version":  "2026_09_v9_stock0_ready",
     "exportDate":  "2026-09-07T12:21:21",
-        "categories": [
-        "Kedi",
-        "Köpek",
-        "Kuş / Kemirgen",
-        "Açık Mama",
-        "Kum / Kozmetik",
-        "Kampanyalar"
-    ],
+    "categories":  [
+                       "Kedi",
+                       "Köpek",
+                       "Kuş / Kemirgen",
+                       "Açık Mama",
+                       "Kum / Kozmetik",
+                       "Kampanyalar"
+                   ],
     "products":  [
                      {
                          "id":  1,
-                         "name":  "Royalist Puppy Shampoo Yavru Köpek Şampuanı (Pudra Kokulu)",
+                         "name":  "Royalist Pudra Kokulu Yavru Köpek Şampuanı",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -25,12 +25,12 @@
                      },
                      {
                          "id":  2,
-                         "name":  "Dreamies Kabartan Ördekli Kedi Ödülü",
+                         "name":  "Dreamies Ördekli Kedi Ödülü",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -43,7 +43,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -56,7 +56,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -64,12 +64,12 @@
                      },
                      {
                          "id":  5,
-                         "name":  "BioFeline Derma Paste Prebiotic",
+                         "name":  "BioFeline Prebiyotik Deri ve Tüy Destek Kedi Macunu",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -77,12 +77,12 @@
                      },
                      {
                          "id":  6,
-                         "name":  "Royalist Disposable Köpek Külotu (XS - Extra Small)",
+                         "name":  "Royalist Tek Kullanımlık Köpek Külodu (XS - Ekstra Küçük)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -90,12 +90,12 @@
                      },
                      {
                          "id":  7,
-                         "name":  "NutriSuper Bird Multi Vitamin",
+                         "name":  "NutriSuper Kuş Multivitamini",
                          "category":  "Kuş / Kemirgen",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -103,12 +103,12 @@
                      },
                      {
                          "id":  8,
-                         "name":  "Garden Mix Deri Burgu Çubuk Köpek Ödülü (5-100 adet)",
+                         "name":  "Garden Mix Deri Burgu Çubuk Köpek Ödülü (5-100 Adet)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -116,12 +116,12 @@
                      },
                      {
                          "id":  9,
-                         "name":  "Garden Mix Somon Ezmeli Kedi Ödülü (Tasty Paste)",
+                         "name":  "Garden Mix Somon Ezmeli Sıvı Kedi Ödülü",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -129,12 +129,12 @@
                      },
                      {
                          "id":  10,
-                         "name":  "LuckyPaw Air Mesh Harness (Göğüs Tasması)",
+                         "name":  "LuckyPaw Air Mesh Göğüs Tasması (Nefes Alan)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -142,12 +142,12 @@
                      },
                      {
                          "id":  11,
-                         "name":  "Royal Canin Kitten Kuru Kedi Maması",
+                         "name":  "Royal Canin Yavru Kedi Kuru Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -160,7 +160,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -173,7 +173,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -186,7 +186,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -194,12 +194,12 @@
                      },
                      {
                          "id":  15,
-                         "name":  "Kiki Excellent Multi Vitamin Paste Professional",
+                         "name":  "Kiki Excellent Profesyonel Multivitamin Kedi Macunu",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -207,12 +207,12 @@
                      },
                      {
                          "id":  16,
-                         "name":  "Garden Mix Karides Ezmeli Kedi Ödülü (Tasty Paste)",
+                         "name":  "Garden Mix Karides Ezmeli Sıvı Kedi Ödülü",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -220,12 +220,12 @@
                      },
                      {
                          "id":  17,
-                         "name":  "Felicia Hypoallergenic Adult Skin \u0026 Coat Support Salmon (Deneme Ürünü)",
+                         "name":  "Felicia Hipoalerjenik Somonlu Yetişkin Deri ve Tüy Destekli Kedi Maması (Deneme Ürünü)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -238,7 +238,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -251,7 +251,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -259,12 +259,12 @@
                      },
                      {
                          "id":  20,
-                         "name":  "BioFeline Kitten Derma Paste Prebiotic",
+                         "name":  "BioFeline Prebiyotik Yavru Kedi Deri ve Tüy Macunu",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -272,12 +272,12 @@
                      },
                      {
                          "id":  21,
-                         "name":  "BioFeline Malt Paste Prebiyotik Tüy Yumağı Atılımı Destekleyici",
+                         "name":  "BioFeline Prebiyotik Tüy Yumağı Önleyici Malt Macun",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -285,12 +285,12 @@
                      },
                      {
                          "id":  22,
-                         "name":  "Advance Active Defense Sterilized Adult Cat Food (Turkey)",
+                         "name":  "Advance Active Defense Hindili Kısırlaştırılmış Yetişkin Kedi Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -298,12 +298,12 @@
                      },
                      {
                          "id":  23,
-                         "name":  "Garden Mix Kuzu Eti Ezmeli Köpek Ödülü (Tasty Paste)",
+                         "name":  "Garden Mix Kuzu Eti Ezmeli Sıvı Köpek Ödülü",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -311,12 +311,12 @@
                      },
                      {
                          "id":  24,
-                         "name":  "Serypet Pet Hair Remover",
+                         "name":  "Serypet Evcil Hayvan Tüy Toplayıcı",
                          "category":  "Kum / Kozmetik",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -329,7 +329,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -337,12 +337,12 @@
                      },
                      {
                          "id":  26,
-                         "name":  "High-Protein Knotted Bone Düğüm Kemik (36 cm, 15 adet)",
+                         "name":  "High-Protein Düğüm Kemik (36 cm, 15 Adet)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -350,12 +350,12 @@
                      },
                      {
                          "id":  27,
-                         "name":  "High-Protein Pressed Bone Preslenmiş Kemik (22 cm)",
+                         "name":  "High-Protein Preslenmiş Kemik (22 cm)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -363,12 +363,12 @@
                      },
                      {
                          "id":  28,
-                         "name":  "Royal Canin Starter Mother \u0026 Babydog (1-2 months) Mousse",
+                         "name":  "Royal Canin Starter Anne ve Yavru Köpek Mus Konserve (1-2 Ay)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -376,12 +376,12 @@
                      },
                      {
                          "id":  29,
-                         "name":  "Garden Mix Ton Balığı Ezmeli Kedi Ödülü (Tasty Paste)",
+                         "name":  "Garden Mix Ton Balığı Ezmeli Sıvı Kedi Ödülü",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -394,7 +394,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -407,7 +407,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -415,12 +415,12 @@
                      },
                      {
                          "id":  32,
-                         "name":  "Garden Mix Crystal Litter Kristal Kedi Kumu",
+                         "name":  "Garden Mix Kristal Kedi Kumu",
                          "category":  "Kum / Kozmetik",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -428,12 +428,12 @@
                      },
                      {
                          "id":  33,
-                         "name":  "NaturaPel by Trope Cat \u0026 Dog Cleaning Wet Wipes (100 adet)",
+                         "name":  "NaturaPel by Trope Kedi ve Köpek Temizleme Islak Mendili (100 Adet)",
                          "category":  "Kum / Kozmetik",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -441,12 +441,12 @@
                      },
                      {
                          "id":  34,
-                         "name":  "BioFeline Move Tablet Glucosamine",
+                         "name":  "BioFeline Move Glukozamin Eklem Destek Tableti",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -454,12 +454,12 @@
                      },
                      {
                          "id":  35,
-                         "name":  "BioFeline Microbi Liquid Probiotic",
+                         "name":  "BioFeline Microbi Sıvı Probiyotik",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -467,12 +467,12 @@
                      },
                      {
                          "id":  36,
-                         "name":  "Royalist Disposable Köpek Külotu (M - Medium / L - Large)",
+                         "name":  "Royalist Tek Kullanımlık Köpek Külodu (M - Orta / L - Büyük)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -480,12 +480,12 @@
                      },
                      {
                          "id":  37,
-                         "name":  "High-Protein White Bone XL Preslenmiş Kemik (27 cm)",
+                         "name":  "High-Protein Beyaz Preslenmiş Kemik XL (27 cm)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -493,12 +493,12 @@
                      },
                      {
                          "id":  38,
-                         "name":  "Advance Active Defense Sterilized Cat Food (Salmon)",
+                         "name":  "Advance Active Defense Somonlu Kısırlaştırılmış Yetişkin Kedi Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -506,12 +506,12 @@
                      },
                      {
                          "id":  39,
-                         "name":  "Hill\u0027s Science Diet Sensitive Care Digestive Wellbeing",
+                         "name":  "Hill\u0027s Science Diet Hassas Sindirim Kedi Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -519,12 +519,12 @@
                      },
                      {
                          "id":  40,
-                         "name":  "Advance Active Defense Adult Mini Dog Food (Chicken, 1-10 kg)",
+                         "name":  "Advance Active Defense Tavuklu Küçük Irk Yetişkin Köpek Maması (1-10 kg)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -532,12 +532,12 @@
                      },
                      {
                          "id":  41,
-                         "name":  "Garden Mix Sığır Derisi Halka (Cowhide Rings)",
+                         "name":  "Garden Mix Sığır Derisi Halka Köpek Ödülü",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -550,7 +550,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -558,12 +558,12 @@
                      },
                      {
                          "id":  43,
-                         "name":  "Garden Mix Stick Crackers Budgies Muhabbet Kuşu Krakeri",
+                         "name":  "Garden Mix Muhabbet Kuşu Krakeri",
                          "category":  "Kuş / Kemirgen",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -571,12 +571,12 @@
                      },
                      {
                          "id":  44,
-                         "name":  "Purina Pro Plan Small \u0026 Mini Adult Sensitive Skin Salmon",
+                         "name":  "Purina Pro Plan Küçük Irk Somonlu Hassas Deri Yetişkin Köpek Maması",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -589,7 +589,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -602,7 +602,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -615,7 +615,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -623,12 +623,12 @@
                      },
                      {
                          "id":  48,
-                         "name":  "GimCat Malt-Soft Extra Professional Pasta Anti-Hairball",
+                         "name":  "GimCat Malt-Soft Extra Profesyonel Tüy Yumağı Önleyici Kedi Macunu",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -636,12 +636,12 @@
                      },
                      {
                          "id":  49,
-                         "name":  "GimCat Multi-Vitamin Professional Pasta",
+                         "name":  "GimCat Profesyonel Multivitamin Kedi Macunu",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -649,12 +649,12 @@
                      },
                      {
                          "id":  50,
-                         "name":  "SupraVet Hairball Anti Malt Soft Paste",
+                         "name":  "SupraVet Tüy Yumağı Önleyici Yumuşak Kedi Malt Macunu",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -667,7 +667,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -675,12 +675,12 @@
                      },
                      {
                          "id":  52,
-                         "name":  "Purina Pro Plan All Size Everyday Nutrition Turkey in Jelly",
+                         "name":  "Purina Pro Plan Jöleli Hindili Günlük Beslenme Yaş Kedi Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -688,12 +688,12 @@
                      },
                      {
                          "id":  53,
-                         "name":  "Advance Active Defense Sensitive Care Mini Dog Food (Salmon, 1-10 kg)",
+                         "name":  "Advance Active Defense Somonlu Küçük Irk Hassas Yetişkin Köpek Maması (1-10 kg)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -706,7 +706,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -714,12 +714,12 @@
                      },
                      {
                          "id":  55,
-                         "name":  "My Cat Original Natural Çam Pelleti Kedi Kumu",
+                         "name":  "My Cat Doğal Çam Pelleti Kedi Kumu",
                          "category":  "Kum / Kozmetik",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -727,12 +727,12 @@
                      },
                      {
                          "id":  56,
-                         "name":  "Advance Active Defense Hairball Weight Control Cat Food",
+                         "name":  "Advance Active Defense Tüy Yumağı ve Kilo Kontrollü Yetişkin Kedi Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -745,7 +745,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -753,12 +753,12 @@
                      },
                      {
                          "id":  58,
-                         "name":  "Reflex Kitten Cat Food With Chicken Chunks in Gravy (400 gr)",
+                         "name":  "Reflex Soslu Tavuk Parçalı Yavru Kedi Konserve Maması (400 gr)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -766,12 +766,12 @@
                      },
                      {
                          "id":  59,
-                         "name":  "Quik Freshwater Salt",
+                         "name":  "Quik Tatlı Su Akvaryum Tuzu",
                          "category":  "Kuş / Kemirgen",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -784,7 +784,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -797,7 +797,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -810,7 +810,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -818,12 +818,12 @@
                      },
                      {
                          "id":  63,
-                         "name":  "Felicia Chunks in Gravy Kedi Maması",
+                         "name":  "Felicia Soslu Parçalı Yaş Kedi Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -836,7 +836,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -844,12 +844,12 @@
                      },
                      {
                          "id":  65,
-                         "name":  "Pro Line Baby Powder %100 Natural Bentonit Clumping Cat Litter",
+                         "name":  "Pro Line Bebek Pudrası Kokulu %100 Doğal Bentonit Kedi Kumu",
                          "category":  "Kum / Kozmetik",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -857,12 +857,12 @@
                      },
                      {
                          "id":  66,
-                         "name":  "Nutri Super Bird Multi Vitamin",
+                         "name":  "Nutri Super Kuş Multivitamini",
                          "category":  "Kuş / Kemirgen",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -870,12 +870,12 @@
                      },
                      {
                          "id":  67,
-                         "name":  "Reflex Plus Chunks in Jelly With Salmon \u0026 Tuna Adult Cat Food",
+                         "name":  "Reflex Plus Jöleli Somonlu ve Ton Balıklı Yetişkin Kedi Konservesi",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -883,12 +883,12 @@
                      },
                      {
                          "id":  68,
-                         "name":  "Reflex Meaty Sticks With Game \u0026 Goose",
+                         "name":  "Reflex Av Eti ve Kaz Etli Kedi Ödül Çubuğu",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -896,12 +896,12 @@
                      },
                      {
                          "id":  69,
-                         "name":  "Reflex Meaty Sticks With Chicken",
+                         "name":  "Reflex Tavuklu Kedi Ödül Çubuğu",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -914,7 +914,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -922,12 +922,12 @@
                      },
                      {
                          "id":  71,
-                         "name":  "Reflex Plus Meaty Sticks With Lamb Grain Free Adult Dog Treat",
+                         "name":  "Reflex Plus Tahılsız Kuzu Etli Yetişkin Köpek Ödül Çubuğu",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -935,12 +935,12 @@
                      },
                      {
                          "id":  72,
-                         "name":  "Wanpy Meaty Sticks",
+                         "name":  "Wanpy Etli Kedi Ödül Çubuğu",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -948,12 +948,12 @@
                      },
                      {
                          "id":  73,
-                         "name":  "Royal Canin Hair \u0026 Skin Care Cat Food",
+                         "name":  "Royal Canin Tüy ve Deri Sağlığı Destekli Kedi Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -961,12 +961,12 @@
                      },
                      {
                          "id":  74,
-                         "name":  "BioFeline Fish Oil Omega 3 ve Omega 6",
+                         "name":  "BioFeline Balık Yağı Omega 3 ve Omega 6",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -974,12 +974,12 @@
                      },
                      {
                          "id":  75,
-                         "name":  "BioFeline Sterile Paste Prebiyotik Kısırlaştırılmış Kediler İçin Macun",
+                         "name":  "BioFeline Prebiyotik Kısırlaştırılmış Kedi Macunu",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -987,12 +987,12 @@
                      },
                      {
                          "id":  76,
-                         "name":  "Reflex Plus Meaty Sticks for Adult Dogs with Beef",
+                         "name":  "Reflex Plus Sığır Etli Yetişkin Köpek Ödül Çubuğu",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1000,12 +1000,12 @@
                      },
                      {
                          "id":  77,
-                         "name":  "Fresh Paty Health Indicator Kedi Kumu Deodorantı",
+                         "name":  "Fresh Paty Sağlık Göstergeli Kedi Kumu Koku Giderici Deodorant",
                          "category":  "Kum / Kozmetik",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1013,12 +1013,12 @@
                      },
                      {
                          "id":  78,
-                         "name":  "Royal Canin Chihuahua Adult Dog Food",
+                         "name":  "Royal Canin Chihuahua Yetişkin Köpek Maması",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1026,12 +1026,12 @@
                      },
                      {
                          "id":  79,
-                         "name":  "Royal Canin Yorkshire Terrier Adult Dog Food",
+                         "name":  "Royal Canin Yorkshire Terrier Yetişkin Köpek Maması",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1044,7 +1044,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1057,7 +1057,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1065,12 +1065,12 @@
                      },
                      {
                          "id":  82,
-                         "name":  "High-Protein Knotted Bone %100 Sığır Doğal Düğüm Kemik",
+                         "name":  "High-Protein %100 Sığır Doğal Düğüm Çiğneme Kemiği",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1078,12 +1078,12 @@
                      },
                      {
                          "id":  83,
-                         "name":  "Les Repas Plaisir Care Urinary Support Kedi Maması",
+                         "name":  "Les Repas Plaisir İdrar Yolu Destekli Yaş Kedi Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1096,7 +1096,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1109,7 +1109,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1117,12 +1117,12 @@
                      },
                      {
                          "id":  86,
-                         "name":  "Kiki Excellent Pudra Kokulu Koku Giderici (Odor Remover)",
+                         "name":  "Kiki Excellent Pudra Kokulu Kedi Kumu Koku Giderici",
                          "category":  "Kum / Kozmetik",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1130,12 +1130,12 @@
                      },
                      {
                          "id":  87,
-                         "name":  "Wanpy Wet Food Tasty Meat Paste Tuna, Chicken \u0026 Carrot",
+                         "name":  "Wanpy Ton Balığı, Tavuk ve Havuçlu Sıvı Kedi Ödül Ezmesi",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1143,12 +1143,12 @@
                      },
                      {
                          "id":  88,
-                         "name":  "Dreamies Kabartan Ördekli Kedi Ödülü (Mavi Paket)",
+                         "name":  "Dreamies Ördekli Kedi Ödülü (Mavi Paket)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1161,7 +1161,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1169,12 +1169,12 @@
                      },
                      {
                          "id":  90,
-                         "name":  "Reflex Plus Chunks in Gravy With White Fish Adult Cat Food",
+                         "name":  "Reflex Plus Soslu Beyaz Etli Balıklı Yetişkin Kedi Konservesi",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1182,12 +1182,12 @@
                      },
                      {
                          "id":  91,
-                         "name":  "Reflex Plus Chunks in Jelly With Tuna \u0026 Trout Adult Cat Food",
+                         "name":  "Reflex Plus Jöleli Ton Balıklı ve Alabalıklı Yetişkin Kedi Konservesi",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1195,12 +1195,12 @@
                      },
                      {
                          "id":  92,
-                         "name":  "Reflex Plus Chunks in Gravy With Lamb Adult Cat Food",
+                         "name":  "Reflex Plus Soslu Kuzu Etli Yetişkin Kedi Konservesi",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1208,12 +1208,12 @@
                      },
                      {
                          "id":  93,
-                         "name":  "Dreamies Lezzetli Somon Aromalı ve Enfes Peynirli Kedi Ödülü",
+                         "name":  "Dreamies Somon Aromalı ve Peynirli Kedi Ödülü",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1221,12 +1221,12 @@
                      },
                      {
                          "id":  94,
-                         "name":  "Pedigree Dentastix Daily Oral Care (10-25 kg)",
+                         "name":  "Pedigree Dentastix Günlük Ağız ve Diş Bakımı Köpek Ödülü (10-25 kg)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1234,12 +1234,12 @@
                      },
                      {
                          "id":  95,
-                         "name":  "Royal Canin Starter Mother \u0026 Babydog Mini Adult (Up to 10 kg)",
+                         "name":  "Royal Canin Starter Anne ve Yavru Küçük Irk Köpek Maması (10 kg\u0027a kadar)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1252,7 +1252,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1260,12 +1260,12 @@
                      },
                      {
                          "id":  97,
-                         "name":  "Reflex Plus Chunks in Gravy With Chicken Adult Cat Food",
+                         "name":  "Reflex Plus Soslu Tavuklu Yetişkin Kedi Konservesi",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1273,12 +1273,12 @@
                      },
                      {
                          "id":  98,
-                         "name":  "SupraVet Professional Anti Hairball Malt Soft Paste",
+                         "name":  "SupraVet Profesyonel Tüy Yumağı Önleyici Kedi Malt Macunu",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1286,12 +1286,12 @@
                      },
                      {
                          "id":  99,
-                         "name":  "Advance Active Defense Sensitive Care Medium-Maxi Dog Food (Salmon, +10 kg)",
+                         "name":  "Advance Active Defense Somonlu Orta ve Büyük Irk Hassas Köpek Maması (+10 kg)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1299,12 +1299,12 @@
                      },
                      {
                          "id":  100,
-                         "name":  "Pikare Chunks in Gravy Kuzu Etli Yetişkin Köpek Maması",
+                         "name":  "Pikare Soslu Kuzu Etli Parçalı Yetişkin Köpek Konserve Maması",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1312,12 +1312,12 @@
                      },
                      {
                          "id":  101,
-                         "name":  "Reflex Plus Sterilised Chunks in Jelly With Beef Adult Cat Food",
+                         "name":  "Reflex Plus Jöleli Sığır Etli Kısırlaştırılmış Yetişkin Kedi Konservesi",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1325,12 +1325,12 @@
                      },
                      {
                          "id":  102,
-                         "name":  "Reflex Plus Meaty Sticks With Duck \u0026 Geese Grain Free",
+                         "name":  "Reflex Plus Tahılsız Ördek ve Kaz Etli Kedi Ödül Çubuğu",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1338,12 +1338,12 @@
                      },
                      {
                          "id":  103,
-                         "name":  "Felicia Starter Care \u0026 Starter Support Kitten Chicken",
+                         "name":  "Felicia Başlangıç Destekli Tavuklu Yavru Kedi Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1351,12 +1351,12 @@
                      },
                      {
                          "id":  104,
-                         "name":  "Purina Pro Plan Hydra Care Feline Hydration",
+                         "name":  "Purina Pro Plan Hydra Care Sıvı Alımı Destekleyici Kedi Ek Besini",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1364,12 +1364,12 @@
                      },
                      {
                          "id":  105,
-                         "name":  "Reflex Puppy Food Lamb (Kuzu Etli Yavru Köpek Maması, 1 kg)",
+                         "name":  "Reflex Kuzu Etli Yavru Köpek Maması (1 kg)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1377,12 +1377,12 @@
                      },
                      {
                          "id":  106,
-                         "name":  "Reflex Compact Unscented Cat Litter (10 kg)",
+                         "name":  "Reflex Kompakt Kokusuz Kedi Kumu (10 kg)",
                          "category":  "Kum / Kozmetik",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1390,12 +1390,12 @@
                      },
                      {
                          "id":  107,
-                         "name":  "Matth Yetişkin Kedi Maması Tavuklu Chunks in Gravy",
+                         "name":  "Matth Soslu Parçalı Tavuklu Yetişkin Kedi Konserve Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1403,12 +1403,12 @@
                      },
                      {
                          "id":  108,
-                         "name":  "NutriCanin Grain Free Lamb \u0026 Beef Complete Food for Dogs (400 gr)",
+                         "name":  "NutriCanin Tahılsız Kuzu ve Sığır Etli Köpek Konserve Maması (400 gr)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1416,12 +1416,12 @@
                      },
                      {
                          "id":  109,
-                         "name":  "Garden Mix Ördekli Kedi Çorbası (Cat Soup, 40 gr)",
+                         "name":  "Garden Mix Ördekli Kedi Çorbası (40 gr)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1429,12 +1429,12 @@
                      },
                      {
                          "id":  110,
-                         "name":  "Kitten Genius Rewards Grain Free Chicken and Pomegranate Recipe",
+                         "name":  "Kitten Genius Rewards Tahılsız Tavuklu ve Narlı Yavru Kedi Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1442,12 +1442,12 @@
                      },
                      {
                          "id":  111,
-                         "name":  "NutriCanin Grain Free Wild Boar Hypoallergenic Adult Dog Food",
+                         "name":  "NutriCanin Tahılsız Yaban Domuzlu Hipoalerjenik Yetişkin Köpek Maması",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1455,12 +1455,12 @@
                      },
                      {
                          "id":  112,
-                         "name":  "Advance Active Defense Adult Cat Food (Chicken, 1-10 years)",
+                         "name":  "Advance Active Defense Tavuklu Yetişkin Kedi Maması (1-10 Yaş)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1468,12 +1468,12 @@
                      },
                      {
                          "id":  113,
-                         "name":  "Reflex Chunks in Gravy Kitten Food With Lamb (185 gr)",
+                         "name":  "Reflex Soslu Kuzu Etli Yavru Kedi Konserve Maması (185 gr)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1481,12 +1481,12 @@
                      },
                      {
                          "id":  114,
-                         "name":  "Advance Active Defense Kitten Food (Chicken, 2-12 months)",
+                         "name":  "Advance Active Defense Tavuklu Yavru Kedi Maması (2-12 Ay)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1494,12 +1494,12 @@
                      },
                      {
                          "id":  115,
-                         "name":  "Purina Pro Plan Medium Sensitive Skin Puppy Food",
+                         "name":  "Purina Pro Plan Orta Irk Hassas Derili Yavru Köpek Maması",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1507,12 +1507,12 @@
                      },
                      {
                          "id":  116,
-                         "name":  "Kiki Excellent Lavanta Kokulu Koku Giderici (Odor Remover)",
+                         "name":  "Kiki Excellent Lavanta Kokulu Kedi Kumu Koku Giderici",
                          "category":  "Kum / Kozmetik",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1520,12 +1520,12 @@
                      },
                      {
                          "id":  117,
-                         "name":  "Wanpy Grain-Free Complete Food Chicken with Oven Baked Bites (1.5 kg)",
+                         "name":  "Wanpy Tahılsız Fırınlanmış Parçacıklı Tavuklu Yetişkin Kedi Maması (1.5 kg)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1533,12 +1533,12 @@
                      },
                      {
                          "id":  118,
-                         "name":  "Dreamies Shakeups Multivitamin Meeresfrüchte Kedi Ödülü",
+                         "name":  "Dreamies Shakeups Deniz Mahsullü Multivitaminli Kedi Ödülü",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1546,12 +1546,12 @@
                      },
                      {
                          "id":  119,
-                         "name":  "Pedigree Dentastix Daily Oral Care (Large Dog, 5-10 kg)",
+                         "name":  "Pedigree Dentastix Günlük Ağız ve Diş Bakımı Köpek Ödülü (5-10 kg)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1559,12 +1559,12 @@
                      },
                      {
                          "id":  120,
-                         "name":  "Fresh Paty Indicator pH Göstergeli Kedi Kumu",
+                         "name":  "Fresh Paty pH Göstergeli Sağlık Kontrol Kedi Kumu",
                          "category":  "Kum / Kozmetik",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1572,12 +1572,12 @@
                      },
                      {
                          "id":  121,
-                         "name":  "Quik Extra Calcium Cuttlefish Bone (Mürekkep Balığı Kemiği)",
+                         "name":  "Quik Ekstra Kalsiyumlu Mürekkep Balığı Kemiği",
                          "category":  "Kuş / Kemirgen",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1585,12 +1585,12 @@
                      },
                      {
                          "id":  122,
-                         "name":  "Nutri canin All Natural Duck \u0026 Rawhide Rich in Protein Dog Treat",
+                         "name":  "Nutri Canin Doğal Ördekli ve Pres Derili Yüksek Proteinli Köpek Ödülü",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1598,12 +1598,12 @@
                      },
                      {
                          "id":  123,
-                         "name":  "Wanpy Creamy Treat Tuna \u0026 Shrimp",
+                         "name":  "Wanpy Ton Balıklı ve Karidesli Sıvı Kedi Ödülü",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1611,12 +1611,12 @@
                      },
                      {
                          "id":  124,
-                         "name":  "Garden Mix Tavuklu Kedi Çorbası (Cat Soup, 40 gr)",
+                         "name":  "Garden Mix Tavuklu Kedi Çorbası (40 gr)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1624,12 +1624,12 @@
                      },
                      {
                          "id":  125,
-                         "name":  "Purina Pro Plan Small \u0026 Mini Adult Sensitive Digestion",
+                         "name":  "Purina Pro Plan Küçük Irk Hassas Sindirim Yetişkin Köpek Maması",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1637,12 +1637,12 @@
                      },
                      {
                          "id":  126,
-                         "name":  "Garden Mix Somonlu Kedi Çorbası (Cat Soup, 40 gr)",
+                         "name":  "Garden Mix Somonlu Kedi Çorbası (40 gr)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1650,12 +1650,12 @@
                      },
                      {
                          "id":  127,
-                         "name":  "Super Premium Qualität Kitten Mit Frischem Lachs (2 kg)",
+                         "name":  "Super Premium Taze Somonlu Yavru Kedi Maması (2 kg)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1663,12 +1663,12 @@
                      },
                      {
                          "id":  128,
-                         "name":  "Wanpy Creamy Treat Duck \u0026 Chicken (5 Pack)",
+                         "name":  "Wanpy Ördekli ve Tavuklu Sıvı Kedi Ödülü (5\u0027li Paket)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1676,12 +1676,12 @@
                      },
                      {
                          "id":  129,
-                         "name":  "Wanpy Creamy Treat Salmon \u0026 Chicken (5 Pack)",
+                         "name":  "Wanpy Somonlu ve Tavuklu Sıvı Kedi Ödülü (5\u0027li Paket)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1689,12 +1689,12 @@
                      },
                      {
                          "id":  130,
-                         "name":  "Nutri Feline Natural Cat Snack Salmon (50 gr)",
+                         "name":  "Nutri Feline Doğal Somonlu Kedi Ödülü (50 gr)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1702,12 +1702,12 @@
                      },
                      {
                          "id":  131,
-                         "name":  "Advance Active Defense Light Medium Satiating Effect (10-30 kg)",
+                         "name":  "Advance Active Defense Orta Irk Kilo Kontrollü Diyet Köpek Maması (10-30 kg)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1715,12 +1715,12 @@
                      },
                      {
                          "id":  132,
-                         "name":  "Wanpy Wet Food Lamb, Chicken, Duck, Carrot \u0026 Pea Tasty Meat Paste",
+                         "name":  "Wanpy Kuzu, Tavuk, Ördek, Havuç ve Bezelyeli Sıvı Kedi Ödül Ezmesi",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1728,12 +1728,12 @@
                      },
                      {
                          "id":  133,
-                         "name":  "BioFeline Plus+B Multivitamin + Biotin Anti Hair Loss Support",
+                         "name":  "BioFeline Plus+B Multivitamin \u0026 Biotin Tüy Dökülme Karşıtı Kedi Macunu",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1746,7 +1746,7 @@
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1754,12 +1754,12 @@
                      },
                      {
                          "id":  135,
-                         "name":  "BioFeline Probio Liquid Probiotic Digestive System Support",
+                         "name":  "BioFeline Probio Sıvı Probiyotik Sindirim Destekleyici",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1767,12 +1767,12 @@
                      },
                      {
                          "id":  136,
-                         "name":  "Quik Natural Grass Kedi Çimi (Koruyucu File Hediyeli)",
+                         "name":  "Quik Doğal Kedi Çimi (Koruyucu File Hediyeli)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1780,12 +1780,12 @@
                      },
                      {
                          "id":  137,
-                         "name":  "Wanpy Creamy Treat Codfish \u0026 Chicken Hairball Control",
+                         "name":  "Wanpy Morina Balıklı ve Tavuklu Tüy Yumağı Kontrollü Sıvı Kedi Ödülü",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1793,12 +1793,12 @@
                      },
                      {
                          "id":  138,
-                         "name":  "Nutri Feline Natural Cat Snack Lamb + Catnip Added",
+                         "name":  "Nutri Feline Kuzu Etli ve Kedi Otlu Doğal Kedi Ödülü",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1806,12 +1806,12 @@
                      },
                      {
                          "id":  139,
-                         "name":  "Nutri Canin All Natural Lamb \u0026 Rawhide Immunity Support",
+                         "name":  "Nutri Canin Doğal Kuzu Etli \u0026 Burgu Derili Bağışıklık Destekli Köpek Ödülü",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1819,12 +1819,12 @@
                      },
                      {
                          "id":  140,
-                         "name":  "Motta Yetişkin Köpek Maması Dana Etli Chunks in Gravy",
+                         "name":  "Motta Soslu Dana Etli Parçalı Yetişkin Köpek Konserve Maması",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1832,12 +1832,12 @@
                      },
                      {
                          "id":  141,
-                         "name":  "Kiki Excellent Okyanus Esintisi Koku Giderici",
+                         "name":  "Kiki Excellent Okyanus Esintisi Kedi Kumu Koku Giderici",
                          "category":  "Kum / Kozmetik",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1845,12 +1845,12 @@
                      },
                      {
                          "id":  142,
-                         "name":  "Purina Pro Plan Medium Puppy Sensitive Digestion Lamb",
+                         "name":  "Purina Pro Plan Kuzu Etli Orta Irk Hassas Sindirim Yavru Köpek Maması",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1858,12 +1858,12 @@
                      },
                      {
                          "id":  143,
-                         "name":  "Reflex Plus Meaty Sticks With Salmon",
+                         "name":  "Reflex Plus Somonlu Kedi Ödül Çubuğu",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1871,12 +1871,12 @@
                      },
                      {
                          "id":  144,
-                         "name":  "Kiki Excellent Yasemin Kokulu Koku Giderici",
+                         "name":  "Kiki Excellent Yasemin Kokulu Kedi Kumu Koku Giderici",
                          "category":  "Kum / Kozmetik",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1884,12 +1884,12 @@
                      },
                      {
                          "id":  145,
-                         "name":  "Matth Yetişkin Kedi Maması Kuzu Etli Chunks in Gravy",
+                         "name":  "Matth Soslu Kuzu Etli Parçalı Yetişkin Kedi Konserve Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1897,12 +1897,12 @@
                      },
                      {
                          "id":  146,
-                         "name":  "Nutri Feline Natural Cat Snack Chicken \u0026 Fish Sandwich (50 gr)",
+                         "name":  "Nutri Feline Doğal Tavuklu ve Balıklı Sandviç Kedi Ödülü (50 gr)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1910,12 +1910,12 @@
                      },
                      {
                          "id":  147,
-                         "name":  "Acana Indoor Entrée Adult Indoor Cat / Sterilized (Chicken with Herring)",
+                         "name":  "Acana Evde Yaşayan ve Kısırlaştırılmış Tavuklu \u0026 Ringa Balıklı Kedi Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1923,12 +1923,12 @@
                      },
                      {
                          "id":  148,
-                         "name":  "SupraVet Professional Pet Care Training Pads (60 x 90 cm, 30 Piece)",
+                         "name":  "SupraVet Profesyonel Çiş Eğitim Pedi (60 x 90 cm, 30 Adet)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1936,12 +1936,12 @@
                      },
                      {
                          "id":  149,
-                         "name":  "Slim Cat Litter Lavender Scented",
+                         "name":  "Slim Lavanta Kokulu Kedi Kumu",
                          "category":  "Kum / Kozmetik",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1949,12 +1949,12 @@
                      },
                      {
                          "id":  150,
-                         "name":  "Purina Gourmet Gold Sığır Etli Pelerinli/Soslu Yaş Kedi Maması",
+                         "name":  "Purina Gourmet Gold Sığır Etli Soslu Yaş Kedi Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1962,12 +1962,12 @@
                      },
                      {
                          "id":  151,
-                         "name":  "Wanpy Creamy Treat Tuna \u0026 Shrimp (5 Pack)",
+                         "name":  "Wanpy Ton Balıklı ve Karidesli Sıvı Kedi Ödülü (5\u0027li Paket)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1975,12 +1975,12 @@
                      },
                      {
                          "id":  152,
-                         "name":  "Enjoy Chunks in Gravy Chicken Adult Cat Food (85 gr)",
+                         "name":  "Enjoy Soslu Tavuk Parçalı Yetişkin Kedi Konservesi (85 gr)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -1988,12 +1988,12 @@
                      },
                      {
                          "id":  153,
-                         "name":  "Wanpy Urinary Care Creamy Treat Duck \u0026 Chicken",
+                         "name":  "Wanpy İdrar Yolu Sağlığı Destekli Ördek ve Tavuklu Sıvı Kedi Ödülü",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2001,12 +2001,12 @@
                      },
                      {
                          "id":  154,
-                         "name":  "Nutri Canin Lamb \u0026 Collagen Stick (80 gr)",
+                         "name":  "Nutri Canin Kuzu Etli ve Kolajenli Köpek Ödül Çubuğu (80 gr)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2014,12 +2014,12 @@
                      },
                      {
                          "id":  155,
-                         "name":  "Nutri Canin Duck \u0026 Collagen Stick (80 gr)",
+                         "name":  "Nutri Canin Ördek Etli ve Kolajenli Köpek Ödül Çubuğu (80 gr)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2027,12 +2027,12 @@
                      },
                      {
                          "id":  156,
-                         "name":  "Felicia Derma+ Care Skin \u0026 Coat Support Adult Salmon \u0026 Potato",
+                         "name":  "Felicia Derma+ Somonlu ve Patatesli Yetişkin Deri ve Tüy Destekli Kedi Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2040,12 +2040,12 @@
                      },
                      {
                          "id":  157,
-                         "name":  "Felicia Adult Hypoallergenic Kuzu Etli Kedi Maması (1 kg)",
+                         "name":  "Felicia Hipoalerjenik Kuzu Etli Yetişkin Kedi Maması (1 kg)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2053,12 +2053,12 @@
                      },
                      {
                          "id":  158,
-                         "name":  "Nutri Canin Grain Free Beef Hypoallergenic Adult Dog Food",
+                         "name":  "Nutri Canin Tahılsız Sığır Etli Hipoalerjenik Yetişkin Köpek Maması",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2066,12 +2066,12 @@
                      },
                      {
                          "id":  159,
-                         "name":  "Reflex Plus Chunks in Gravy With Duck \u0026 Rabbit Adult Cat Food",
+                         "name":  "Reflex Plus Soslu Ördek ve Tavşan Etli Yetişkin Kedi Konservesi",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2079,12 +2079,12 @@
                      },
                      {
                          "id":  160,
-                         "name":  "Royal Canin Mother \u0026 Babycat (1-4 months) Ultra Soft Mousse",
+                         "name":  "Royal Canin Anne ve Bebek Kedi Mus Konserve (1-4 Ay)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2092,12 +2092,12 @@
                      },
                      {
                          "id":  161,
-                         "name":  "Royalist Perfume For Pets",
+                         "name":  "Royalist Evcil Hayvan Parfümü",
                          "category":  "Kum / Kozmetik",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2105,12 +2105,12 @@
                      },
                      {
                          "id":  162,
-                         "name":  "SupraVet Professional Pupil Biotine + Zinc Omega 3",
+                         "name":  "SupraVet Profesyonel Biotin, Çinko ve Omega 3 Deri-Tüy Desteği",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2118,12 +2118,12 @@
                      },
                      {
                          "id":  163,
-                         "name":  "Les Repas Plaisir Chat Adulte \u0026 Stérilisé Au Cabillaud (with Cod)",
+                         "name":  "Les Repas Plaisir Morina Balıklı Kısırlaştırılmış Yetişkin Kedi Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2131,12 +2131,12 @@
                      },
                      {
                          "id":  164,
-                         "name":  "Enjoy Chunks in Gravy With Lamb Adult Cat Food (85 gr)",
+                         "name":  "Enjoy Soslu Kuzu Parçalı Yetişkin Kedi Konservesi (85 gr)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2144,12 +2144,12 @@
                      },
                      {
                          "id":  165,
-                         "name":  "Wanpy Soft Oven-Roasted Salmon \u0026 Fish Skin Dog Treat",
+                         "name":  "Wanpy Fırınlanmış Yumuşak Somonlu ve Balık Derili Köpek Ödülü",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2157,12 +2157,12 @@
                      },
                      {
                          "id":  166,
-                         "name":  "Nutri Canin Beef \u0026 Rawhide Immunity Support + Calcium Dog Treat",
+                         "name":  "Nutri Canin Sığır Etli ve Pres Derili Kalsiyum Destekli Köpek Ödülü",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2170,12 +2170,12 @@
                      },
                      {
                          "id":  167,
-                         "name":  "Nutri canin Hypoallergenic Puppy Dog Grain Free Lamb",
+                         "name":  "Nutri Canin Tahılsız Kuzu Etli Hipoalerjenik Yavru Köpek Maması",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2183,12 +2183,12 @@
                      },
                      {
                          "id":  168,
-                         "name":  "Nutri Complementary Foods for Dogs Natural Dog Snack Lamb Cubes",
+                         "name":  "Nutri Canin Doğal Kuzu Etli Küp Köpek Ödülü",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2196,12 +2196,12 @@
                      },
                      {
                          "id":  169,
-                         "name":  "Wanpy Wet Food Tasty Meat Paste Duck, Chicken, Carrot \u0026 Pea",
+                         "name":  "Wanpy Ördek, Tavuk, Havuç ve Bezelyeli Sıvı Kedi Ödül Ezmesi",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2209,12 +2209,12 @@
                      },
                      {
                          "id":  170,
-                         "name":  "Wanpy Wet Food Tasty Meat Paste Salmon, Chicken \u0026 Carrot",
+                         "name":  "Wanpy Somon, Tavuk ve Havuçlu Sıvı Kedi Ödül Ezmesi",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2222,12 +2222,12 @@
                      },
                      {
                          "id":  171,
-                         "name":  "Felicia Digestive System Support Adult Chicken",
+                         "name":  "Felicia Sindirim Sistemi Destekli Tavuklu Yetişkin Kedi Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2235,12 +2235,12 @@
                      },
                      {
                          "id":  172,
-                         "name":  "Felicia Urinary System Support Sterilised Cat Food",
+                         "name":  "Felicia Üriner Sistem Destekli Kısırlaştırılmış Yetişkin Kedi Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2248,12 +2248,12 @@
                      },
                      {
                          "id":  173,
-                         "name":  "Ultra Premium Performance Low Grain Adult Sterilised Urinary Care Lamb \u0026 Salmon",
+                         "name":  "Ultra Premium Az Tahıllı Kuzu ve Somonlu Üriner Kısırlaştırılmış Kedi Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2261,12 +2261,12 @@
                      },
                      {
                          "id":  174,
-                         "name":  "Loi Life Origin Ingredient New Generation Clumping Cat Litter Activated Carbon",
+                         "name":  "Loi Life Aktif Karbonlu Yeni Nesil Topaklanan Kedi Kumu",
                          "category":  "Kum / Kozmetik",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2274,12 +2274,12 @@
                      },
                      {
                          "id":  175,
-                         "name":  "Wanpy Wet Food Tasty Meat Paste Tuna, Chicken \u0026 Carrot",
+                         "name":  "Wanpy Ton Balıklı, Tavuklu ve Havuçlu Sıvı Kedi Ödül Ezmesi",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2287,12 +2287,12 @@
                      },
                      {
                          "id":  176,
-                         "name":  "Wanpy Wet Food Tasty Meat Paste Duck \u0026 Pumpkin",
+                         "name":  "Wanpy Ördekli ve Balkabaklı Sıvı Kedi Ödül Ezmesi",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2300,12 +2300,12 @@
                      },
                      {
                          "id":  177,
-                         "name":  "Wanpy Wet Food Tasty Meat Paste Chicken \u0026 Carrot",
+                         "name":  "Wanpy Tavuklu ve Havuçlu Sıvı Kedi Ödül Ezmesi",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2313,12 +2313,12 @@
                      },
                      {
                          "id":  178,
-                         "name":  "Nutri In Complementary Foods for Dogs Beef \u0026 Collagen Stick",
+                         "name":  "Nutri Canin Sığır Etli ve Kolajenli Köpek Ödül Çubuğu",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2326,12 +2326,12 @@
                      },
                      {
                          "id":  179,
-                         "name":  "Ranova Pet Treat Lollipop Freeze-Dried Chicken Recipe Pumpkin Flavor",
+                         "name":  "Ranova Dondurularak Kurutulmuş Tavuklu ve Balkabaklı Lolipop Kedi Ödülü",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2339,12 +2339,12 @@
                      },
                      {
                          "id":  180,
-                         "name":  "Royal Canin Mini Adult Loaf Mousse Morbido Paté (195 gr)",
+                         "name":  "Royal Canin Mini Yetişkin Köpek Ezme Konserve (195 gr)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2352,12 +2352,12 @@
                      },
                      {
                          "id":  181,
-                         "name":  "Garden Mix Dog Treat Tasty Meat Paste Duck, Carrot \u0026 Pea",
+                         "name":  "Garden Mix Ördek, Havuç ve Bezelyeli Sıvı Köpek Ödül Ezmesi",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2365,12 +2365,12 @@
                      },
                      {
                          "id":  182,
-                         "name":  "Eastland Matatabi Toys for Cats",
+                         "name":  "Eastland Matatabi Kedi Oyuncağı",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2378,12 +2378,12 @@
                      },
                      {
                          "id":  183,
-                         "name":  "Hill\u0027s Science Plan Sterilised Kitten Development Support (Chicken)",
+                         "name":  "Hill\u0027s Science Plan Tavuklu Kısırlaştırılmış Yavru Kedi Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2391,12 +2391,12 @@
                      },
                      {
                          "id":  184,
-                         "name":  "Royal Canin Kitten Chunks in Gravy (85 gr)",
+                         "name":  "Royal Canin Soslu Yavru Kedi Konserve Maması (85 gr)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2404,12 +2404,12 @@
                      },
                      {
                          "id":  185,
-                         "name":  "Ranova Lollipop Freeze-Dried Pet Treat Mixed Flavor",
+                         "name":  "Ranova Dondurularak Kurutulmuş Karışık Lolipop Kedi Ödülü",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2417,12 +2417,12 @@
                      },
                      {
                          "id":  186,
-                         "name":  "Royal Canin Size Health Nutrition Maxi Adult (Dogs over 15 months)",
+                         "name":  "Royal Canin Maxi Yetişkin Büyük Irk Köpek Maması (15 Ay Üzeri)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2430,12 +2430,12 @@
                      },
                      {
                          "id":  187,
-                         "name":  "Royalist Pure Paws Paw Cleaner Foam For Pets With Aloe Vera",
+                         "name":  "Royalist Aloe Veralı Pati Temizleme Köpüğü",
                          "category":  "Kum / Kozmetik",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2443,12 +2443,12 @@
                      },
                      {
                          "id":  188,
-                         "name":  "Wanpy Creamy Treat Joint Support Beef (5 Pack)",
+                         "name":  "Wanpy Eklem Destekli Sığır Etli Sıvı Kedi Ödülü (5\u0027li Paket)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2456,12 +2456,12 @@
                      },
                      {
                          "id":  189,
-                         "name":  "Nutri Canin Duck \u0026 Collagen Stick Vitamin E Added",
+                         "name":  "Nutri Canin E Vitaminli Ördekli ve Kolajenli Köpek Ödül Çubuğu",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2469,12 +2469,12 @@
                      },
                      {
                          "id":  190,
-                         "name":  "Royal Canin Size Up To 10 kg Mini Adult Gravy",
+                         "name":  "Royal Canin Mini Yetişkin Soslu Köpek Konserve Maması (10 kg\u0027a kadar)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2482,12 +2482,12 @@
                      },
                      {
                          "id":  191,
-                         "name":  "Pedigree Jumbone Mini Sigir ve Kus Etli Dog Treat",
+                         "name":  "Pedigree Jumbone Mini Sığır ve Kümes Hayvanlı Köpek Ödülü",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2495,12 +2495,12 @@
                      },
                      {
                          "id":  192,
-                         "name":  "Royal Canin Sterilised Thin Slices in Gravy for Adult Cats",
+                         "name":  "Royal Canin Kısırlaştırılmış Yetişkin Kedi Soslu İnce Dilimler Konserve",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2508,12 +2508,12 @@
                      },
                      {
                          "id":  193,
-                         "name":  "Wanpy Skin \u0026 Coat Creamy Treat Tuna \u0026 Salmon (5 Pack)",
+                         "name":  "Wanpy Deri ve Tüy Destekli Ton Balıklı ve Somonlu Sıvı Kedi Ödülü (5\u0027li Paket)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2521,12 +2521,12 @@
                      },
                      {
                          "id":  194,
-                         "name":  "Royal Canin Care Light Weight Thin Slices in Gravy",
+                         "name":  "Royal Canin Kilo Kontrollü Soslu İnce Dilimler Kedi Konservesi",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2534,12 +2534,12 @@
                      },
                      {
                          "id":  195,
-                         "name":  "Royal Canin Sterilised All Sizes Canine Care Nutrition Loaf",
+                         "name":  "Royal Canin Kısırlaştırılmış Tüm Irklar İçin Köpek Konserve Maması",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2547,12 +2547,12 @@
                      },
                      {
                          "id":  196,
-                         "name":  "Royal Canin Breed Health Nutrition Chihuahua Adult Mousse",
+                         "name":  "Royal Canin Chihuahua Yetişkin Köpek Mus Konserve",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2560,12 +2560,12 @@
                      },
                      {
                          "id":  197,
-                         "name":  "Ranova Pet Treat Lollipop Freeze-Dried Chicken Recipe Cranberry Flavor",
+                         "name":  "Ranova Dondurularak Kurutulmuş Tavuklu ve Turna Yemişli Lolipop Kedi Ödülü",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2573,12 +2573,12 @@
                      },
                      {
                          "id":  198,
-                         "name":  "Felicia Sterilised With Chicken Adult Cat Food Grain Free",
+                         "name":  "Felicia Tahılsız Tavuklu Kısırlaştırılmış Yetişkin Kedi Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2586,12 +2586,12 @@
                      },
                      {
                          "id":  199,
-                         "name":  "Nutri Canin Lamb \u0026 Collagen Enriched with Pure Tendon Soft Stick",
+                         "name":  "Nutri Canin Sinirli Kuzu Etli ve Kolajenli Yumuşak Köpek Ödül Çubuğu",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2599,12 +2599,12 @@
                      },
                      {
                          "id":  200,
-                         "name":  "Les Repas Plaisir Chien Adulte Au Poulet (with Chicken)",
+                         "name":  "Les Repas Plaisir Tavuklu Yetişkin Köpek Konserve Maması",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2612,12 +2612,12 @@
                      },
                      {
                          "id":  201,
-                         "name":  "Ranova Pet Treat Lollipop Freeze-Dried Chicken Recipe Goat Milk Flavor",
+                         "name":  "Ranova Dondurularak Kurutulmuş Tavuklu ve Keçi Sütlü Lolipop Kedi Ödülü",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2625,12 +2625,12 @@
                      },
                      {
                          "id":  202,
-                         "name":  "Nutri canin Natural Dog Snack Duck Meat (80 gr)",
+                         "name":  "Nutri Canin Doğal Ördek Etli Köpek Ödülü (80 gr)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2638,12 +2638,12 @@
                      },
                      {
                          "id":  203,
-                         "name":  "Flexi Tape Style Medium (5 Meter, max. 25 kg) Otomatik Köpek Tasması",
+                         "name":  "Flexi Tape Şerit Otomatik Köpek Gezdirme Tasması Medium (5 Metre, maks. 25 kg)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2651,12 +2651,12 @@
                      },
                      {
                          "id":  204,
-                         "name":  "Nutri Canin Natural Dog Snack Lamb Stripes (80 gr)",
+                         "name":  "Nutri Canin Doğal Kuzu Etli Şerit Köpek Ödülü (80 gr)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2664,12 +2664,12 @@
                      },
                      {
                          "id":  205,
-                         "name":  "Les Repas Plaisir Care Intestinal Comfort Émincés au Poulet en Sauce",
+                         "name":  "Les Repas Plaisir Bağırsak Sağlığı Destekli Soslu Tavuklu Kedi Konservesi",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2677,12 +2677,12 @@
                      },
                      {
                          "id":  206,
-                         "name":  "Nutri Canin Dental Twist Lamb Vitamin E + Calcium Added",
+                         "name":  "Nutri Canin Kuzu Etli Kalsiyum ve E Vitaminli Burgu Diş Bakım Ödülü",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2690,12 +2690,12 @@
                      },
                      {
                          "id":  207,
-                         "name":  "Wanpy Crunchy Pockets Chicken with Soft Filling (60 gr)",
+                         "name":  "Wanpy İçi Dolgulu Çıtır Tavuklu Kedi Ödülü (60 gr)",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2703,12 +2703,12 @@
                      },
                      {
                          "id":  208,
-                         "name":  "Reflex Crunchy Bubbles Adult Cat Food Lamb",
+                         "name":  "Reflex Crunchy Bubbles Kuzu Etli Yetişkin Kedi Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2716,12 +2716,12 @@
                      },
                      {
                          "id":  209,
-                         "name":  "Wanpy Grain-Free Complete Food Lamb with Oven Baked Bites",
+                         "name":  "Wanpy Tahılsız Fırınlanmış Kuzu Etli Yetişkin Kedi Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2729,12 +2729,12 @@
                      },
                      {
                          "id":  210,
-                         "name":  "Wanpy Kidney Health Creamy Treat Chicken \u0026 Veggies",
+                         "name":  "Wanpy Böbrek Sağlığı Destekli Tavuklu ve Sebzeli Sıvı Kedi Ödülü",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2742,12 +2742,12 @@
                      },
                      {
                          "id":  211,
-                         "name":  "Nutri Canin Natural Dog Snack Beef Meat (80 gr)",
+                         "name":  "Nutri Canin Doğal Sığır Etli Köpek Ödülü (80 gr)",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2755,12 +2755,12 @@
                      },
                      {
                          "id":  212,
-                         "name":  "Wanpy Wet Food Tasty Meat Paste Lamb, Carrot \u0026 Pea",
+                         "name":  "Wanpy Kuzu Etli, Havuç ve Bezelyeli Sıvı Kedi Ödül Ezmesi",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2768,12 +2768,12 @@
                      },
                      {
                          "id":  213,
-                         "name":  "Nutri Canin Duck \u0026 Collagen Grain Free Premium Quality Stick",
+                         "name":  "Nutri Canin Tahılsız Ördekli ve Kolajenli Köpek Ödül Çubuğu",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2781,12 +2781,12 @@
                      },
                      {
                          "id":  214,
-                         "name":  "Felicia Kitten With Lamb In Jelly Grain Free",
+                         "name":  "Felicia Tahılsız Jöleli Kuzu Etli Yavru Kedi Konserve Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2794,12 +2794,12 @@
                      },
                      {
                          "id":  215,
-                         "name":  "Felicia Sterilised With Salmon In Jelly Grain Free",
+                         "name":  "Felicia Tahılsız Jöleli Somonlu Kısırlaştırılmış Kedi Konserve Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2807,12 +2807,12 @@
                      },
                      {
                          "id":  216,
-                         "name":  "Adult Dog Food Coat No Gluten Grain-Free Beef",
+                         "name":  "Nutri Canin Tahılsız \u0026 Glutensiz Sığır Etli Yetişkin Köpek Maması",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2820,12 +2820,12 @@
                      },
                      {
                          "id":  217,
-                         "name":  "Les Repas Plaisir Chaton Kitten Au Poulet (with Chicken)",
+                         "name":  "Les Repas Plaisir Tavuklu Yavru Kedi Konserve Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2833,12 +2833,12 @@
                      },
                      {
                          "id":  218,
-                         "name":  "Nutri Canin Dental Twist Beef + Catnip Added Grain Free",
+                         "name":  "Nutri Canin Tahılsız Sığır Etli ve Kedi Otlu Burgu Diş Bakım Ödülü",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2846,12 +2846,12 @@
                      },
                      {
                          "id":  219,
-                         "name":  "Nutri Canin Dental Twist Duck Grain Free Dental Care",
+                         "name":  "Nutri Canin Tahılsız Ördekli Burgu Diş Bakım Köpek Ödülü",
                          "category":  "Köpek",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2859,12 +2859,12 @@
                      },
                      {
                          "id":  220,
-                         "name":  "Felicia Adult Grain Free With Salmon In Jelly",
+                         "name":  "Felicia Tahılsız Jöleli Somonlu Yetişkin Kedi Konserve Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2872,12 +2872,12 @@
                      },
                      {
                          "id":  221,
-                         "name":  "Wanpy Kitten Food 100% Real Meat Stew Chicken \u0026 Duck in Gravy",
+                         "name":  "Wanpy Soslu Gerçek Tavuk ve Ördek Etli Yavru Kedi Konserve Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2885,12 +2885,12 @@
                      },
                      {
                          "id":  222,
-                         "name":  "Felicia Adult Grain Free With Lamb In Jelly",
+                         "name":  "Felicia Tahılsız Jöleli Kuzu Etli Yetişkin Kedi Konserve Maması",
                          "category":  "Kedi",
                          "price":  0,
                          "cost":  0,
                          "vatRate":  20,
-                         "stock": 0,
+                         "stock":  0,
                          "supplier":  "-",
                          "batches":  [
 
@@ -2950,7 +2950,7 @@
                       },
                       {
                           "id":  206,
-                          "name":  "Boğaziçi Tasma & Aksesuar",
+                          "name":  "Boğaziçi Tasma \u0026 Aksesuar",
                           "phone":  "0530 600 8090",
                           "notes":  "Tasma ve aksesuar.",
                           "balance":  0,
