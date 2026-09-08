@@ -1359,30 +1359,36 @@
           </div>
         </div>
 
-        <!-- 1. GÜNLÜK GELİR DÖKÜMÜ KARTLARI (Ödeme Yöntemlerine Göre Ayrı Ayrı) -->
+        <!-- 1. GÜNLÜK GELİR DÖKÜMÜ KARTLARI (Kategori Toplamları) -->
         <div class="mb-3" style="background:#f8fafc; border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px;">
           <div style="font-size:11.5px; font-weight:700; color:#64748b; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">
-            📊 Bugünün Gelir Dağılımı (Ayrı Ayrı Tahsilatlar)
+            📊 Bugünün Gelir Dağılımı (Kategori Toplamları)
           </div>
           
-          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:10px;">
-            <!-- Kredi Kartı -->
-            <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:var(--radius-sm); padding:10px 8px; text-align:center;">
-              <div style="font-size:11px; font-weight:700; color:#1d4ed8;">💳 KREDİ KARTI</div>
-              <div id="dcCardSales" style="font-size:17px; font-weight:900; color:#1e40af; margin-top:2px;">0.00 ₺</div>
-              <div id="dcCardCount" style="font-size:10.5px; color:#60a5fa; margin-top:1px;">0 işlem</div>
-            </div>
-            <!-- Nakit -->
+          <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; margin-bottom:10px;">
+            <!-- Toplam Nakit -->
             <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:var(--radius-sm); padding:10px 8px; text-align:center;">
-              <div style="font-size:11px; font-weight:700; color:#166534;">💵 NAKİT</div>
-              <div id="dcCashSalesDisplay" style="font-size:17px; font-weight:900; color:#15803d; margin-top:2px;">0.00 ₺</div>
-              <div id="dcCashCount" style="font-size:10.5px; color:#4ade80; margin-top:1px;">0 işlem</div>
+              <div style="font-size:10.5px; font-weight:700; color:#166534;">💵 TOPLAM NAKİT</div>
+              <div id="dcCashSalesDisplay" style="font-size:16px; font-weight:900; color:#15803d; margin-top:2px;">0.00 ₺</div>
+              <div style="font-size:10px; color:#166534; margin-top:2px;">Fişli: <b id="dcOfficialCash">0.00 ₺</b></div>
             </div>
-            <!-- Havale / IBAN -->
+            <!-- Toplam Kredi Kartı -->
+            <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:var(--radius-sm); padding:10px 8px; text-align:center;">
+              <div style="font-size:10.5px; font-weight:700; color:#1d4ed8;">💳 TOPLAM KREDİ KARTI</div>
+              <div id="dcCardSales" style="font-size:16px; font-weight:900; color:#1e40af; margin-top:2px;">0.00 ₺</div>
+              <div id="dcCardCount" style="font-size:10px; color:#60a5fa; margin-top:2px;">0 işlem</div>
+            </div>
+            <!-- Toplam Havale -->
             <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:var(--radius-sm); padding:10px 8px; text-align:center;">
-              <div style="font-size:11px; font-weight:700; color:#0369a1;">📲 HAVALE / IBAN</div>
-              <div id="dcTransferSales" style="font-size:17px; font-weight:900; color:#0284c7; margin-top:2px;">0.00 ₺</div>
-              <div id="dcTransferCount" style="font-size:10.5px; color:#38bdf8; margin-top:1px;">0 işlem</div>
+              <div style="font-size:10.5px; font-weight:700; color:#0369a1;">📲 TOPLAM HAVALE</div>
+              <div id="dcTransferSales" style="font-size:16px; font-weight:900; color:#0284c7; margin-top:2px;">0.00 ₺</div>
+              <div style="font-size:10px; color:#0369a1; margin-top:2px;">Fişli: <b id="dcOfficialTransfer">0.00 ₺</b></div>
+            </div>
+            <!-- Toplam Online -->
+            <div style="background:#faf5ff; border:1px solid #e9d5ff; border-radius:var(--radius-sm); padding:10px 8px; text-align:center;">
+              <div style="font-size:10.5px; font-weight:700; color:#7e22ce;">📦 TOPLAM ONLİNE</div>
+              <div id="dcPlatformSales" style="font-size:16px; font-weight:900; color:#6b21a8; margin-top:2px;">0.00 ₺</div>
+              <div style="font-size:10px; color:#a855f7; margin-top:2px;">Platform / Web</div>
             </div>
           </div>
 
@@ -1421,12 +1427,12 @@
           </div>
         </div>
 
-        <!-- 3. DETAYLI BUGÜNKÜ SATIŞLAR TABLOSU -->
-        <div class="mt-3">
-          <div class="flex justify-between items-center mb-1">
-            <b class="text-xs text-muted">📜 BUGÜNKÜ SATIŞLARIN AYRINTILI TABLOSU</b>
-          </div>
-          <div style="max-height:160px; overflow-y:auto; border:1px solid var(--border); border-radius:var(--radius-sm);">
+        <!-- 3. DETAYLI BUGÜNKÜ SATIŞLAR TABLOSU (İsteğe Bağlı Açılır) -->
+        <details class="mt-3" style="border:1px solid var(--border); border-radius:var(--radius-sm); background:#fff; padding:8px 10px;">
+          <summary style="cursor:pointer; font-size:11.5px; font-weight:700; color:#64748b; outline:none; user-select:none;">
+            📜 Siparişleri Tek Tek İncele (Ayrıntılı Liste)
+          </summary>
+          <div style="max-height:160px; overflow-y:auto; margin-top:8px; border-top:1px solid var(--border); padding-top:6px;">
             <table class="data-table" style="margin:0; font-size:11.5px;">
               <thead>
                 <tr style="position:sticky; top:0; background:var(--bg); z-index:1;">
@@ -1439,7 +1445,7 @@
               <tbody id="dcSalesTableBody"></tbody>
             </table>
           </div>
-        </div>
+        </details>
         
         <div class="modal-actions mt-3 flex justify-between items-center flex-wrap gap-2">
           <button class="btn btn-ghost" onclick="closeModal('dailyCloseModal')">Kapat</button>

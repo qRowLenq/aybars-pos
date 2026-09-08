@@ -72,6 +72,7 @@ function doPost(e) {
     }
 
     var ss = SpreadsheetApp.getActiveSpreadsheet();
+    deleteGunSonuKasaIfExists(ss);
     var action = data.action || data.type || "";
 
     switch (action) {
@@ -225,6 +226,23 @@ function getTimeFormatted() {
   return hours + ":" + minutes;
 }
 
+/**
+ * Kullanıcı talebi: 'Gün Sonu Kasa' sayfası kaldırıldı, tüm veriler GELİR sayfasına taşındı.
+ * E-tabloda böyle bir sekme varsa kalıcı olarak siler.
+ */
+function deleteGunSonuKasaIfExists(ss) {
+  if (!ss) return;
+  try {
+    var dcSheet = ss.getSheetByName("Gün Sonu Kasa");
+    if (dcSheet) {
+      ss.deleteSheet(dcSheet);
+      Logger.log("'Gün Sonu Kasa' sayfası kullanıcı talebiyle e-tablodan silindi.");
+    }
+  } catch (e) {
+    Logger.log("'Gün Sonu Kasa' silinirken: " + e);
+  }
+}
+
 // ===================================================================
 // 3. GELİR SAYFASI & HAFTALIK TAKVİM DÜZENİ (GELİR - AY YIL)
 // ===================================================================
@@ -346,85 +364,55 @@ function buildMonthlySalesSheetTemplate(sheet, monthYearStr) {
 }
 
 function getSalesRowMap(sheet) {
-  var rowMap = {
-    total: 5,
-    officialCash: 6,
-    unoffCash: 7,
-    card: 8,
-    officialTransfer: 9,
-    unoffTransfer: 10,
-    platform: 11,
-    closeTime: 12
+  return {
+    total: 5,            // 💰 GÜN TOPLAMI (CİRO)
+    totalCash: 6,        // 💵 TOPLAM NAKİT
+    card: 7,             // 💳 TOPLAM KREDİ KARTI
+    totalTransfer: 8,    // 📲 TOPLAM HAVALE
+    platform: 9,         // 📦 TOPLAM ONLİNE
+    officialCash: 10,    // 🧾 Toplam Fişli Nakit
+    unoffCash: 11,       // 📝 Toplam Fişsiz Nakit
+    officialTransfer: 12,// 🧾 Toplam Fişli Havale
+    unoffTransfer: 13,   // 🏦 Toplam Fişsiz Havale
+    closeTime: 14,       // 🏁 Kapanış Saati
+    countedCash: 15,     // 💵 Sayılan Kasa Nakit
+    cashDiff: 16,        // ⚖️ Kasa Farkı
+    reconcileStatus: 17  // 🏷️ Mutabakat Durumu
   };
-  if (!sheet) return rowMap;
-
-  try {
-    var aVals = sheet.getRange("A5:A16").getValues();
-    var foundOffCash = false;
-    var foundUnoffCash = false;
-    var foundOffTrans = false;
-    var foundUnoffTrans = false;
-
-    for (var r = 0; r < aVals.length; r++) {
-      var rowNum = 5 + r;
-      var label = String(aVals[r][0] || "").toUpperCase().replace(/\s+/g, " ");
-
-      if (label.indexOf("TOPLAM") !== -1 && (label.indexOf("GÜN") !== -1 || label.indexOf("GUN") !== -1)) {
-        rowMap.total = rowNum;
-      } else if (label.indexOf("FİŞLİ NAKİT") !== -1 || label.indexOf("FISLI NAKIT") !== -1) {
-        rowMap.officialCash = rowNum;
-        foundOffCash = true;
-      } else if (label.indexOf("FİŞSİZ NAKİT") !== -1 || label.indexOf("FISSIZ NAKIT") !== -1) {
-        rowMap.unoffCash = rowNum;
-        foundUnoffCash = true;
-      } else if (label.indexOf("KART") !== -1 || label.indexOf("KREDİ") !== -1 || label.indexOf("KREDI") !== -1) {
-        rowMap.card = rowNum;
-      } else if (label.indexOf("FİŞLİ HAVALE") !== -1 || label.indexOf("FISLI HAVALE") !== -1) {
-        rowMap.officialTransfer = rowNum;
-        foundOffTrans = true;
-      } else if (label.indexOf("FİŞSİZ HAVALE") !== -1 || label.indexOf("FISSIZ HAVALE") !== -1) {
-        rowMap.unoffTransfer = rowNum;
-        foundUnoffTrans = true;
-      } else if (label.indexOf("PLATFORM") !== -1) {
-        rowMap.platform = rowNum;
-      } else if (label.indexOf("KAPANIŞ") !== -1 || label.indexOf("KAPANIS") !== -1 || label.indexOf("SAAT") !== -1) {
-        rowMap.closeTime = rowNum;
-      } else if ((label.indexOf("NAKİT") !== -1 || label.indexOf("NAKIT") !== -1) && !foundOffCash && !foundUnoffCash) {
-        rowMap.officialCash = rowNum;
-        rowMap.unoffCash = rowNum;
-      } else if ((label.indexOf("HAVALE") !== -1 || label.indexOf("IBAN") !== -1 || label.indexOf("EFT") !== -1) && !foundOffTrans && !foundUnoffTrans) {
-        rowMap.officialTransfer = rowNum;
-        rowMap.unoffTransfer = rowNum;
-      }
-    }
-  } catch (e) {
-    Logger.log("getSalesRowMap hatası: " + e);
-  }
-
-  return rowMap;
 }
 
 function ensureSalesSheetStructure(sheet) {
   var rowMap = getSalesRowMap(sheet);
 
-  // A Sütunu Başlıkları (Fişli / Fişsiz Ayrımlı Standart Mimari)
-  sheet.getRange(rowMap.total, 1).setValue("💰 GÜN TOPLAMI").setFontSize(8.5).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#065f46").setFontColor("#a7f3d0");
-  sheet.getRange(rowMap.officialCash, 1).setValue("🧾 Fişli Nakit").setFontSize(8.5).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#f0fdf4").setFontColor("#15803d");
-  sheet.getRange(rowMap.unoffCash, 1).setValue("💵 Fişsiz Nakit").setFontSize(8.5).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#fefce8").setFontColor("#a16207");
-  sheet.getRange(rowMap.card, 1).setValue("💳 Kredi Kartı").setFontSize(8.5).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#eff6ff").setFontColor("#1d4ed8");
-  sheet.getRange(rowMap.officialTransfer, 1).setValue("📲 Fişli Havale").setFontSize(8.5).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#f0f9ff").setFontColor("#0369a1");
-  sheet.getRange(rowMap.unoffTransfer, 1).setValue("🏦 Fişsiz Havale").setFontSize(8.5).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#f8fafc").setFontColor("#475569");
-  sheet.getRange(rowMap.platform, 1).setValue("📦 Platform Geliri").setFontSize(8.5).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#faf5ff").setFontColor("#7e22ce");
-  sheet.getRange(rowMap.closeTime, 1).setValue("🏁 Kapanış Saati").setFontSize(8.5).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#f8fafc").setFontColor("#64748b");
+  // A Sütunu Başlıkları (Kullanıcının talep ettiği satır başlıkları ve standart düzen)
+  sheet.getRange(rowMap.total, 1).setValue("💰 GÜN TOPLAMI").setFontSize(9).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#065f46").setFontColor("#a7f3d0");
+  sheet.getRange(rowMap.totalCash, 1).setValue("💵 TOPLAM NAKİT").setFontSize(9).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#dcfce7").setFontColor("#15803d");
+  sheet.getRange(rowMap.card, 1).setValue("💳 TOPLAM KREDİ KARTI").setFontSize(9).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#eff6ff").setFontColor("#1d4ed8");
+  sheet.getRange(rowMap.totalTransfer, 1).setValue("📲 TOPLAM HAVALE").setFontSize(9).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#f0f9ff").setFontColor("#0369a1");
+  sheet.getRange(rowMap.platform, 1).setValue("📦 TOPLAM ONLİNE").setFontSize(9).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#faf5ff").setFontColor("#7e22ce");
+  sheet.getRange(rowMap.officialCash, 1).setValue("🧾 Toplam Fişli Nakit").setFontSize(8.5).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#f0fdf4").setFontColor("#166534");
+  sheet.getRange(rowMap.unoffCash, 1).setValue("📝 Toplam Fişsiz Nakit").setFontSize(8.5).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#fefce8").setFontColor("#854d0e");
+  sheet.getRange(rowMap.officialTransfer, 1).setValue("🧾 Toplam Fişli Havale").setFontSize(8.5).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#f0f9ff").setFontColor("#075985");
+  sheet.getRange(rowMap.unoffTransfer, 1).setValue("🏦 Toplam Fişsiz Havale").setFontSize(8.5).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#f8fafc").setFontColor("#475569");
+  sheet.getRange(rowMap.closeTime, 1).setValue("🏁 Kapanış Saati").setFontSize(8.5).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#1e293b").setFontColor("#f8fafc");
+  sheet.getRange(rowMap.countedCash, 1).setValue("💵 Sayılan Kasa Nakit").setFontSize(8.5).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#f1f5f9").setFontColor("#0f172a");
+  sheet.getRange(rowMap.cashDiff, 1).setValue("⚖️ Kasa Farkı").setFontSize(8.5).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#f1f5f9").setFontColor("#0f172a");
+  sheet.getRange(rowMap.reconcileStatus, 1).setValue("🏷️ Mutabakat Durumu").setFontSize(8.5).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#f8fafc").setFontColor("#334155");
 
   sheet.setRowHeight(rowMap.total, 24);
-  sheet.setRowHeight(rowMap.officialCash, 22);
-  sheet.setRowHeight(rowMap.unoffCash, 22);
+  sheet.setRowHeight(rowMap.totalCash, 22);
   sheet.setRowHeight(rowMap.card, 22);
-  sheet.setRowHeight(rowMap.officialTransfer, 22);
-  sheet.setRowHeight(rowMap.unoffTransfer, 22);
+  sheet.setRowHeight(rowMap.totalTransfer, 22);
   sheet.setRowHeight(rowMap.platform, 22);
+  sheet.setRowHeight(rowMap.officialCash, 20);
+  sheet.setRowHeight(rowMap.unoffCash, 20);
+  sheet.setRowHeight(rowMap.officialTransfer, 20);
+  sheet.setRowHeight(rowMap.unoffTransfer, 20);
   sheet.setRowHeight(rowMap.closeTime, 20);
+  sheet.setRowHeight(rowMap.countedCash, 20);
+  sheet.setRowHeight(rowMap.cashDiff, 20);
+  sheet.setRowHeight(rowMap.reconcileStatus, 20);
+  sheet.setColumnWidth(1, 160);
 
   // Hafta toplamları ve Aylık Gelir Toplamını hatasız formülle bağla
   sheet.getRange("B3:H3").merge().setFormula("=SUM(B5:H5)").setNumberFormat("₺#,##0.00").setBackground("#0f172a").setFontColor("#34d399").setFontWeight("bold").setFontSize(11).setHorizontalAlignment("center");
@@ -435,13 +423,33 @@ function ensureSalesSheetStructure(sheet) {
   sheet.getRange("AP3:AQ3").merge().setFormula("=B3+J3+R3+Z3+AH3").setNumberFormat("₺#,##0.00").setBackground("#064e3b").setFontColor("#fef08a").setFontWeight("bold").setFontSize(13).setHorizontalAlignment("center");
 
   function applyDayFormulas(startCol, count) {
-    var minRow = Math.min(rowMap.officialCash, rowMap.unoffCash, rowMap.card, rowMap.officialTransfer, rowMap.unoffTransfer, rowMap.platform);
-    var maxRow = Math.max(rowMap.officialCash, rowMap.unoffCash, rowMap.card, rowMap.officialTransfer, rowMap.unoffTransfer, rowMap.platform);
     for (var c = 0; c < count; c++) {
       var colIdx = startCol + c;
       var colLetter = getColumnLetter(colIdx);
-      var sumCell = sheet.getRange(rowMap.total, colIdx);
-      sumCell.setFormula("=SUM(" + colLetter + minRow + ":" + colLetter + maxRow + ")")
+
+      // Row 6: Toplam Nakit = Fişli Nakit (Row 10) + Fişsiz Nakit (Row 11)
+      sheet.getRange(rowMap.totalCash, colIdx)
+        .setFormula("=" + colLetter + rowMap.officialCash + "+" + colLetter + rowMap.unoffCash)
+        .setNumberFormat("₺#,##0.00")
+        .setFontWeight("bold")
+        .setFontSize(9)
+        .setHorizontalAlignment("right")
+        .setBackground("#dcfce7")
+        .setFontColor("#15803d");
+
+      // Row 8: Toplam Havale = Fişli Havale (Row 12) + Fişsiz Havale (Row 13)
+      sheet.getRange(rowMap.totalTransfer, colIdx)
+        .setFormula("=" + colLetter + rowMap.officialTransfer + "+" + colLetter + rowMap.unoffTransfer)
+        .setNumberFormat("₺#,##0.00")
+        .setFontWeight("bold")
+        .setFontSize(9)
+        .setHorizontalAlignment("right")
+        .setBackground("#f0f9ff")
+        .setFontColor("#0369a1");
+
+      // Row 5: Gün Toplamı = Toplam Nakit (6) + Toplam Kredi Kartı (7) + Toplam Havale (8) + Toplam Online (9)
+      sheet.getRange(rowMap.total, colIdx)
+        .setFormula("=SUM(" + colLetter + rowMap.totalCash + ":" + colLetter + rowMap.platform + ")")
         .setNumberFormat("₺#,##0.00")
         .setBackground("#065f46")
         .setFontColor("#a7f3d0")
@@ -449,11 +457,19 @@ function ensureSalesSheetStructure(sheet) {
         .setFontSize(9.5)
         .setHorizontalAlignment("center");
 
-      sheet.getRange(minRow, colIdx, (maxRow - minRow + 1), 1)
-        .setNumberFormat("₺#,##0.00")
-        .setFontWeight("bold")
-        .setHorizontalAlignment("right")
-        .setFontSize(9);
+      // Diğer veri hücreleri sayı formatları
+      sheet.getRange(rowMap.card, colIdx).setNumberFormat("₺#,##0.00").setFontWeight("bold").setHorizontalAlignment("right");
+      sheet.getRange(rowMap.platform, colIdx).setNumberFormat("₺#,##0.00").setFontWeight("bold").setHorizontalAlignment("right");
+      sheet.getRange(rowMap.officialCash, colIdx).setNumberFormat("₺#,##0.00").setFontWeight("bold").setHorizontalAlignment("right");
+      sheet.getRange(rowMap.unoffCash, colIdx).setNumberFormat("₺#,##0.00").setFontWeight("bold").setHorizontalAlignment("right");
+      sheet.getRange(rowMap.officialTransfer, colIdx).setNumberFormat("₺#,##0.00").setFontWeight("bold").setHorizontalAlignment("right");
+      sheet.getRange(rowMap.unoffTransfer, colIdx).setNumberFormat("₺#,##0.00").setFontWeight("bold").setHorizontalAlignment("right");
+
+      // Gün sonu kasa alanları
+      sheet.getRange(rowMap.closeTime, colIdx).setHorizontalAlignment("center").setFontSize(8.5);
+      sheet.getRange(rowMap.countedCash, colIdx).setNumberFormat("₺#,##0.00").setFontWeight("bold").setHorizontalAlignment("right");
+      sheet.getRange(rowMap.cashDiff, colIdx).setNumberFormat("₺#,##0.00").setFontWeight("bold").setHorizontalAlignment("right");
+      sheet.getRange(rowMap.reconcileStatus, colIdx).setHorizontalAlignment("center").setFontSize(8.5);
     }
   }
 
@@ -463,17 +479,26 @@ function ensureSalesSheetStructure(sheet) {
   applyDayFormulas(26, 7);
   applyDayFormulas(34, 7);
 
-  // Varsa #ERROR! veya bozuk hücreleri sıfırla
+  // Varsa bozuk hata hücrelerini sıfırla
   try {
-    var minRow = Math.min(rowMap.officialCash, rowMap.unoffCash, rowMap.card, rowMap.officialTransfer, rowMap.unoffTransfer, rowMap.platform);
-    var maxRow = Math.max(rowMap.officialCash, rowMap.unoffCash, rowMap.card, rowMap.officialTransfer, rowMap.unoffTransfer, rowMap.platform);
     for (var col = 2; col <= 40; col++) {
       if (col === 9 || col === 17 || col === 25 || col === 33) continue;
-      var vals = sheet.getRange(minRow, col, (maxRow - minRow + 1), 1).getValues();
+      var vals = sheet.getRange(5, col, 13, 1).getValues();
       for (var r = 0; r < vals.length; r++) {
         var vStr = String(vals[r][0] || "");
         if (vStr.indexOf("#ERROR") !== -1 || vStr.indexOf("#VALUE") !== -1 || vStr.indexOf("#N/A") !== -1 || vStr.indexOf("#REF") !== -1) {
-          sheet.getRange(minRow + r, col).setValue(0);
+          if (r + 5 === rowMap.totalCash) {
+            var colLet = getColumnLetter(col);
+            sheet.getRange(r + 5, col).setFormula("=" + colLet + rowMap.officialCash + "+" + colLet + rowMap.unoffCash);
+          } else if (r + 5 === rowMap.totalTransfer) {
+            var colLet = getColumnLetter(col);
+            sheet.getRange(r + 5, col).setFormula("=" + colLet + rowMap.officialTransfer + "+" + colLet + rowMap.unoffTransfer);
+          } else if (r + 5 === rowMap.total) {
+            var colLet = getColumnLetter(col);
+            sheet.getRange(r + 5, col).setFormula("=SUM(" + colLet + rowMap.totalCash + ":" + colLet + rowMap.platform + ")");
+          } else {
+            sheet.getRange(r + 5, col).setValue(0);
+          }
         }
       }
     }
@@ -490,6 +515,8 @@ function getSalesColumnForDay(dayNum) {
 }
 
 function handleSaveSale(ss, data) {
+  deleteGunSonuKasaIfExists(ss);
+
   var dateObj = parseDateHelper(data.date);
   var monthYearStr = getMonthYearTitle(dateObj);
   var sheet = getOrCreateMonthlySalesSheet(ss, monthYearStr);
@@ -530,19 +557,19 @@ function handleSaveSale(ss, data) {
     sheet.getRange(rowMap.officialCash, targetCol).setValue(Math.max(0, curOffCash + officialCash));
   }
 
-  // 💵 Fişsiz Nakit Ekleme
+  // 📝 Fişsiz Nakit Ekleme
   if (unoffCash !== 0) {
     var curUnoffCash = safeParseMoney(sheet.getRange(rowMap.unoffCash, targetCol).getValue());
     sheet.getRange(rowMap.unoffCash, targetCol).setValue(Math.max(0, curUnoffCash + unoffCash));
   }
 
-  // 💳 Kredi Kartı Ekleme
+  // 💳 Toplam Kredi Kartı Ekleme
   if (cardAmt !== 0) {
     var curCard = safeParseMoney(sheet.getRange(rowMap.card, targetCol).getValue());
     sheet.getRange(rowMap.card, targetCol).setValue(Math.max(0, curCard + cardAmt));
   }
 
-  // 📲 Fişli Havale Ekleme
+  // 🧾 Fişli Havale Ekleme
   if (officialTransfer !== 0) {
     var curOffTrans = safeParseMoney(sheet.getRange(rowMap.officialTransfer, targetCol).getValue());
     sheet.getRange(rowMap.officialTransfer, targetCol).setValue(Math.max(0, curOffTrans + officialTransfer));
@@ -554,17 +581,17 @@ function handleSaveSale(ss, data) {
     sheet.getRange(rowMap.unoffTransfer, targetCol).setValue(Math.max(0, curUnoffTrans + unoffTransfer));
   }
 
-  // 📦 Platform Geliri Ekleme
+  // 📦 Toplam Online Ekleme
   if (platformAmt !== 0) {
     var curPlat = safeParseMoney(sheet.getRange(rowMap.platform, targetCol).getValue());
     sheet.getRange(rowMap.platform, targetCol).setValue(Math.max(0, curPlat + platformAmt));
   }
 
-  // 5. Satırdaki Gün Toplamı Formülü
+  // Formülleri Garantiye Al
   var colLetter = getColumnLetter(targetCol);
-  var minRow = Math.min(rowMap.officialCash, rowMap.unoffCash, rowMap.card, rowMap.officialTransfer, rowMap.unoffTransfer, rowMap.platform);
-  var maxRow = Math.max(rowMap.officialCash, rowMap.unoffCash, rowMap.card, rowMap.officialTransfer, rowMap.unoffTransfer, rowMap.platform);
-  sheet.getRange(rowMap.total, targetCol).setFormula("=SUM(" + colLetter + minRow + ":" + colLetter + maxRow + ")");
+  sheet.getRange(rowMap.totalCash, targetCol).setFormula("=" + colLetter + rowMap.officialCash + "+" + colLetter + rowMap.unoffCash);
+  sheet.getRange(rowMap.totalTransfer, targetCol).setFormula("=" + colLetter + rowMap.officialTransfer + "+" + colLetter + rowMap.unoffTransfer);
+  sheet.getRange(rowMap.total, targetCol).setFormula("=SUM(" + colLetter + rowMap.totalCash + ":" + colLetter + rowMap.platform + ")");
   SpreadsheetApp.flush();
 
   if (data.officialSales !== undefined || data.taxBase !== undefined) {
@@ -573,6 +600,8 @@ function handleSaveSale(ss, data) {
 }
 
 function handleSavePlatformIncome(ss, data) {
+  deleteGunSonuKasaIfExists(ss);
+
   var dateObj = parseDateHelper(data.date);
   var monthYearStr = getMonthYearTitle(dateObj);
   var sheet = getOrCreateMonthlySalesSheet(ss, monthYearStr);
@@ -586,9 +615,7 @@ function handleSavePlatformIncome(ss, data) {
   sheet.getRange(rowMap.platform, targetCol).setValue(curPlat + netAmt);
 
   var colLetter = getColumnLetter(targetCol);
-  var minRow = Math.min(rowMap.officialCash, rowMap.unoffCash, rowMap.card, rowMap.officialTransfer, rowMap.unoffTransfer, rowMap.platform);
-  var maxRow = Math.max(rowMap.officialCash, rowMap.unoffCash, rowMap.card, rowMap.officialTransfer, rowMap.unoffTransfer, rowMap.platform);
-  sheet.getRange(rowMap.total, targetCol).setFormula("=SUM(" + colLetter + minRow + ":" + colLetter + maxRow + ")");
+  sheet.getRange(rowMap.total, targetCol).setFormula("=SUM(" + colLetter + rowMap.totalCash + ":" + colLetter + rowMap.platform + ")");
 }
 
 // ===================================================================
@@ -1089,18 +1116,9 @@ function handleSyncTaxReport(ss, data) {
 // ===================================================================
 
 function handleDailyClose(ss, data) {
-  // Kullanıcı talebi: 'Gün Sonu Kasa' sekmesi kaldırıldı, varsa e-tablodan sil
-  try {
-    var dcSheet = ss.getSheetByName("Gün Sonu Kasa");
-    if (dcSheet) {
-      ss.deleteSheet(dcSheet);
-      Logger.log("Eski 'Gün Sonu Kasa' sekmesi e-tablodan kaldırıldı.");
-    }
-  } catch (delErr) {
-    Logger.log("'Gün Sonu Kasa' sekmesi silinirken uyarı: " + delErr);
-  }
+  deleteGunSonuKasaIfExists(ss);
 
-  // GELİR - [AY YIL] sayfasına gün sütununun altına kapanış saatini damgala
+  // GELİR - [AY YIL] sayfasına gün sütununun altına kapanış detaylarını damgala (Zero-Error)
   try {
     var dateObj = parseDateHelper(data.date);
     var monthYearStr = getMonthYearTitle(dateObj);
@@ -1109,23 +1127,64 @@ function handleDailyClose(ss, data) {
     var targetCol = getSalesColumnForDay(dayNum);
     var rowMap = getSalesRowMap(salesSheet);
 
+    var actualCash = Number(data.actualCash !== undefined ? data.actualCash : 0);
     var diff = Number(data.difference !== undefined ? data.difference : 0);
-    var cleanStatus = (Math.abs(diff) < 0.01) ? "Tam Mutabakat" : (diff > 0 ? "Kasa Fazlası" : "Kasa Açığı");
-    var timeStamp = (data.time || getTimeFormatted()) + " (" + cleanStatus + ")";
+    var closeTime = data.time || getTimeFormatted();
 
+    var diffStatus = "✅ Tam Mutabakat";
+    var diffBg = "#dcfce7";
+    var diffColor = "#166534";
+    if (diff > 0.01) {
+      diffStatus = "📈 +" + diff.toFixed(2) + " TL Fazla";
+      diffBg = "#dbeafe";
+      diffColor = "#1e40af";
+    } else if (diff < -0.01) {
+      diffStatus = "⚠️ " + diff.toFixed(2) + " TL Açık";
+      diffBg = "#fee2e2";
+      diffColor = "#991b1b";
+    }
+
+    // Row 14: Kapanış Saati
     salesSheet.getRange(rowMap.closeTime, targetCol)
-      .setValue(timeStamp)
+      .setValue(closeTime)
       .setFontSize(8.5)
       .setHorizontalAlignment("center")
-      .setFontColor("#15803d")
+      .setFontColor("#0f172a")
       .setBackground("#f8fafc");
 
-    // Gün toplamı formülünü garantiye al
+    // Row 15: Sayılan Kasa Nakit
+    salesSheet.getRange(rowMap.countedCash, targetCol)
+      .setValue(actualCash)
+      .setNumberFormat("₺#,##0.00")
+      .setFontWeight("bold")
+      .setHorizontalAlignment("right")
+      .setFontColor("#15803d")
+      .setBackground("#f0fdf4");
+
+    // Row 16: Kasa Farkı
+    salesSheet.getRange(rowMap.cashDiff, targetCol)
+      .setValue(diff)
+      .setNumberFormat("₺#,##0.00")
+      .setFontWeight("bold")
+      .setHorizontalAlignment("right")
+      .setFontColor(diff < -0.01 ? "#dc2626" : (diff > 0.01 ? "#1e40af" : "#166534"))
+      .setBackground("#f8fafc");
+
+    // Row 17: Mutabakat Durumu
+    salesSheet.getRange(rowMap.reconcileStatus, targetCol)
+      .setValue(diffStatus)
+      .setFontSize(8.5)
+      .setFontWeight("bold")
+      .setHorizontalAlignment("center")
+      .setFontColor(diffColor)
+      .setBackground(diffBg);
+
+    // Gün toplamı formüllerini garantiye al
     var colLetter = getColumnLetter(targetCol);
-    var minRow = Math.min(rowMap.officialCash, rowMap.unoffCash, rowMap.card, rowMap.officialTransfer, rowMap.unoffTransfer, rowMap.platform);
-    var maxRow = Math.max(rowMap.officialCash, rowMap.unoffCash, rowMap.card, rowMap.officialTransfer, rowMap.unoffTransfer, rowMap.platform);
+    salesSheet.getRange(rowMap.totalCash, targetCol).setFormula("=" + colLetter + rowMap.officialCash + "+" + colLetter + rowMap.unoffCash);
+    salesSheet.getRange(rowMap.totalTransfer, targetCol).setFormula("=" + colLetter + rowMap.officialTransfer + "+" + colLetter + rowMap.unoffTransfer);
     salesSheet.getRange(rowMap.total, targetCol)
-      .setFormula("=SUM(" + colLetter + minRow + ":" + colLetter + maxRow + ")")
+      .setFormula("=SUM(" + colLetter + rowMap.totalCash + ":" + colLetter + rowMap.platform + ")")
       .setNumberFormat("₺#,##0.00")
       .setHorizontalAlignment("center")
       .setFontWeight("bold")
@@ -1133,7 +1192,7 @@ function handleDailyClose(ss, data) {
       .setFontColor("#a7f3d0");
 
     SpreadsheetApp.flush();
-    return { success: true, message: "Kapanış saati GELİR tablosuna işlendi." };
+    return { success: true, message: "Gün sonu kapanışı GELİR sayfasına başarıyla işlendi." };
   } catch (syncErr) {
     Logger.log("GELİR sayfasına gün sonu yazılırken hata: " + syncErr);
     return { success: false, error: String(syncErr) };
@@ -1141,17 +1200,11 @@ function handleDailyClose(ss, data) {
 }
 
 function handleReopenDailyClose(ss, data) {
-  // 'Gün Sonu Kasa' sekmesi varsa temizle
-  try {
-    var dcSheet = ss.getSheetByName("Gün Sonu Kasa");
-    if (dcSheet) {
-      ss.deleteSheet(dcSheet);
-    }
-  } catch (delErr) {}
+  deleteGunSonuKasaIfExists(ss);
 
   var targetDate = data.date || getTodayFormatted();
 
-  // GELİR sayfasındaki gün sonu kapanış saatini temizle
+  // GELİR sayfasındaki gün sonu kapanış detaylarını temizle
   try {
     var dateObj = parseDateHelper(targetDate);
     var monthYearStr = getMonthYearTitle(dateObj);
@@ -1161,11 +1214,14 @@ function handleReopenDailyClose(ss, data) {
       var targetCol = getSalesColumnForDay(dayNum);
       var rowMap = getSalesRowMap(salesSheet);
       salesSheet.getRange(rowMap.closeTime, targetCol).clearContent().setBackground(null);
+      salesSheet.getRange(rowMap.countedCash, targetCol).clearContent().setBackground(null);
+      salesSheet.getRange(rowMap.cashDiff, targetCol).clearContent().setBackground(null);
+      salesSheet.getRange(rowMap.reconcileStatus, targetCol).clearContent().setBackground(null);
     }
     SpreadsheetApp.flush();
     return { success: true, message: "Günü geri açma başarılı." };
   } catch (syncErr) {
-    Logger.log("GELİR sayfasından gün sonu saati temizlenirken hata: " + syncErr);
+    Logger.log("GELİR sayfasından gün sonu bilgileri temizlenirken hata: " + syncErr);
     return { success: false, error: String(syncErr) };
   }
 }
@@ -1196,19 +1252,11 @@ function fixAllErrorCells(sheet) {
 
 /**
  * Tek tıkla Apps Script editöründen çalıştırılabilir onarım fonksiyonu.
- * Gün Sonu Kasa sayfasındaki #ERROR! hücrelerini anında temizler ve GELİR sayfasını hazırlar.
+ * Gün Sonu Kasa sayfasını kaldırır ve tüm GELİR sayfalarını 13 satırlı yeni formata geçirir.
  */
 function repairEverything() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  
-  // Gün Sonu Kasa sekmesi kaldırıldı, varsa temizle
-  try {
-    var dcSheet = ss.getSheetByName("Gün Sonu Kasa");
-    if (dcSheet) {
-      ss.deleteSheet(dcSheet);
-      Logger.log("'Gün Sonu Kasa' sekmesi kaldırıldı.");
-    }
-  } catch (e) {}
+  deleteGunSonuKasaIfExists(ss);
   
   var allSheets = ss.getSheets();
   for (var i = 0; i < allSheets.length; i++) {
@@ -1223,7 +1271,7 @@ function repairEverything() {
   var salesSheet = getOrCreateMonthlySalesSheet(ss, monthYearStr);
   ensureSalesSheetStructure(salesSheet);
   
-  Logger.log("✅ Tüm GELİR sayfaları 8 satırlı yeni formata geçirildi ve #ERROR! formülleri düzeltildi!");
+  Logger.log("✅ Tüm GELİR sayfaları 13 satırlı yeni formata geçirildi ve #ERROR! formülleri düzeltildi!");
 }
 
 // ===================================================================
@@ -1335,7 +1383,7 @@ function resetSpreadsheetFinancials() {
       var rowMap = getSalesRowMap(s);
       for (var col = 2; col <= 40; col++) {
         if (col === 9 || col === 17 || col === 25 || col === 33) continue;
-        s.getRange(rowMap.officialCash, col, 7, 1).clearContent();
+        s.getRange(6, col, 12, 1).clearContent();
       }
       ensureSalesSheetStructure(s);
       Logger.log(s.getName() + " gelir takvimi sıfırlandı.");

@@ -5,6 +5,10 @@
 // ── Daily Close (Gün Sonu Kapanış & Eski Güne Dönme) ──
 function openDailyCloseModal() {
   document.querySelectorAll(".banknote-grid .fc").forEach(inp => inp.value = "");
+  window._lastCountedCashTotal = 0;
+  window._lastExpectedCashTotal = 0;
+  window._lastDifference = 0;
+  window._lastDailyCloseData = null;
   const totalCashEl = document.getElementById("dcTotalCash");
   if (totalCashEl) totalCashEl.innerText = "0.00 ₺";
   switchDcModalTab("today");
@@ -52,8 +56,28 @@ function switchDcModalTab(tab) {
   }
 }
 
+function safeParseMoney(val) {
+  if (typeof val === "number") return isNaN(val) ? 0 : val;
+  if (!val) return 0;
+  var s = String(val).replace(/[^0-9.,-]/g, "").trim();
+  if (!s) return 0;
+  if (s.indexOf(".") !== -1 && s.indexOf(",") !== -1) {
+    s = s.replace(/\./g, "").replace(",", ".");
+  } else if (s.indexOf(",") !== -1) {
+    s = s.replace(",", ".");
+  }
+  var n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
 function calculateDailyClose() {
-  const getVal = id => Number(document.getElementById(id)?.value) || 0;
+  const getVal = id => {
+    const el = document.getElementById(id);
+    if (!el) return 0;
+    const v = String(el.value || "").trim().replace(",", ".");
+    const n = parseFloat(v);
+    return isNaN(n) ? 0 : n;
+  };
   
   const b200 = getVal("b200") * 200;
   const b100 = getVal("b100") * 100;
@@ -64,6 +88,8 @@ function calculateDailyClose() {
   const coin = getVal("bCoin");
 
   const actualTotal = b200 + b100 + b50 + b20 + b10 + b5 + coin;
+  window._lastCountedCashTotal = actualTotal;
+
   const totalCashEl = document.getElementById("dcTotalCash");
   if (totalCashEl) totalCashEl.innerText = actualTotal.toFixed(2) + " ₺";
 
@@ -73,12 +99,18 @@ function calculateDailyClose() {
   let cashSales = 0;
   let cardSales = 0;
   let transferSales = 0;
+  let officialCash = 0;
+  let unoffCash = 0;
+  let officialTransfer = 0;
+  let unoffTransfer = 0;
+  let platformSales = 0;
 
   let cardCount = 0;
   let cashCount = 0;
   let transferCount = 0;
 
   todaySales.forEach(s => {
+    const isOfficial = (s.isOfficial === true || s.isOfficial === "true" || (s.invoiceStatus || "").includes("Fişli"));
     const bk = (typeof getSalePaymentBreakdown === "function") 
       ? getSalePaymentBreakdown(s) 
       : { cash: Number(s.splitCash) || 0, card: Number(s.splitCard) || 0, transfer: Number(s.splitTransfer) || 0 };
@@ -86,6 +118,18 @@ function calculateDailyClose() {
     cashSales += bk.cash;
     cardSales += bk.card;
     transferSales += bk.transfer;
+
+    if (isOfficial) {
+      officialCash += bk.cash;
+      officialTransfer += bk.transfer;
+    } else {
+      unoffCash += bk.cash;
+      unoffTransfer += bk.transfer;
+    }
+
+    if (s.platform || (s.paymentType || "").toLowerCase().includes("platform")) {
+      platformSales += Number(s.total) || 0;
+    }
 
     if (bk.card > 0) cardCount++;
     if (bk.cash > 0) cashCount++;
@@ -100,12 +144,14 @@ function calculateDailyClose() {
         const amt = Number(h.total) || 0;
         if (p.includes("nakit")) {
           cashSales += amt;
+          unoffCash += amt;
           cashCount++;
         } else if (p.includes("kart")) {
           cardSales += amt;
           cardCount++;
         } else if (p.includes("havale") || p.includes("iban")) {
           transferSales += amt;
+          unoffTransfer += amt;
           transferCount++;
         }
       });
@@ -154,6 +200,14 @@ function calculateDailyClose() {
   const transferCountEl = document.getElementById("dcTransferCount");
   if (transferCountEl) transferCountEl.innerText = `${transferCount} işlem`;
 
+  // UI Güncelleme: Fişli ve Platform Detayları
+  const offCashEl = document.getElementById("dcOfficialCash");
+  if (offCashEl) offCashEl.innerText = officialCash.toFixed(2) + " ₺";
+  const offTransEl = document.getElementById("dcOfficialTransfer");
+  if (offTransEl) offTransEl.innerText = officialTransfer.toFixed(2) + " ₺";
+  const platEl = document.getElementById("dcPlatformSales");
+  if (platEl) platEl.innerText = platformSales.toFixed(2) + " ₺";
+
   // EN ALTTA TOPLAT: Günlük Toplam Gelir (Ciro)
   const totalRevEl = document.getElementById("dcTotalSalesDisplay");
   if (totalRevEl) totalRevEl.innerText = totalRevenue.toFixed(2) + " ₺";
@@ -162,10 +216,29 @@ function calculateDailyClose() {
 
   // Kasada olması beklenen nakit
   const expectedCash = Math.max(0, cashSales - cashExpenses);
+  window._lastExpectedCashTotal = expectedCash;
   const expCashEl = document.getElementById("dcExpectedCash");
   if (expCashEl) expCashEl.innerText = expectedCash.toFixed(2) + " ₺";
   
   const diff = actualTotal - expectedCash;
+  window._lastDifference = diff;
+
+  window._lastDailyCloseData = {
+    actualCash: actualTotal,
+    expectedCash: expectedCash,
+    difference: diff,
+    cashSales: cashSales,
+    cardSales: cardSales,
+    transferSales: transferSales,
+    platformSales: platformSales,
+    officialCash: officialCash,
+    unoffCash: unoffCash,
+    officialTransfer: officialTransfer,
+    unoffTransfer: unoffTransfer,
+    totalRevenue: totalRevenue,
+    cashExpenses: cashExpenses
+  };
+
   const diffEl = document.getElementById("dcDifference");
   if (diffEl) {
     diffEl.innerText = (diff > 0 ? "+" : "") + diff.toFixed(2) + " ₺";
@@ -311,60 +384,31 @@ function renderDailyCloseModalView() {
 }
 
 function completeDailyClose() {
-  const actualStr = document.getElementById("dcTotalCash")?.innerText.replace("₺", "").trim() || "0";
-  const actualNum = parseFloat(actualStr.replace(/\./g, "").replace(",", ".")) || 0;
-  const expStr = document.getElementById("dcExpectedCash")?.innerText.replace("₺", "").trim() || "0";
-  const expNum = parseFloat(expStr.replace(/\./g, "").replace(",", ".")) || 0;
-  const diffNum = actualNum - expNum;
+  const dcData = window._lastDailyCloseData || {};
+
+  const actualNum = (typeof window._lastCountedCashTotal === "number") 
+    ? window._lastCountedCashTotal 
+    : safeParseMoney(document.getElementById("dcTotalCash")?.innerText);
+
+  const expNum = (typeof window._lastExpectedCashTotal === "number") 
+    ? window._lastExpectedCashTotal 
+    : safeParseMoney(document.getElementById("dcExpectedCash")?.innerText);
+
+  const diffNum = (typeof window._lastDifference === "number")
+    ? window._lastDifference
+    : (actualNum - expNum);
 
   const today = nowDate();
-  const todaySales = (salesHistory || []).filter(s => s.date === today);
-  let cashSales = 0;
-  let cardSales = 0;
-  let transferSales = 0;
-
-  todaySales.forEach(s => {
-    const bk = (typeof getSalePaymentBreakdown === "function") 
-      ? getSalePaymentBreakdown(s) 
-      : { cash: Number(s.splitCash) || 0, card: Number(s.splitCard) || 0, transfer: Number(s.splitTransfer) || 0 };
-    cashSales += bk.cash;
-    cardSales += bk.card;
-    transferSales += bk.transfer;
-  });
-
-  // + Müşteri veresiye tahsilatları
-  if (Array.isArray(window.customers || customers)) {
-    (window.customers || customers).forEach(c => {
-      (c.purchaseHistory || []).filter(h => h.date === today && (h.payment || "").includes("Tahsilat")).forEach(h => {
-        const p = (h.payment || "").toLowerCase();
-        const amt = Number(h.total) || 0;
-        if (p.includes("nakit")) {
-          cashSales += amt;
-        } else if (p.includes("kart")) {
-          cardSales += amt;
-        } else if (p.includes("havale") || p.includes("iban")) {
-          transferSales += amt;
-        }
-      });
-    });
-  }
-
-  const totalRevenue = cashSales + cardSales + transferSales;
-
-  let cashExpenses = 0;
-  if (Array.isArray(window.expenses || expenses)) {
-    (window.expenses || expenses).filter(e => e.date === today && (
-      (e.paymentMethod && (e.paymentMethod.includes("Nakit") || e.paymentMethod.includes("Kasa"))) ||
-      (e.source && (e.source.includes("Nakit") || e.source.includes("Kasa"))) ||
-      e.status === "Peşin Ödendi"
-    )).forEach(e => cashExpenses += (Number(e.amount) || 0));
-  }
-
-  if (Array.isArray(window.suppliers || suppliers)) {
-    (window.suppliers || suppliers).forEach(s => {
-      (s.transactions || []).filter(t => t.date === today && t.type === "Ödeme" && (t.item || "").includes("Kasa (Nakit)")).forEach(t => cashExpenses += (Number(t.amount) || 0));
-    });
-  }
+  const cashSales = dcData.cashSales || 0;
+  const cardSales = dcData.cardSales || 0;
+  const transferSales = dcData.transferSales || 0;
+  const platformSales = dcData.platformSales || 0;
+  const officialCash = dcData.officialCash || 0;
+  const unoffCash = dcData.unoffCash || 0;
+  const officialTransfer = dcData.officialTransfer || 0;
+  const unoffTransfer = dcData.unoffTransfer || 0;
+  const totalRevenue = dcData.totalRevenue || (cashSales + cardSales + transferSales);
+  const cashExpenses = dcData.cashExpenses || 0;
 
   // Gün Sonu Kaydı oluştur ve yerel belleğe / localStorage'a kaydet
   const closeRecord = {
@@ -376,6 +420,11 @@ function completeDailyClose() {
     cashSales: cashSales,
     cardSales: cardSales,
     transferSales: transferSales,
+    platformSales: platformSales,
+    officialCash: officialCash,
+    unoffCash: unoffCash,
+    officialTransfer: officialTransfer,
+    unoffTransfer: unoffTransfer,
     totalRevenue: totalRevenue,
     cashExpenses: cashExpenses,
     difference: diffNum,
@@ -387,7 +436,7 @@ function completeDailyClose() {
   window.dailyCloseRecords = dailyCloseRecords;
   saveData();
   
-  // Google E-Tablo'ya gönder
+  // Google E-Tablo'ya gönder (GELİR tablosuna işlenir, eski Gün Sonu Kasa sekmesi silinir)
   sendToGoogleSheets({ 
     action: "daily_close", 
     date: today,
@@ -397,6 +446,11 @@ function completeDailyClose() {
     cashSales: cashSales,
     cardSales: cardSales,
     transferSales: transferSales,
+    platformSales: platformSales,
+    officialCash: officialCash,
+    unoffCash: unoffCash,
+    officialTransfer: officialTransfer,
+    unoffTransfer: unoffTransfer,
     totalSales: totalRevenue,
     cashExpenses: cashExpenses,
     difference: diffNum 
