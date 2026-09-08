@@ -103,10 +103,39 @@ function renderCatalog() {
 
   if (!prodList) prodList = [];
 
-  const filtered = prodList.filter(p => {
-    if (!p) return false;
-    const catMatch = (selectedCategory === "TÜMÜ" || !selectedCategory || (p.category && p.category.toLowerCase() === selectedCategory.toLowerCase()));
-    const nameMatch = !search || (p.name && p.name.toLowerCase().includes(search)) || (p.barcode && String(p.barcode).includes(search));
+  // ID'ye göre tekilleştir (Deduplicate)
+  const seenIds = new Set();
+  const uniqueProdList = [];
+  for (let i = 0; i < prodList.length; i++) {
+    const p = prodList[i];
+    if (p && p.id && !seenIds.has(String(p.id))) {
+      seenIds.add(String(p.id));
+      uniqueProdList.push(p);
+    }
+  }
+
+  const filtered = uniqueProdList.filter(p => {
+    if (!p || !p.name) return false;
+    const pCat = (p.category || "").trim().toLowerCase();
+    const sCat = (selectedCategory || "TÜMÜ").trim().toLowerCase();
+    const pName = (p.name || "").toLowerCase();
+
+    let catMatch = (sCat === "tümü" || !selectedCategory || pCat === sCat);
+    if (!catMatch) {
+      if ((sCat.includes("açık") || sCat.includes("acik")) && (pCat.includes("açık") || pCat.includes("acik") || pName.includes("açık") || pName.includes("acik"))) {
+        catMatch = true;
+      } else if (sCat.includes("kum") && (pCat.includes("kum") || pName.includes("kum") || pName.includes("paspas") || pName.includes("tuvalet") || pName.includes("akkum"))) {
+        catMatch = true;
+      } else if (sCat === "kedi" && (pCat === "kedi" || pName.includes("kedi") || pName.includes("cat") || pName.includes("kitten") || pName.includes("felicia") || pName.includes("royal canin") || pName.includes("micho") || pName.includes("supreme") || pName.includes("anatolian") || pName.includes("gourmet") || pName.includes("dreamies") || pName.includes("akkum") || pName.includes("motto") || pName.includes("proplan"))) {
+        catMatch = true;
+      } else if ((sCat === "köpek" || sCat === "kopek") && (pCat === "köpek" || pCat === "kopek" || pName.includes("köpek") || pName.includes("dog") || pName.includes("kemik") || pName.includes("pedigree") || pName.includes("puppy"))) {
+        catMatch = true;
+      } else if (sCat.includes("kuş") || sCat.includes("kus") || sCat.includes("kemirgen")) {
+        catMatch = (pCat.includes("kuş") || pCat.includes("kus") || pCat.includes("kemirgen") || pName.includes("kuş") || pName.includes("darı") || pName.includes("tülü") || pName.includes("yonca") || pName.includes("yem"));
+      }
+    }
+
+    const nameMatch = !search || pName.includes(search) || (p.barcode && String(p.barcode).includes(search));
     return catMatch && nameMatch;
   });
 
@@ -390,7 +419,7 @@ function toggleRecentSalesBox() {
   if (!body) return;
   const isHidden = body.style.display === "none";
   body.style.display = isHidden ? "block" : "none";
-  if (icon) icon.innerText = isHidden ? "▼" : "▲";
+  if (icon) icon.innerText = isHidden ? "▼" : "▶";
   if (btn) btn.innerText = isHidden ? "▲ Daralt" : "▼ Göster";
 }
 

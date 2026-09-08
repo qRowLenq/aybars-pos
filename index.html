@@ -61,17 +61,17 @@
         <div class="recent-sales-box mt-2" id="posRecentSalesContainer">
           <div class="rs-header flex justify-between items-center mb-2 flex-wrap gap-2" style="cursor:pointer;" onclick="toggleRecentSalesBox()">
             <div class="flex items-center gap-2">
-              <span id="posRecentSalesToggleIcon" style="font-size:12px; transition:transform 0.2s;">▼</span>
+              <span id="posRecentSalesToggleIcon" style="font-size:12px; transition:transform 0.2s;">▶</span>
               <b>📜 Son Satışlar & Günlük Gelir (Bugün)</b>
               <span id="posDayStatusBadge" class="badge" style="font-size:10.5px; background:#dcfce7; color:#166534; border:1px solid #bbf7d0;">🟢 Gün Açık</span>
             </div>
             <div class="flex gap-1 items-center" id="posDayActionsContainer" onclick="event.stopPropagation()">
-              <button class="btn btn-outline btn-xs" id="btnToggleRecentSales" onclick="toggleRecentSalesBox()">▲ Daralt</button>
+              <button class="btn btn-outline btn-xs" id="btnToggleRecentSales" onclick="toggleRecentSalesBox()">▼ Göster</button>
               <button class="btn btn-warning btn-xs" onclick="openDailyCloseModal()">🏁 Gün Sonu Sayımı Yap</button>
             </div>
           </div>
 
-          <div id="posRecentSalesBody">
+          <div id="posRecentSalesBody" style="display:none;">
             <!-- Gün Sonu Kapatıldı Bildirimi (Kapatıldığında Görünür ve Geri Aç Butonu Sunar) -->
             <div id="posClosedNoticeBox" style="display:none; margin-bottom:10px;"></div>
 
@@ -1467,15 +1467,15 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/products_catalog.js?v=20260908_7_tr"></script>
-  <script src="js/state.js?v=20260908_7_tr"></script>
-  <script src="js/ui.js?v=20260908_7_tr"></script>
-  <script src="js/pos.js?v=20260908_7_tr"></script>
-  <script src="js/orders.js?v=20260908_7_tr"></script>
-  <script src="js/inventory.js?v=20260908_7_tr"></script>
-  <script src="js/crm.js?v=20260908_7_tr"></script>
-  <script src="js/procurement.js?v=20260908_7_tr"></script>
-  <script src="js/expenses.js?v=20260908_7_tr"></script>
-  <script src="js/app.js?v=20260908_7_tr"></script>
+  <script src="js/products_catalog.js?v=20260908_8_tr_all255"></script>
+  <script src="js/state.js?v=20260908_8_tr_all255"></script>
+  <script src="js/ui.js?v=20260908_8_tr_all255"></script>
+  <script src="js/pos.js?v=20260908_8_tr_all255"></script>
+  <script src="js/orders.js?v=20260908_8_tr_all255"></script>
+  <script src="js/inventory.js?v=20260908_8_tr_all255"></script>
+  <script src="js/crm.js?v=20260908_8_tr_all255"></script>
+  <script src="js/procurement.js?v=20260908_8_tr_all255"></script>
+  <script src="js/expenses.js?v=20260908_8_tr_all255"></script>
+  <script src="js/app.js?v=20260908_8_tr_all255"></script>
 </body>
 </html>

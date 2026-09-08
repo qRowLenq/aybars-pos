@@ -10,7 +10,14 @@ window.defaultCategories = defaultCategories;
 window.categories = categories;
 window.selectedCategory = selectedCategory;
 
-var products = [];
+var catalogProducts = (typeof window !== "undefined" && window.catalogProducts && window.catalogProducts.length > 0)
+  ? window.catalogProducts
+  : ((typeof catalogProducts !== "undefined" && Array.isArray(catalogProducts)) ? catalogProducts : []);
+
+const sampleProducts = catalogProducts;
+
+var products = (catalogProducts && catalogProducts.length > 0) ? [...catalogProducts] : [];
+window.products = products;
 var suppliers = [];
 var customers = [];
 var bundles = [];
@@ -27,12 +34,6 @@ var dailyCloseRecords = [];
 window.dailyCloseRecords = dailyCloseRecords;
 
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_l1PLYUVmHL6dqnholoKke2JsTx56FScjd4qa6veqcoK49ztzLqggwp9M7uze10sU/exec";
-
-var catalogProducts = (typeof window !== "undefined" && window.catalogProducts && window.catalogProducts.length > 0)
-  ? window.catalogProducts
-  : ((typeof catalogProducts !== "undefined" && Array.isArray(catalogProducts)) ? catalogProducts : []);
-
-const sampleProducts = catalogProducts;
 
 const sampleBundles = [];
 
@@ -207,7 +208,7 @@ function loadState() {
   window.categories = cats;
   categories = window.categories;
 
-  const CURRENT_CATALOG_VERSION = "2026_09_v11_tr_catalog";
+  const CURRENT_CATALOG_VERSION = "2026_09_v12_aybars_all_products_255";
   const savedVer = localStorage.getItem("ps_catalog_version");
   let prods = raw("ps_products");
 
@@ -217,7 +218,7 @@ function loadState() {
       ? catalogProducts
       : (typeof sampleProducts !== "undefined" && Array.isArray(sampleProducts) ? sampleProducts : []));
 
-  if (savedVer !== CURRENT_CATALOG_VERSION || !Array.isArray(prods) || prods.length < 50) {
+  if (savedVer !== CURRENT_CATALOG_VERSION || !Array.isArray(prods) || prods.length < 100) {
     // Mevcut ürünlerin haritası (özel girilmiş fiyat, maliyet veya stokları korumak için)
     const existingMap = new Map();
     if (Array.isArray(prods)) {
@@ -227,7 +228,7 @@ function loadState() {
       });
     }
 
-    // 222 Türkçe ürünü yükle, varsa kullanıcının daha önce girdiği fiyat/stok bilgilerini koru
+    // 255 Türkçe ve dükkân ürününü yükle, varsa kullanıcının daha önce girdiği fiyat/stok bilgilerini koru
     window.products = JSON.parse(JSON.stringify(catalogSource));
     window.products.forEach(p => {
       const old = existingMap.get(String(p.id)) || (p.barcode ? existingMap.get(String(p.barcode)) : null);
@@ -258,6 +259,19 @@ function loadState() {
     localStorage.setItem("ps_catalog_version", CURRENT_CATALOG_VERSION);
   } else {
     window.products = (prods && prods.length > 0) ? prods : JSON.parse(JSON.stringify(catalogSource));
+    // Eksik katalog ürünlerini otomatik enjekte et
+    const currentIdSet = new Set(window.products.map(p => String(p.id)));
+    let hasNewInjected = false;
+    catalogSource.forEach(cp => {
+      if (!currentIdSet.has(String(cp.id))) {
+        window.products.push(JSON.parse(JSON.stringify(cp)));
+        currentIdSet.add(String(cp.id));
+        hasNewInjected = true;
+      }
+    });
+    if (hasNewInjected) {
+      localStorage.setItem("ps_products", JSON.stringify(window.products));
+    }
   }
   
   // Ensure product integrity & default values

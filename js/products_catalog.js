@@ -224,7 +224,43 @@ window.catalogProducts = [
   { id: 219, name: "Nutri Canin Tahılsız Ördekli Burgu Diş Bakım Köpek Ödülü", category: "Köpek", price: 0, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
   { id: 220, name: "Felicia Tahılsız Jöleli Somonlu Yetişkin Kedi Konserve Maması", category: "Kedi", price: 0, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
   { id: 221, name: "Wanpy Soslu Gerçek Tavuk ve Ördek Etli Yavru Kedi Konserve Maması", category: "Kedi", price: 0, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
-  { id: 222, name: "Felicia Tahılsız Jöleli Kuzu Etli Yetişkin Kedi Konserve Maması", category: "Kedi", price: 0, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] }
+  { id: 222, name: "Felicia Tahılsız Jöleli Kuzu Etli Yetişkin Kedi Konserve Maması", category: "Kedi", price: 0, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+
+  /* ─── DÜKKÂN VE TEZGÂH ÜRÜNLERİ (AÇIK MAMA, AKKUM, SUPREME, ANATOLIAN VB.) ─── */
+  { id: 1788868772448, name: "Supreme Kıyılmış Tavuk Biftek", category: "Kedi", price: 35, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788868753596, name: "Supreme Kıyılmış Ton Balıklı Mus", category: "Kedi", price: 35, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788868712528, name: "Supreme Kıyılmış Tavuklu Uskumrulu", category: "Kedi", price: 35, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788868696150, name: "Supreme Kıyılmış Tavuklu Ton Balık", category: "Kedi", price: 35, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788868675953, name: "Supreme Kıyılmış Tavuk Mus", category: "Kedi", price: 35, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788868654079, name: "Supreme Kıyılmış Ördekli Somon", category: "Kedi", price: 35, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788868067469, name: "AÇIK Micho 1 kg", category: "Açık Mama", price: 165, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788868016569, name: "AÇIK Felicia Kısır Somon 1 kg", category: "Açık Mama", price: 350, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788868001791, name: "AÇIK Felicia Yetişkin Tavuk 1 kg", category: "Açık Mama", price: 350, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788867985206, name: "AÇIK Felicia Yetişkin Somon 1 kg", category: "Açık Mama", price: 350, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788867967123, name: "AÇIK Felicia Yetişkin Kuzu 1 kg", category: "Açık Mama", price: 350, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788867931547, name: "Felicia Kitten Kuzu 1 kg", category: "Kedi", price: 350, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788867907735, name: "Felicia Kitten Tavuk 1 kg", category: "Kedi", price: 350, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788867786593, name: "Akkum Kalın Kokusuz 10 kg", category: "Kum / Kozmetik", price: 340, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788867763073, name: "Akkum Kalın Sabun Kokulu 10 kg", category: "Kum / Kozmetik", price: 340, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788867738198, name: "Akkum Kalın Pudra Kokulu 10 kg", category: "Kum / Kozmetik", price: 340, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788867721864, name: "Akkum İnce Pudra Kokulu 10 kg", category: "Kum / Kozmetik", price: 340, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788867570255, name: "Akkum İnce Sabun Kokulu 10 kg", category: "Kum / Kozmetik", price: 340, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788867546787, name: "Akkum İnce Kokusuz 10 kg", category: "Kum / Kozmetik", price: 340, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788867405996, name: "Anatolian Kitten Tavuk Pate 400 gr", category: "Kedi", price: 85, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788867384535, name: "Anatolian Kısır Somon Pate 400 gr", category: "Kedi", price: 85, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788867362572, name: "Anatolian Somon Pate 400 gr", category: "Kedi", price: 85, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788867324448, name: "Anatolian Tavuk Pate 400 gr", category: "Kedi", price: 85, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788867302299, name: "Anatolian Kuzu 400 gr Pate", category: "Kedi", price: 85, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788856842402, name: "AÇIK Royal Canin Kısır 1 kg", category: "Açık Mama", price: 600, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788884802113, name: "Pro Plan Yaş Mama Kısır Ton Balığı 85 gr", category: "Kedi", price: 70, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788884422358, name: "Kuş Kafesi Tülü", category: "Kuş / Kemirgen", price: 50, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788884045195, name: "Elekli Paspas", category: "Kum / Kozmetik", price: 200, cost: 0, vatRate: 20, stock: 1, supplier: "-", batches: [] },
+  { id: 1788883731401, name: "Kedi Tuvaleti Küçük Boy", category: "Kum / Kozmetik", price: 650, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788883571561, name: "AÇIK Royal Canin Sensible 1 kg", category: "Açık Mama", price: 600, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788881627839, name: "Motto Kedi Yaş Mama 3 Tane", category: "Kedi", price: 160, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788881586006, name: "Garden Mix Darı", category: "Kuş / Kemirgen", price: 250, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] },
+  { id: 1788880048112, name: "Tekli Kemik", category: "Köpek", price: 10, cost: 0, vatRate: 20, stock: 0, supplier: "-", batches: [] }
 ];
 
 var catalogProducts = window.catalogProducts;
+
