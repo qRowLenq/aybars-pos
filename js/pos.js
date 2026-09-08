@@ -483,7 +483,6 @@ function renderPosSalesHistory() {
   // Gün Sonu Durum Rozeti ve Kapatıldı/Geri Aç Bildirim Kutusu
   const statusBadge = document.getElementById("posDayStatusBadge");
   const closedNoticeBox = document.getElementById("posClosedNoticeBox");
-  const currentWorkingDay = nowDate();
   
   const closeRecordForCurrent = (typeof getTodayDailyCloseRecord === "function") 
     ? getTodayDailyCloseRecord(currentWorkingDay) 
