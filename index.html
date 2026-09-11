@@ -132,11 +132,11 @@
             </div>
             <div class="flex gap-2">
               <label class="flex items-center gap-1.5 flex-1" style="cursor:pointer; background:#fff; padding:5px 8px; border-radius:4px; border:1px solid #bbf7d0; font-size:11.5px; font-weight:700;">
-                <input type="radio" name="posReceiptOption" id="posReceiptOfficial" value="official" onchange="syncPosReceiptToggle()">
+                <input type="radio" name="posReceiptOption" id="posReceiptOfficial" value="official" autocomplete="off" onchange="syncPosReceiptToggle()">
                 <span style="color:#166534;">🧾 FİŞLİ (Resmi)</span>
               </label>
               <label class="flex items-center gap-1.5 flex-1" style="cursor:pointer; background:#fff; padding:5px 8px; border-radius:4px; border:1px solid #fde68a; font-size:11.5px; font-weight:700;">
-                <input type="radio" name="posReceiptOption" id="posReceiptUnofficial" value="unofficial" checked onchange="syncPosReceiptToggle()">
+                <input type="radio" name="posReceiptOption" id="posReceiptUnofficial" value="unofficial" checked autocomplete="off" onchange="syncPosReceiptToggle()">
                 <span style="color:#b45309;">📝 FİŞSİZ</span>
               </label>
             </div>
@@ -150,7 +150,12 @@
             <button class="btn btn-info" style="background:#0284c7; color:#fff;" onclick="completeSale('Havale / IBAN')">📲 Havale / IBAN</button>
             <button class="btn btn-purple" onclick="openSplitPaymentModal()">✂️ Parçalı Ödeme</button>
             <button class="btn btn-danger" onclick="chargeToCredit()">📝 Veresiye Yaz</button>
-            <button class="btn" id="btnEditCartTotal" style="background:#334155; color:#fff; font-weight:700;" onclick="openCartTotalModal()">🏷️ Toplam Fiyat / İndirim</button>
+            <div class="pos-quick-discount-box" style="display:flex; gap:4px; align-items:center; background:#fff; border:1px solid #cbd5e1; border-radius:var(--radius-sm); padding:2px 4px; box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+              <input type="number" id="quickCartDiscountInput" step="any" min="0" placeholder="Yeni Tutar ₺" style="width:100%; min-width:0; flex:1; height:38px; padding:0 6px; border:1px solid #e2e8f0; border-radius:4px; font-size:12px; font-weight:700; background:#f8fafc; color:#0f172a; outline:none;" onkeydown="if(event.key==='Enter'){event.preventDefault(); applyQuickCartDiscount();}" title="Yeni toplam tutarı yazıp İndirim Yap'a veya Enter'a basın">
+              <button type="button" class="btn" id="btnQuickCartDiscount" style="background:#f59e0b; color:#fff; font-weight:800; font-size:11.5px; padding:0 8px; height:38px; white-space:nowrap; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; gap:2px; border-radius:4px; border:none; cursor:pointer;" onclick="applyQuickCartDiscount()" title="Yeni tutarı sepete uygula (Boş bırakılırsa detaylı indirim modalını açar)">
+                🏷️ İndirim Yap
+              </button>
+            </div>
             <button class="btn btn-warning btn-wide" onclick="openDispatchModal()">🛵 Gidecek Siparişe Ekle</button>
           </div>
         </div>

@@ -681,6 +681,10 @@ function initializeApp() {
   try { renderExpensesTable(); } catch(e) { console.error("renderExpensesTable error:", e); }
   try { populateAllProductDatalists(); } catch(e) { console.error("populateAllProductDatalists error:", e); }
   try { updateAllBadges(); } catch(e) { console.error("updateAllBadges error:", e); }
+  try {
+    if (typeof setPosReceiptDefaultUnofficial === "function") setPosReceiptDefaultUnofficial();
+    else if (typeof window !== "undefined" && typeof window.setPosReceiptDefaultUnofficial === "function") window.setPosReceiptDefaultUnofficial();
+  } catch(e) {}
   
   // Set version in footer
   const vEl = document.getElementById("appVersion");

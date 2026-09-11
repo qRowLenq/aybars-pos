@@ -196,15 +196,17 @@ function changeCartQty(id, delta) {
 function editCartItemPrice(id) {
   const item = cart.find(i => i.id === id);
   if (!item) return;
-  const val = prompt(`"${item.name}" için özel fiyat (TL):`, item.customPrice);
+  const currentP = item.customPrice !== undefined ? item.customPrice : item.price;
+  const val = prompt(`"${item.name}" için özel ürün fiyatı / indirimli fiyat (TL):`, currentP);
   if (val !== null) {
     const p = parseFloat(val);
     if (!isNaN(p) && p >= 0) {
       if (item.originalPrice === undefined) item.originalPrice = item.price !== undefined ? item.price : item.customPrice;
       item.customPrice = p;
       renderCart();
+      toast(`✅ "${item.name}" fiyatı ${p.toFixed(2)} ₺ olarak güncellendi!`);
     }
-    else toast("Geçersiz fiyat!", "error");
+    else toast("Geçersiz fiyat girdiniz!", "error");
   }
 }
 
@@ -236,6 +238,7 @@ function renderCart() {
         <div class="ci-info">
           <b>${item.name}</b>
           <span class="text-sm text-muted">${priceText} <span class="badge" style="font-size:10px; padding:1px 5px; background:#f1f5f9; color:#475569;">%${rate} KDV</span></span>
+          <span class="price-edit-link" onclick="editCartItemPrice(${item.id})" title="Bu ürüne özel indirim veya fiyat belirle">✏️ İndirim / Fiyat</span>
         </div>
         <div class="ci-qty">
           <button class="qty-btn" onclick="changeCartQty(${item.id}, -1)">−</button>
@@ -339,7 +342,7 @@ function deductProductStockFIFO(prod, qtyNeeded) {
 
   const isReceiptOfficial = document.getElementById("posReceiptOfficial") 
     ? document.getElementById("posReceiptOfficial").checked 
-    : (document.getElementById("posCashIsOfficial") ? document.getElementById("posCashIsOfficial").checked : true);
+    : (document.getElementById("posCashIsOfficial") ? document.getElementById("posCashIsOfficial").checked : false);
 
   const payUpper = (payType || "").toUpperCase();
   const isCard = payUpper.includes("KREDİ KARTI") || payUpper.includes("KART");
@@ -428,10 +431,8 @@ function deductProductStockFIFO(prod, qtyNeeded) {
 
   cart = [];
   if (document.getElementById("cartCustomerSelect")) document.getElementById("cartCustomerSelect").value = "";
-  if (document.getElementById("posReceiptUnofficial")) {
-    document.getElementById("posReceiptUnofficial").checked = true;
-    syncPosReceiptToggle();
-  }
+  if (document.getElementById("quickCartDiscountInput")) document.getElementById("quickCartDiscountInput").value = "";
+  setPosReceiptDefaultUnofficial();
   renderCart(); renderCatalog(); renderPosSalesHistory(); saveData(); updateAllBadges();
   if (typeof renderSktRadarWidget === "function") renderSktRadarWidget();
   toast(`✅ ${total.toFixed(2)} ₺ satış tamamlandı! ${isOfficial ? '(🧾 Fişli)' : '(📝 Fişsiz)'}`);
@@ -446,6 +447,14 @@ function toggleRecentSalesBox() {
   body.style.display = isHidden ? "block" : "none";
   if (icon) icon.innerText = isHidden ? "▼" : "▶";
   if (btn) btn.innerText = isHidden ? "▲ Daralt" : "▼ Göster";
+}
+
+function setPosReceiptDefaultUnofficial() {
+  const unoff = document.getElementById("posReceiptUnofficial");
+  const off = document.getElementById("posReceiptOfficial");
+  if (unoff) unoff.checked = true;
+  if (off) off.checked = false;
+  syncPosReceiptToggle();
 }
 
 function syncPosReceiptToggle() {
@@ -757,7 +766,9 @@ function chargeToCredit() {
   });
 
   cart = [];
-  document.getElementById("cartCustomerSelect").value = "";
+  if (document.getElementById("cartCustomerSelect")) document.getElementById("cartCustomerSelect").value = "";
+  if (document.getElementById("quickCartDiscountInput")) document.getElementById("quickCartDiscountInput").value = "";
+  setPosReceiptDefaultUnofficial();
   renderCart(); renderCatalog(); renderPosSalesHistory(); saveData(); updateAllBadges();
   toast(`📝 ${total.toFixed(2)} ₺ veresiye defterine işlendi!`);
 }
@@ -889,18 +900,13 @@ function applyCtmQuickPercent(pct) {
   }
 }
 
-function confirmCartTotalOverride() {
-  if (cart.length === 0) {
-    closeModal("cartTotalModal");
-    return;
-  }
-  const val = document.getElementById("ctmNewTotalInput")?.value;
-  const targetTotal = parseFloat(val);
+function applyTargetCartTotal(targetTotal) {
+  if (cart.length === 0) return toast("Sepetiniz boş! Önce sepete ürün ekleyin.", "warning");
   if (isNaN(targetTotal) || targetTotal < 0) {
     return toast("Lütfen geçerli bir toplam tutar girin!", "error");
   }
 
-  const { currentTotal } = getCartSubtotals();
+  const { currentTotal, originalTotal } = getCartSubtotals();
 
   if (cart.length === 1) {
     const item = cart[0];
@@ -925,9 +931,44 @@ function confirmCartTotalOverride() {
     lastItem.customPrice = Number((remainingTotal / lastItem.qty).toFixed(2));
   }
 
-  closeModal("cartTotalModal");
   renderCart();
-  toast(`✅ Sepet toplamı ${targetTotal.toFixed(2)} ₺ olarak güncellendi!`);
+  const diff = originalTotal - targetTotal;
+  if (diff > 0.01) {
+    toast(`✅ Sepet toplamı ${targetTotal.toFixed(2)} ₺ olarak güncellendi! (-${diff.toFixed(2)} ₺ İndirim)`);
+  } else {
+    toast(`✅ Sepet toplamı ${targetTotal.toFixed(2)} ₺ olarak güncellendi!`);
+  }
+}
+
+function applyQuickCartDiscount() {
+  if (cart.length === 0) return toast("Sepetiniz boş! Önce sepete ürün ekleyin.", "warning");
+  const inputEl = document.getElementById("quickCartDiscountInput");
+  const val = inputEl ? inputEl.value.trim() : "";
+  if (!val) {
+    // Tutar girilmediyse kapsamlı indirim modalını aç
+    openCartTotalModal();
+    return;
+  }
+  const targetTotal = parseFloat(val);
+  if (isNaN(targetTotal) || targetTotal < 0) {
+    return toast("Lütfen geçerli bir toplam tutar girin!", "error");
+  }
+  applyTargetCartTotal(targetTotal);
+  if (inputEl) inputEl.value = "";
+}
+
+function confirmCartTotalOverride() {
+  if (cart.length === 0) {
+    closeModal("cartTotalModal");
+    return;
+  }
+  const val = document.getElementById("ctmNewTotalInput")?.value;
+  const targetTotal = parseFloat(val);
+  if (isNaN(targetTotal) || targetTotal < 0) {
+    return toast("Lütfen geçerli bir toplam tutar girin!", "error");
+  }
+  closeModal("cartTotalModal");
+  applyTargetCartTotal(targetTotal);
 }
 
 function resetCartPricesToOriginal() {
@@ -959,11 +1000,22 @@ if (typeof window !== "undefined") {
   window.confirmCartTotalOverride = confirmCartTotalOverride;
   window.resetCartPricesToOriginal = resetCartPricesToOriginal;
   window.syncPosReceiptToggle = syncPosReceiptToggle;
+  window.setPosReceiptDefaultUnofficial = setPosReceiptDefaultUnofficial;
+  window.applyTargetCartTotal = applyTargetCartTotal;
+  window.applyQuickCartDiscount = applyQuickCartDiscount;
+  window.editCartItemPrice = editCartItemPrice;
 }
 
-// Sayfa ilk yüklendiğinde Fişli/Fişsiz seçimini eşle
+// Sayfa ilk yüklendiğinde ve form yenilendiğinde varsayılan Fişsiz seçimini garantile
+function initPosReceiptSelection() {
+  setPosReceiptDefaultUnofficial();
+}
+
 if (typeof document !== "undefined") {
-  document.addEventListener("DOMContentLoaded", () => {
-    try { syncPosReceiptToggle(); } catch(e) {}
-  });
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initPosReceiptSelection);
+  } else {
+    initPosReceiptSelection();
+  }
+  window.addEventListener("pageshow", initPosReceiptSelection);
 }
