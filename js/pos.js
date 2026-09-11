@@ -177,8 +177,11 @@ function renderCatalog() {
 function addToCart(p) {
   const item = cart.find(i => i.id === p.id);
   const vatRate = p.vatRate !== undefined ? p.vatRate : 20;
-  if (item) item.qty++;
-  else cart.push({ ...p, vatRate, qty: 1, customPrice: p.price });
+  if (item) {
+    item.qty++;
+  } else {
+    cart.push({ ...p, vatRate, qty: 1, customPrice: p.price, originalPrice: p.price });
+  }
   renderCart();
 }
 
@@ -196,7 +199,11 @@ function editCartItemPrice(id) {
   const val = prompt(`"${item.name}" için özel fiyat (TL):`, item.customPrice);
   if (val !== null) {
     const p = parseFloat(val);
-    if (!isNaN(p) && p >= 0) { item.customPrice = p; renderCart(); }
+    if (!isNaN(p) && p >= 0) {
+      if (item.originalPrice === undefined) item.originalPrice = item.price !== undefined ? item.price : item.customPrice;
+      item.customPrice = p;
+      renderCart();
+    }
     else toast("Geçersiz fiyat!", "error");
   }
 }
@@ -207,19 +214,28 @@ function renderCart() {
   container.innerHTML = "";
   let total = 0;
   let vatTotal = 0;
+  let originalTotal = 0;
 
   cart.forEach(item => {
+    if (item.originalPrice === undefined) item.originalPrice = item.price !== undefined ? item.price : item.customPrice;
+    originalTotal += (item.qty * item.originalPrice);
+
     const lineTotal = item.qty * item.customPrice;
     const rate = Number(item.vatRate !== undefined ? item.vatRate : 20);
     const itemVat = rate > 0 ? (lineTotal - (lineTotal / (1 + rate / 100))) : 0;
     total += lineTotal;
     vatTotal += itemVat;
 
+    const hasDiscount = item.originalPrice !== undefined && item.customPrice < (item.originalPrice - 0.001);
+    const priceText = hasDiscount 
+      ? `<s style="color:#94a3b8; font-size:11px; margin-right:3px;">${item.originalPrice.toFixed(2)} ₺</s> <b style="color:#16a34a;">${item.customPrice.toFixed(2)} ₺</b>`
+      : `${item.customPrice.toFixed(2)} ₺`;
+
     container.innerHTML += `
       <div class="cart-item">
         <div class="ci-info">
           <b>${item.name}</b>
-          <span class="text-sm text-muted">${item.customPrice.toFixed(2)} ₺ <span class="badge" style="font-size:10px; padding:1px 5px; background:#f1f5f9; color:#475569;">%${rate} KDV</span></span>
+          <span class="text-sm text-muted">${priceText} <span class="badge" style="font-size:10px; padding:1px 5px; background:#f1f5f9; color:#475569;">%${rate} KDV</span></span>
           <span class="price-edit-link" onclick="editCartItemPrice(${item.id})">✏️ Fiyat</span>
         </div>
         <div class="ci-qty">
@@ -232,7 +248,13 @@ function renderCart() {
   });
 
   const totalEl = document.getElementById("cartTotalDisplay");
-  if (totalEl) totalEl.innerText = total.toFixed(2) + " ₺";
+  if (totalEl) {
+    if (cart.length > 0 && originalTotal > (total + 0.01)) {
+      totalEl.innerHTML = `${total.toFixed(2)} ₺ <span style="display:block; font-size:11px; font-weight:700; color:#dc2626;">(İndirimli: -${(originalTotal - total).toFixed(2)} ₺)</span>`;
+    } else {
+      totalEl.innerText = total.toFixed(2) + " ₺";
+    }
+  }
 
   const vatEl = document.getElementById("cartVatDisplay");
   if (vatEl) vatEl.innerText = vatTotal.toFixed(2) + " ₺";
@@ -772,6 +794,152 @@ function restoreHeldCart(idx) {
   saveData(); renderCart(); closeModal("holdCartsModal"); updateAllBadges();
 }
 
+// ── Cart Total Override & Discount Functions ──
+function getCartSubtotals() {
+  let currentTotal = 0;
+  let originalTotal = 0;
+  cart.forEach(item => {
+    if (item.originalPrice === undefined) item.originalPrice = item.price !== undefined ? item.price : item.customPrice;
+    originalTotal += (item.qty * item.originalPrice);
+    currentTotal += (item.qty * item.customPrice);
+  });
+  return { currentTotal, originalTotal };
+}
+
+function openCartTotalModal() {
+  if (cart.length === 0) return toast("Sepetiniz boş! Önce sepete ürün ekleyin.", "warning");
+  const { currentTotal, originalTotal } = getCartSubtotals();
+
+  const origEl = document.getElementById("ctmOriginalTotal");
+  if (origEl) origEl.innerText = originalTotal.toFixed(2) + " ₺";
+
+  const curEl = document.getElementById("ctmCurrentTotal");
+  if (curEl) curEl.innerText = currentTotal.toFixed(2) + " ₺";
+
+  const newTotalInput = document.getElementById("ctmNewTotalInput");
+  if (newTotalInput) {
+    newTotalInput.value = currentTotal.toFixed(2);
+    setTimeout(() => {
+      newTotalInput.focus();
+      newTotalInput.select();
+    }, 150);
+  }
+
+  const discAmtInput = document.getElementById("ctmDiscountAmountInput");
+  const disc = Math.max(0, originalTotal - currentTotal);
+  if (discAmtInput) discAmtInput.value = disc > 0 ? disc.toFixed(2) : "";
+
+  const discPctInput = document.getElementById("ctmDiscountPercentInput");
+  if (discPctInput) discPctInput.value = (originalTotal > 0 && disc > 0) ? ((disc / originalTotal) * 100).toFixed(1) : "";
+
+  openModal("cartTotalModal");
+}
+
+function handleCtmNewTotalChange(val) {
+  const { originalTotal } = getCartSubtotals();
+  const entered = parseFloat(val);
+  const discAmtInput = document.getElementById("ctmDiscountAmountInput");
+  const discPctInput = document.getElementById("ctmDiscountPercentInput");
+  if (!isNaN(entered) && entered >= 0) {
+    const disc = Math.max(0, originalTotal - entered);
+    if (discAmtInput) discAmtInput.value = disc > 0 ? disc.toFixed(2) : "";
+    if (discPctInput) discPctInput.value = (originalTotal > 0 && disc > 0) ? ((disc / originalTotal) * 100).toFixed(1) : "";
+  }
+}
+
+function handleCtmDiscountAmountChange(val) {
+  const { originalTotal } = getCartSubtotals();
+  const disc = parseFloat(val) || 0;
+  const newTot = Math.max(0, originalTotal - disc);
+  const newTotalInput = document.getElementById("ctmNewTotalInput");
+  const discPctInput = document.getElementById("ctmDiscountPercentInput");
+  if (newTotalInput) newTotalInput.value = newTot.toFixed(2);
+  if (discPctInput) discPctInput.value = (originalTotal > 0 && disc > 0) ? ((disc / originalTotal) * 100).toFixed(1) : "";
+}
+
+function handleCtmDiscountPercentChange(val) {
+  const { originalTotal } = getCartSubtotals();
+  const pct = parseFloat(val) || 0;
+  const disc = (originalTotal * pct) / 100;
+  const newTot = Math.max(0, originalTotal - disc);
+  const newTotalInput = document.getElementById("ctmNewTotalInput");
+  const discAmtInput = document.getElementById("ctmDiscountAmountInput");
+  if (newTotalInput) newTotalInput.value = newTot.toFixed(2);
+  if (discAmtInput) discAmtInput.value = disc > 0 ? disc.toFixed(2) : "";
+}
+
+function applyCtmQuickRound() {
+  const newTotalInput = document.getElementById("ctmNewTotalInput");
+  const cur = parseFloat(newTotalInput?.value) || (getCartSubtotals().currentTotal);
+  const rounded = Math.floor(cur);
+  if (newTotalInput) {
+    newTotalInput.value = rounded.toFixed(2);
+    handleCtmNewTotalChange(newTotalInput.value);
+  }
+}
+
+function applyCtmQuickPercent(pct) {
+  const discPctInput = document.getElementById("ctmDiscountPercentInput");
+  if (discPctInput) {
+    discPctInput.value = pct;
+    handleCtmDiscountPercentChange(pct);
+  }
+}
+
+function confirmCartTotalOverride() {
+  if (cart.length === 0) {
+    closeModal("cartTotalModal");
+    return;
+  }
+  const val = document.getElementById("ctmNewTotalInput")?.value;
+  const targetTotal = parseFloat(val);
+  if (isNaN(targetTotal) || targetTotal < 0) {
+    return toast("Lütfen geçerli bir toplam tutar girin!", "error");
+  }
+
+  const { currentTotal } = getCartSubtotals();
+
+  if (cart.length === 1) {
+    const item = cart[0];
+    if (item.originalPrice === undefined) item.originalPrice = item.price !== undefined ? item.price : item.customPrice;
+    item.customPrice = Number((targetTotal / item.qty).toFixed(2));
+  } else {
+    const baseTotal = currentTotal > 0 ? currentTotal : cart.reduce((s, i) => s + (i.qty * (i.originalPrice || i.price || 1)), 0);
+    const ratio = baseTotal > 0 ? (targetTotal / baseTotal) : 1;
+    let allocatedSum = 0;
+
+    for (let i = 0; i < cart.length - 1; i++) {
+      const item = cart[i];
+      if (item.originalPrice === undefined) item.originalPrice = item.price !== undefined ? item.price : item.customPrice;
+      const newUnitPrice = Number((item.customPrice * ratio).toFixed(2));
+      item.customPrice = newUnitPrice;
+      allocatedSum += (newUnitPrice * item.qty);
+    }
+
+    const lastItem = cart[cart.length - 1];
+    if (lastItem.originalPrice === undefined) lastItem.originalPrice = lastItem.price !== undefined ? lastItem.price : lastItem.customPrice;
+    const remainingTotal = Math.max(0, targetTotal - allocatedSum);
+    lastItem.customPrice = Number((remainingTotal / lastItem.qty).toFixed(2));
+  }
+
+  closeModal("cartTotalModal");
+  renderCart();
+  toast(`✅ Sepet toplamı ${targetTotal.toFixed(2)} ₺ olarak güncellendi!`);
+}
+
+function resetCartPricesToOriginal() {
+  cart.forEach(item => {
+    if (item.originalPrice !== undefined) {
+      item.customPrice = item.originalPrice;
+    } else if (item.price !== undefined) {
+      item.customPrice = item.price;
+    }
+  });
+  closeModal("cartTotalModal");
+  renderCart();
+  toast("🔄 Ürün fiyatları orijinal liste fiyatına döndürüldü.");
+}
+
 // Window global exports
 if (typeof window !== "undefined") {
   window.initCategoryBar = initCategoryBar;
@@ -779,4 +947,20 @@ if (typeof window !== "undefined") {
   window.renderCatalog = renderCatalog;
   window.addToCart = addToCart;
   window.getCatBadgeClass = getCatBadgeClass;
+  window.openCartTotalModal = openCartTotalModal;
+  window.handleCtmNewTotalChange = handleCtmNewTotalChange;
+  window.handleCtmDiscountAmountChange = handleCtmDiscountAmountChange;
+  window.handleCtmDiscountPercentChange = handleCtmDiscountPercentChange;
+  window.applyCtmQuickRound = applyCtmQuickRound;
+  window.applyCtmQuickPercent = applyCtmQuickPercent;
+  window.confirmCartTotalOverride = confirmCartTotalOverride;
+  window.resetCartPricesToOriginal = resetCartPricesToOriginal;
+  window.syncPosReceiptToggle = syncPosReceiptToggle;
+}
+
+// Sayfa ilk yüklendiğinde Fişli/Fişsiz seçimini eşle
+if (typeof document !== "undefined") {
+  document.addEventListener("DOMContentLoaded", () => {
+    try { syncPosReceiptToggle(); } catch(e) {}
+  });
 }
