@@ -236,7 +236,6 @@ function renderCart() {
         <div class="ci-info">
           <b>${item.name}</b>
           <span class="text-sm text-muted">${priceText} <span class="badge" style="font-size:10px; padding:1px 5px; background:#f1f5f9; color:#475569;">%${rate} KDV</span></span>
-          <span class="price-edit-link" onclick="editCartItemPrice(${item.id})">✏️ Fiyat</span>
         </div>
         <div class="ci-qty">
           <button class="qty-btn" onclick="changeCartQty(${item.id}, -1)">−</button>
@@ -429,6 +428,10 @@ function deductProductStockFIFO(prod, qtyNeeded) {
 
   cart = [];
   if (document.getElementById("cartCustomerSelect")) document.getElementById("cartCustomerSelect").value = "";
+  if (document.getElementById("posReceiptUnofficial")) {
+    document.getElementById("posReceiptUnofficial").checked = true;
+    syncPosReceiptToggle();
+  }
   renderCart(); renderCatalog(); renderPosSalesHistory(); saveData(); updateAllBadges();
   if (typeof renderSktRadarWidget === "function") renderSktRadarWidget();
   toast(`✅ ${total.toFixed(2)} ₺ satış tamamlandı! ${isOfficial ? '(🧾 Fişli)' : '(📝 Fişsiz)'}`);
