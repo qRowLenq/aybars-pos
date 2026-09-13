@@ -3,7 +3,7 @@
 Modern esnaf ihtiyaçları ile bulut mimarisini harmanlayan, istemci tarafında tam yetenekli (Client-Side Rendered) bir POS ve ERP çözümü.
 
 ## 🚀 Canlı Demo
- 
+
 - **Blue Petshop:** [https://qrowlenq.github.io/bluepetshop/](https://qrowlenq.github.io/bluepetshop/)
 
 ## ✨ Özellikler
