@@ -590,12 +590,12 @@ function downloadAybars222Backup() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "aybars_yedek_222_urun.json";
+    a.download = "aybars_yedek_297_urun.json";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast("📥 222 Ürünlük yedek dosyası başarıyla hazırlandı ve indirildi!", "success");
+    toast("📥 297 Ürünlük güncel yedek dosyası başarıyla hazırlandı ve indirildi!", "success");
   } catch (err) {
     console.error("downloadAybars222Backup error:", err);
     toast("İndirme sırasında hata: " + err.message, "error");
