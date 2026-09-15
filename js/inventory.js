@@ -7,14 +7,15 @@ function populateCatalogProductSelect() {
   try {
     const sel = document.getElementById("quickProductSelect");
     if (!sel) return;
-    const pList = window.products || products || [];
-    let html = '<option value="">-- Katalogdaki 222 Üründen Birini Seçin --</option>';
+    const pList = [...(window.products || products || [])];
+    pList.sort((a, b) => (a.name || "").localeCompare(b.name || "", "tr"));
+    let html = '<option value="">-- Katalogdaki Ürünlerden Birini Seçin (A-Z) --</option>';
     pList.forEach(p => {
       if (p && !p.isBundle) {
         const stockStr = `Stok: ${p.stock !== undefined ? p.stock : 0}`;
         const costStr = p.cost > 0 ? `Alış: ${p.cost}₺` : 'Alış: Yok';
         const priceStr = p.price > 0 ? `Satış: ${p.price}₺` : 'Satış: Yok';
-        html += `<option value="${p.id}">${p.id}. ${p.name} (${stockStr} · ${costStr} · ${priceStr})</option>`;
+        html += `<option value="${p.id}">${p.name} (${stockStr} · ${costStr} · ${priceStr})</option>`;
       }
     });
     sel.innerHTML = html;
@@ -24,11 +25,16 @@ function populateCatalogProductSelect() {
 }
 
 function handleSelectCatalogProductForEdit(id) {
-  if (!id) return;
+  const npId = document.getElementById("npProductId");
+  if (!id) {
+    if (npId) npId.value = "";
+    return;
+  }
   const pList = window.products || products || [];
   const p = pList.find(prod => Number(prod.id) === Number(id));
   if (!p) return;
 
+  if (npId) npId.value = String(p.id);
   const npName = document.getElementById("npName");
   if (npName) npName.value = p.name || "";
   const npCat = document.getElementById("npCategory");
@@ -45,7 +51,7 @@ function handleSelectCatalogProductForEdit(id) {
   if (supSelect && p.supplier && p.supplier !== "-") supSelect.value = p.supplier;
 
   const titleEl = document.getElementById("addProductModalTitle");
-  if (titleEl) titleEl.innerText = `✏️ Ürünü Düzenle / Stok Ekle: ${p.name}`;
+  if (titleEl) titleEl.innerText = `✏️ Ürünü Düzenle: ${p.name}`;
 }
 
 // ── Dedicated Stock Entry Modal ──
@@ -138,6 +144,9 @@ function openAddProductModal(preSelectedSupplier = null) {
     if (typeof populateAllProductDatalists === "function") populateAllProductDatalists();
     if (typeof populateCatalogProductSelect === "function") populateCatalogProductSelect();
 
+    const npId = document.getElementById("npProductId");
+    if (npId) npId.value = "";
+
     const qSelect = document.getElementById("quickProductSelect");
     if (qSelect) qSelect.value = "";
     const qSearch = document.getElementById("quickProductSearch");
@@ -158,7 +167,7 @@ function openAddProductModal(preSelectedSupplier = null) {
       if (preSelectedSupplier) {
         titleEl.innerText = `+ "${preSelectedSupplier}" İçin Ürün Ekle`;
       } else {
-        titleEl.innerText = "+ Yeni Ürün Tanımla / Düzenle";
+        titleEl.innerText = "+ Yeni Ürün Tanımla";
       }
     }
     const supSelect = document.getElementById("npSupplierSelect");
@@ -181,6 +190,9 @@ function openEditProductModal(id) {
     if (typeof populateSupplierDropdowns === "function") populateSupplierDropdowns();
     if (typeof populateAllProductDatalists === "function") populateAllProductDatalists();
     if (typeof populateCatalogProductSelect === "function") populateCatalogProductSelect();
+
+    const npId = document.getElementById("npProductId");
+    if (npId) npId.value = String(p.id);
 
     const qSelect = document.getElementById("quickProductSelect");
     if (qSelect) qSelect.value = p.id;
@@ -214,6 +226,8 @@ function handleAutoFillExistingProduct(val) {
   const pList = window.products || products || [];
   const p = (typeof findMatchingProduct === "function") ? findMatchingProduct(val) : pList.find(prod => prod && prod.name && prod.name.toLowerCase() === val.trim().toLowerCase());
   if (p) {
+    const npId = document.getElementById("npProductId");
+    if (npId) npId.value = String(p.id);
     const qSelect = document.getElementById("quickProductSelect");
     if (qSelect) qSelect.value = p.id;
     const npName = document.getElementById("npName");
@@ -230,6 +244,9 @@ function handleAutoFillExistingProduct(val) {
     if (vatEl) vatEl.value = String(p.vatRate !== undefined ? p.vatRate : 20);
     const supSelect = document.getElementById("npSupplierSelect");
     if (supSelect && p.supplier && p.supplier !== "-") supSelect.value = p.supplier;
+
+    const titleEl = document.getElementById("addProductModalTitle");
+    if (titleEl) titleEl.innerText = `✏️ Ürünü Düzenle: ${p.name}`;
   }
 }
 
@@ -253,33 +270,66 @@ function saveNewProduct() {
     if (!name) return toast("Lütfen ürün adını yazın!", "error");
     if (!cat) cat = (categories && categories[0]) || "Genel";
 
+    const editId = document.getElementById("npProductId")?.value;
     let pList = window.products || products || [];
-    let existing = pList.find(p => p && p.name && p.name.toLowerCase() === name.toLowerCase());
-    if (existing) {
-      existing.price = price;
-      existing.cost = cost;
-      existing.stock = stock;
-      existing.category = cat;
-      existing.supplier = sup || "-";
-      existing.vatRate = vatRate;
-      toast(`✅ "${name}" güncellendi!`);
+
+    if (editId) {
+      // Düzenleme modu: ID eşleşmesiyle mevcut ürünü güncelle (ismi değişse bile yeni ürün oluşturmaz)
+      let existing = pList.find(p => Number(p.id) === Number(editId) || String(p.id) === String(editId));
+      if (existing) {
+        existing.name = name;
+        existing.price = price;
+        existing.cost = cost;
+        existing.stock = stock;
+        existing.category = cat;
+        existing.supplier = sup || "-";
+        existing.vatRate = vatRate;
+        toast(`✅ "${name}" başarıyla güncellendi!`);
+      } else {
+        const newProd = {
+          id: Number(editId) || Date.now(),
+          name,
+          category: cat,
+          price,
+          cost,
+          stock,
+          supplier: sup || "-",
+          vatRate,
+          batches: []
+        };
+        pList.unshift(newProd);
+        toast(`✅ "${name}" stoğa eklendi!`);
+      }
     } else {
-      const newProd = {
-        id: Date.now(),
-        name,
-        category: cat,
-        price,
-        cost,
-        stock,
-        supplier: sup || "-",
-        vatRate,
-        batches: []
-      };
-      pList.unshift(newProd); // En başa ekle
-      window.products = pList;
-      products = pList;
-      toast(`✅ "${name}" stoğa eklendi!`);
+      // Yeni ürün modu
+      let existingByName = pList.find(p => p && p.name && p.name.toLowerCase() === name.toLowerCase());
+      if (existingByName) {
+        existingByName.price = price;
+        existingByName.cost = cost;
+        existingByName.stock = stock;
+        existingByName.category = cat;
+        existingByName.supplier = sup || "-";
+        existingByName.vatRate = vatRate;
+        toast(`✅ "${name}" güncellendi!`);
+      } else {
+        const newProd = {
+          id: Date.now(),
+          name,
+          category: cat,
+          price,
+          cost,
+          stock,
+          supplier: sup || "-",
+          vatRate,
+          batches: []
+        };
+        pList.unshift(newProd); // En başa ekle
+        toast(`✅ "${name}" stoğa eklendi!`);
+      }
     }
+
+    window.products = pList;
+    products = pList;
 
     saveData();
     closeModal("addProductModal");
@@ -287,6 +337,7 @@ function saveNewProduct() {
     if (typeof renderInventoryTable === "function") renderInventoryTable();
     if (typeof renderQuickPricingTable === "function") renderQuickPricingTable();
     if (typeof populateAllProductDatalists === "function") populateAllProductDatalists();
+    if (typeof populateCatalogProductSelect === "function") populateCatalogProductSelect();
     if (typeof updateAllBadges === "function") updateAllBadges();
   } catch (err) {
     console.error("saveNewProduct error:", err);
@@ -471,6 +522,19 @@ function renderInventoryTable() {
     tbody.innerHTML = `<tr><td colspan="9" class="empty-state">Ürün bulunamadı.</td></tr>`;
     return;
   }
+
+  const sortVal = document.getElementById("invSortSelect")?.value || "name-asc";
+  filtered.sort((a, b) => {
+    if (sortVal === "name-asc") return (a.name || "").localeCompare(b.name || "", "tr");
+    if (sortVal === "name-desc") return (b.name || "").localeCompare(a.name || "", "tr");
+    if (sortVal === "stock-desc") return (Number(b.stock) || 0) - (Number(a.stock) || 0);
+    if (sortVal === "stock-asc") return (Number(a.stock) || 0) - (Number(b.stock) || 0);
+    if (sortVal === "price-desc") return (Number(b.price) || 0) - (Number(a.price) || 0);
+    if (sortVal === "price-asc") return (Number(a.price) || 0) - (Number(b.price) || 0);
+    if (sortVal === "cost-desc") return (Number(b.cost) || 0) - (Number(a.cost) || 0);
+    if (sortVal === "id-desc") return (Number(b.id) || 0) - (Number(a.id) || 0);
+    return (a.name || "").localeCompare(b.name || "", "tr");
+  });
 
   filtered.forEach(p => {
     const numCost = Number(p.cost) || 0;
@@ -707,6 +771,18 @@ function renderQuickPricingTable() {
       return;
     }
 
+    const sortVal = document.getElementById("qpSortSelect")?.value || "name-asc";
+    filtered.sort((a, b) => {
+      if (sortVal === "name-asc") return (a.name || "").localeCompare(b.name || "", "tr");
+      if (sortVal === "name-desc") return (b.name || "").localeCompare(a.name || "", "tr");
+      if (sortVal === "id-asc") return (Number(a.id) || 0) - (Number(b.id) || 0);
+      if (sortVal === "id-desc") return (Number(b.id) || 0) - (Number(a.id) || 0);
+      if (sortVal === "price-desc") return (Number(b.price) || 0) - (Number(a.price) || 0);
+      if (sortVal === "price-asc") return (Number(a.price) || 0) - (Number(b.price) || 0);
+      if (sortVal === "stock-asc") return (Number(a.stock) || 0) - (Number(b.stock) || 0);
+      return (a.name || "").localeCompare(b.name || "", "tr");
+    });
+
     const rowsHtml = filtered.map(p => {
       const numCost = Number(p.cost) || 0;
       const numPrice = Number(p.price) || 0;
@@ -857,8 +933,17 @@ window.saveQuickPricingAll = saveQuickPricingAll;
 
 function deleteProduct(id) {
   if (confirm("Ürünü silmek istiyor musunuz?")) {
-    products = products.filter(p => p.id !== id);
-    saveData(); renderCatalog(); renderInventoryTable(); populateAllProductDatalists();
+    let pList = window.products || products || [];
+    pList = pList.filter(p => Number(p.id) !== Number(id));
+    products = pList;
+    window.products = pList;
+    saveData();
+    renderCatalog();
+    renderInventoryTable();
+    if (typeof renderQuickPricingTable === "function") renderQuickPricingTable();
+    populateAllProductDatalists();
+    if (typeof populateCatalogProductSelect === "function") populateCatalogProductSelect();
+    if (typeof updateAllBadges === "function") updateAllBadges();
   }
 }
 

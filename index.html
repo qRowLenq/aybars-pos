@@ -53,6 +53,15 @@
         <div class="catalog-toolbar flex gap-2 items-center">
           <input type="text" id="catalogSearch" class="search-input" placeholder="🔍 Barkod okut veya ürün ara..." oninput="renderCatalog()">
           <select id="posCatFilter" class="fc pos-cat-select" onchange="filterCategory(this.value)" title="Kategoriye Göre Filtrele"></select>
+          <select id="posSortSelect" class="fc pos-sort-select" onchange="renderCatalog()" title="Ürünleri Sırala" style="width:auto; min-width:145px; font-size:12.5px;">
+            <option value="name-asc" selected>🔤 İsim (A-Z)</option>
+            <option value="name-desc">🔤 İsim (Z-A)</option>
+            <option value="price-asc">💰 Fiyat (Artan)</option>
+            <option value="price-desc">💰 Fiyat (Azalan)</option>
+            <option value="stock-desc">📦 Stok (Çoktan Aza)</option>
+            <option value="stock-asc">📦 Stok (Azdan Çoğa)</option>
+            <option value="id-desc">🕒 Son Eklenenler</option>
+          </select>
           <div id="categoryFilterBar" class="category-bar flex-1"></div>
           <button class="btn btn-primary btn-sm" onclick="openAddProductModal()" style="white-space:nowrap;">+ Yeni Ürün</button>
         </div>
@@ -240,7 +249,17 @@
 
         <div class="flex gap-2 mb-3 items-center flex-wrap">
           <input type="text" id="invSearchInput" class="search-input" placeholder="🔍 Ürün Ara..." oninput="renderInventoryTable()">
-          <select id="invCatFilter" class="fc" style="width:200px;" onchange="renderInventoryTable()"></select>
+          <select id="invCatFilter" class="fc" style="width:190px;" onchange="renderInventoryTable()"></select>
+          <select id="invSortSelect" class="fc" style="width:160px;" onchange="renderInventoryTable()" title="Sıralama">
+            <option value="name-asc" selected>🔤 İsim (A-Z)</option>
+            <option value="name-desc">🔤 İsim (Z-A)</option>
+            <option value="stock-desc">📦 Stok (Azalan)</option>
+            <option value="stock-asc">📦 Stok (Artan)</option>
+            <option value="price-desc">💰 Fiyat (Azalan)</option>
+            <option value="price-asc">💰 Fiyat (Artan)</option>
+            <option value="cost-desc">📥 Maliyet (Azalan)</option>
+            <option value="id-desc">🕒 Son Eklenenler</option>
+          </select>
           <button class="btn btn-primary" onclick="openAddProductModal()">+ Yeni Ürün Ekle</button>
           <button class="btn btn-warning" onclick="switchInvSubtab('quick-pricing'); if (window.renderQuickPricingTable) window.renderQuickPricingTable();">⚡ Toplu / Hızlı Düzenle</button>
         </div>
@@ -314,6 +333,15 @@
             <input type="text" id="qpSearchInput" class="search-input" placeholder="🔍 Ürün Ara (örn: Felicia, Canin, Kum)..." oninput="renderQuickPricingTable()">
             <select id="qpCategoryFilter" class="fc" style="width:180px;" onchange="renderQuickPricingTable()">
               <option value="TÜMÜ">Tüm Kategoriler (222)</option>
+            </select>
+            <select id="qpSortSelect" class="fc" style="width:150px;" onchange="renderQuickPricingTable()" title="Sıralama">
+              <option value="name-asc" selected>🔤 İsim (A-Z)</option>
+              <option value="name-desc">🔤 İsim (Z-A)</option>
+              <option value="id-asc">🔢 ID (Artan)</option>
+              <option value="id-desc">🔢 ID (Azalan)</option>
+              <option value="price-desc">💰 Fiyat (Azalan)</option>
+              <option value="price-asc">💰 Fiyat (Artan)</option>
+              <option value="stock-asc">📦 Stok (Azdan Çoğa)</option>
             </select>
             
             <div class="qp-filter-chips flex gap-1">
@@ -899,6 +927,7 @@
   <div class="modal-overlay" id="addProductModal">
     <div class="modal-box">
       <div class="modal-title" id="addProductModalTitle">+ Yeni Ürün Tanımla / Düzenle</div>
+      <input type="hidden" id="npProductId" value="">
       <div class="fg">
         <label>📦 222 Ürünlük Katalogdan Hızlı Seç (Bilgileri Otomatik Dolar)</label>
         <select id="quickProductSelect" class="fc" onchange="handleSelectCatalogProductForEdit(this.value)">

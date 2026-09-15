@@ -151,6 +151,18 @@ function renderCatalog() {
     return;
   }
 
+  const sortVal = document.getElementById("posSortSelect")?.value || "name-asc";
+  filtered.sort((a, b) => {
+    if (sortVal === "name-asc") return (a.name || "").localeCompare(b.name || "", "tr");
+    if (sortVal === "name-desc") return (b.name || "").localeCompare(a.name || "", "tr");
+    if (sortVal === "price-asc") return (Number(a.price) || 0) - (Number(b.price) || 0);
+    if (sortVal === "price-desc") return (Number(b.price) || 0) - (Number(a.price) || 0);
+    if (sortVal === "stock-desc") return (Number(b.stock) || 0) - (Number(a.stock) || 0);
+    if (sortVal === "stock-asc") return (Number(a.stock) || 0) - (Number(b.stock) || 0);
+    if (sortVal === "id-desc") return (Number(b.id) || 0) - (Number(a.id) || 0);
+    return (a.name || "").localeCompare(b.name || "", "tr");
+  });
+
   filtered.forEach(p => {
     const card = document.createElement("div");
     card.className = "product-card";

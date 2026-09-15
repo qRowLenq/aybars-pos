@@ -157,7 +157,8 @@ function updateAllBadges() {
 // ── Populate Datalists ──
 function populateAllProductDatalists() {
   try {
-    const rawProds = (window.products || products || []).filter(p => p && !p.isBundle);
+    const rawProds = [...(window.products || products || [])].filter(p => p && !p.isBundle);
+    rawProds.sort((a, b) => (a.name || "").localeCompare(b.name || "", "tr"));
     const escapeAttr = s => String(s || "").replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     
     const opts = rawProds.map(p => {
