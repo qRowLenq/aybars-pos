@@ -1040,9 +1040,9 @@
 
   <!-- Category Manage Modal -->
   <div class="modal-overlay" id="categoryManageModal">
-    <div class="modal-box" style="max-width:520px;">
-      <div class="modal-title">🏷️ Kategori Yönetimi & Düzenleme</div>
-      <p class="text-xs text-muted mb-3">Kategorileri yeniden adlandırabilir veya silebilirsiniz. İsim değiştiğinde bu kategorideki tüm ürünler otomatik güncellenir.</p>
+    <div class="modal-box" style="max-width:580px;">
+      <div class="modal-title">🏷️ Kategori Yönetimi & Sıralama</div>
+      <p class="text-xs text-muted mb-3">Kategorileri <b>1. sıraya alabilir (🔝)</b>, <b>yukarı/aşağı taşıyabilir (⬆️/⬇️)</b>, yeniden adlandırabilir veya silebilirsiniz. Sıralama anında kasaya yansır.</p>
       <div id="categoryManageList" style="max-height:360px; overflow-y:auto; margin-bottom:15px;"></div>
       <div class="flex gap-2">
         <input type="text" id="newCatModalInput" class="fc flex-1" placeholder="Yeni kategori adı..." onkeydown="if(event.key==='Enter'){const v=this.value.trim(); if(v){addNewCategory(v); this.value='';}}">

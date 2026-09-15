@@ -88,23 +88,85 @@ function renderCategoryManageModal() {
   const catList = getActiveCategories();
   const pList = window.products || products || [];
 
-  listEl.innerHTML = catList.map(c => {
+  listEl.innerHTML = catList.map((c, idx) => {
     const count = pList.filter(p => p && (p.category || "").toLowerCase() === c.toLowerCase()).length;
     const safeCat = c.replace(/'/g, "\\'");
     return `
-      <div class="flex items-center justify-between p-2 mb-2" style="background:var(--card-bg); border:1px solid var(--border); border-radius:8px;">
-        <div class="flex items-center gap-2">
+      <div class="flex items-center justify-between p-2 mb-2" style="background:var(--card-bg); border:1px solid var(--border); border-radius:8px; gap:8px;">
+        <div class="flex items-center gap-2" style="min-width:130px;">
+          <span style="font-weight:700; color:var(--text-muted); font-size:12px; width:22px;">#${idx + 1}</span>
           <span class="badge ${getCatBadgeClass(c)}" style="font-size:13px; font-weight:600;">${c}</span>
-          <span class="text-xs" style="color:var(--text-muted);">(${count} ürün)</span>
+          <span class="text-xs" style="color:var(--text-muted);">(${count})</span>
         </div>
-        <div class="flex gap-1">
-          <button class="btn btn-ghost btn-xs" onclick="renameCategory('${safeCat}')" title="Kategori Adını Değiştir">✏️ Değiştir</button>
-          <button class="btn btn-danger btn-xs" onclick="deleteCategory('${safeCat}')" title="Kategoriyi Sil">🗑️ Sil</button>
+        <div class="flex gap-1 items-center flex-wrap justify-end">
+          <button class="btn btn-ghost btn-xs" onclick="moveCategory(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.3; cursor:not-allowed;"' : ''} title="Yukarı Taşı">⬆️</button>
+          <button class="btn btn-ghost btn-xs" onclick="moveCategory(${idx}, 1)" ${idx === catList.length - 1 ? 'disabled style="opacity:0.3; cursor:not-allowed;"' : ''} title="Aşağı Taşı">⬇️</button>
+          <button class="btn btn-outline btn-xs" onclick="moveCategoryToTop(${idx})" ${idx === 0 ? 'disabled style="opacity:0.3; cursor:not-allowed;"' : ''} title="1. Sıraya Al">🔝 1. Sıra</button>
+          <button class="btn btn-ghost btn-xs" onclick="promptMoveCategory(${idx})" title="Sıra Numarasını Belirle">🔢 Sıra</button>
+          <button class="btn btn-ghost btn-xs" onclick="renameCategory('${safeCat}')" title="Kategori Adını Değiştir">✏️</button>
+          <button class="btn btn-danger btn-xs" onclick="deleteCategory('${safeCat}')" title="Kategoriyi Sil">🗑️</button>
         </div>
       </div>`;
   }).join("");
 }
 window.renderCategoryManageModal = renderCategoryManageModal;
+
+function moveCategory(index, direction) {
+  let catList = getActiveCategories();
+  const targetIndex = index + direction;
+  if (targetIndex < 0 || targetIndex >= catList.length) return;
+  
+  const [item] = catList.splice(index, 1);
+  catList.splice(targetIndex, 0, item);
+  
+  window.categories = catList;
+  categories = catList;
+  saveData();
+  initCategoryBar();
+  populateCategoryDropdowns();
+  renderCategoryManageModal();
+  toast(`↕️ "${item}" kategorisi ${targetIndex + 1}. sıraya taşındı!`);
+}
+window.moveCategory = moveCategory;
+
+function moveCategoryToTop(index) {
+  let catList = getActiveCategories();
+  if (index <= 0 || index >= catList.length) return;
+  
+  const [item] = catList.splice(index, 1);
+  catList.unshift(item);
+  
+  window.categories = catList;
+  categories = catList;
+  saveData();
+  initCategoryBar();
+  populateCategoryDropdowns();
+  renderCategoryManageModal();
+  toast(`🔝 "${item}" 1. sıraya alındı!`, "success");
+}
+window.moveCategoryToTop = moveCategoryToTop;
+
+function promptMoveCategory(index) {
+  let catList = getActiveCategories();
+  const currentRank = index + 1;
+  const newRankStr = prompt(`"${catList[index]}" kategorisini kaçıncı sıraya taşımak istiyorsunuz? (1 - ${catList.length})`, currentRank);
+  if (!newRankStr) return;
+  const targetRank = parseInt(newRankStr, 10);
+  if (isNaN(targetRank) || targetRank < 1 || targetRank > catList.length || targetRank === currentRank) return;
+  
+  const targetIndex = targetRank - 1;
+  const [item] = catList.splice(index, 1);
+  catList.splice(targetIndex, 0, item);
+  
+  window.categories = catList;
+  categories = catList;
+  saveData();
+  initCategoryBar();
+  populateCategoryDropdowns();
+  renderCategoryManageModal();
+  toast(`✅ "${item}" kategorisi ${targetRank}. sıraya taşındı!`, "success");
+}
+window.promptMoveCategory = promptMoveCategory;
 
 function openCategoryManageModal() {
   renderCategoryManageModal();
