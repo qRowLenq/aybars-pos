@@ -13,14 +13,19 @@ function openAddSupplierModal() {
 function saveSupplier() {
   const name = document.getElementById("supName").value.trim();
   if (!name) return toast("Toptancı firma adını girin!", "error");
-  suppliers.push({ id: Date.now(), name, phone: document.getElementById("supPhone").value.trim() || "-", notes: document.getElementById("supNotes").value.trim() || "-", balance: 0, transactions: [] });
+  const newSup = { id: Date.now(), name, phone: document.getElementById("supPhone").value.trim() || "-", notes: document.getElementById("supNotes").value.trim() || "-", balance: 0, transactions: [] };
+  if (!Array.isArray(window.suppliers)) window.suppliers = [];
+  window.suppliers.push(newSup);
+  suppliers = window.suppliers;
   closeModal("addSupplierModal"); saveData(); renderSuppliersTable(); populateSupplierDropdowns();
   toast(`✅ "${name}" eklendi!`);
 }
 
 function deleteSupplier(id) {
   if (confirm("Bu toptancıyı silmek istediğinize emin misiniz?")) {
-    suppliers = suppliers.filter(s => s.id !== id);
+    const list = Array.isArray(window.suppliers) ? window.suppliers : suppliers;
+    window.suppliers = list.filter(s => s.id !== id);
+    suppliers = window.suppliers;
     saveData(); renderSuppliersTable(); populateSupplierDropdowns();
   }
 }
@@ -30,11 +35,15 @@ function renderSuppliersTable() {
   if (!tbody) return;
   tbody.innerHTML = "";
 
-  if (suppliers.length === 0) {
+  const sups = (Array.isArray(window.suppliers) && window.suppliers.length > 0) ? window.suppliers : ((typeof suppliers !== "undefined" && Array.isArray(suppliers)) ? suppliers : []);
+  window.suppliers = sups;
+  suppliers = sups;
+
+  if (sups.length === 0) {
     tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Henüz toptancı eklenmedi.</td></tr>`;
     return;
   }
-  suppliers.forEach(s => {
+  sups.forEach(s => {
     tbody.innerHTML += `
       <tr>
         <td><b>${s.name}</b></td>

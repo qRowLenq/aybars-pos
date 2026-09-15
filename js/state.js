@@ -4578,7 +4578,7 @@ function loadState() {
     }
   };
 
-  const CURRENT_CATALOG_VERSION = "2026_09_v15_aybars_all_products_updated_319";
+  const CURRENT_CATALOG_VERSION = "2026_09_v17_aybars_suppliers_and_data_v17";
   const savedVer = localStorage.getItem("ps_catalog_version");
   let prods = raw("ps_products");
 
@@ -4660,7 +4660,26 @@ function loadState() {
   products = window.products;
 
   let sups = raw("ps_suppliers");
-  window.suppliers = Array.isArray(sups) ? sups : [...sampleSuppliers];
+  if (!Array.isArray(sups) || sups.length === 0) {
+    window.suppliers = JSON.parse(JSON.stringify(sampleSuppliers));
+    localStorage.setItem("ps_suppliers", JSON.stringify(window.suppliers));
+  } else {
+    window.suppliers = sups;
+    const existingSupNames = new Set(window.suppliers.map(s => (s.name || "").trim().toLowerCase()));
+    let hasNewSup = false;
+    sampleSuppliers.forEach(ss => {
+      const nameKey = (ss.name || "").trim().toLowerCase();
+      if (nameKey && !existingSupNames.has(nameKey)) {
+        window.suppliers.push(JSON.parse(JSON.stringify(ss)));
+        existingSupNames.add(nameKey);
+        hasNewSup = true;
+      }
+    });
+    if (hasNewSup) {
+      localStorage.setItem("ps_suppliers", JSON.stringify(window.suppliers));
+    }
+  }
+  suppliers = window.suppliers;
 
   let custs = raw("ps_customers");
   window.customers = Array.isArray(custs) ? custs : [...sampleCustomers];
