@@ -36,12 +36,325 @@ window.dailyCloseRecords = dailyCloseRecords;
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4ue2uUwGkZUju68CFkaV6fSUZr1zOb57Q08rsVaeA__a1j214ShzK0H5_a6GOOyl_/exec";
 
 const sampleBundles = [];
-const sampleSuppliers = [];
+const sampleSuppliers = [
+    {
+        "id":  1789464581523,
+        "name":  "ERK EVCİL HAYVAN MAMALARI PAZARLAMA SAN. Ve TİC. LTD. ŞTİ.",
+        "phone":  "-",
+        "notes":  "-",
+        "balance":  0,
+        "transactions":  [
+
+                         ]
+    },
+    {
+        "id":  1789464639935,
+        "name":  "KUZEY PET VETERİNER ÜRÜNLERİ İLAÇ VE GIDA SAN.DIŞ. TİC. A.Ş.",
+        "phone":  "-",
+        "notes":  "-",
+        "balance":  0,
+        "transactions":  [
+
+                         ]
+    },
+    {
+        "id":  1789464687709,
+        "name":  "SEVİNÇ PET VE GIDA ÜRÜNLERİ SANAYİ VE TİCARET LİMİTED ŞİRKETİ",
+        "phone":  "-",
+        "notes":  "-",
+        "balance":  0,
+        "transactions":  [
+
+                         ]
+    },
+    {
+        "id":  1789464721193,
+        "name":  "PELAGOS AKVARYUM SAN. VE TİC. LTD. ŞTİ.",
+        "phone":  "-",
+        "notes":  "-",
+        "balance":  0,
+        "transactions":  [
+
+                         ]
+    },
+    {
+        "id":  1789464742513,
+        "name":  "PET GARDEN AKVARYUM İTH. İHR. SAN. TİC. LTD. ŞTİ.",
+        "phone":  "-",
+        "notes":  "-",
+        "balance":  0,
+        "transactions":  [
+
+                         ]
+    },
+    {
+        "id":  1789464782860,
+        "name":  "SMYRNA PETFOOD IC VE DIS TICARET ANONIM SIRKETI",
+        "phone":  "-",
+        "notes":  "-",
+        "balance":  0,
+        "transactions":  [
+
+                         ]
+    },
+    {
+        "id":  1789464827445,
+        "name":  "LERASPET EVCİL HAYVAN ÜRÜNLERİ LİMİTED ŞİRKETİ",
+        "phone":  "-",
+        "notes":  "-",
+        "balance":  0,
+        "transactions":  [
+
+                         ]
+    },
+    {
+        "id":  1789464872471,
+        "name":  "LPF PET PAZ. TİC. A.Ş.",
+        "phone":  "-",
+        "notes":  "-",
+        "balance":  0,
+        "transactions":  [
+
+                         ]
+    },
+    {
+        "id":  1789465000460,
+        "name":  "SARMAT EVCİL HAYVAN VE ÜRÜNLERİ SANAYİ VE TİCARET ANONİM ŞİRKETİ",
+        "phone":  "-",
+        "notes":  "-",
+        "balance":  0,
+        "transactions":  [
+
+                         ]
+    },
+    {
+        "id":  1789465062758,
+        "name":  "ASPET EVCİL HAYVAN ÜRÜNLERİ SANAYİ TİCARET LİMİTED ŞİRKETİ",
+        "phone":  "-",
+        "notes":  "-",
+        "balance":  0,
+        "transactions":  [
+
+                         ]
+    },
+    {
+        "id":  1789465088515,
+        "name":  "TURĞAY BALSAK",
+        "phone":  "-",
+        "notes":  "-",
+        "balance":  0,
+        "transactions":  [
+
+                         ]
+    },
+    {
+        "id":  1789465173564,
+        "name":  "LOTUS EVCİL HAYVAN ÜRÜNLERİ SAN TİC LTD ŞTİ",
+        "phone":  "-",
+        "notes":  "-",
+        "balance":  0,
+        "transactions":  [
+
+                         ]
+    },
+    {
+        "id":  1789465229295,
+        "name":  "PİKAS İSTANBUL TASARIM VE MOBİLYA SANAYİ TİCARET LİMİTED ŞİRKETİ",
+        "phone":  "-",
+        "notes":  "-",
+        "balance":  0,
+        "transactions":  [
+
+                         ]
+    },
+    {
+        "id":  1789466616391,
+        "name":  "YASON SATIŞ DAĞITIM GIDA SANAYİ VE TİCARET LİMİTED ŞİRKETİ",
+        "phone":  "-",
+        "notes":  "-",
+        "balance":  0,
+        "transactions":  [
+
+                         ]
+    },
+    {
+        "id":  1789466745447,
+        "name":  "LAMİ İTHALAT İHRACAT GIDA TİC. LTD. ŞTİ.",
+        "phone":  "-",
+        "notes":  "-",
+        "balance":  0,
+        "transactions":  [
+
+                         ]
+    },
+    {
+        "id":  1789466944694,
+        "name":  "BÜŞRA GÖK",
+        "phone":  "-",
+        "notes":  "-",
+        "balance":  0,
+        "transactions":  [
+
+                         ]
+    },
+    {
+        "id":  1789466985563,
+        "name":  "TEMSA GIDA PAZARLAMA TİCARET A.Ş.",
+        "phone":  "-",
+        "notes":  "-",
+        "balance":  0,
+        "transactions":  [
+
+                         ]
+    },
+    {
+        "id":  1789467070819,
+        "name":  "LUKA PET MALZEMELERİ SAN.TİC.LTD.ŞTİ.",
+        "phone":  "-",
+        "notes":  "-",
+        "balance":  0,
+        "transactions":  [
+
+                         ]
+    }
+];
 const sampleCustomers = [];
 const sampleWaste = [];
 
 // ── Unified Sample Expenses ──
 const sampleExpenses = [
+    {
+        "id":  1789464094386,
+        "date":  "15.09.2026",
+        "time":  "12:21",
+        "mainCategory":  "Genel Dükkân / Sarf",
+        "subType":  "market",
+        "category":  "Genel Dükkân / Sarf",
+        "desc":  "market",
+        "amount":  100,
+        "vatRate":  20,
+        "vatAmount":  16.67,
+        "deductibleVat":  16.67,
+        "paymentMethod":  "Kasa (Nakit)",
+        "source":  "Kasa (Nakit)",
+        "hasInvoice":  true,
+        "isInvoice":  true,
+        "invoiceStatus":  "🧾 Faturalı",
+        "taxDeduction":  83.33,
+        "kkeg":  0,
+        "withholdingTax":  0,
+        "expenseType":  "daily"
+    },
+    {
+        "id":  1789464068647,
+        "date":  "15.09.2026",
+        "time":  "12:21",
+        "mainCategory":  "Genel Dükkân / Sarf",
+        "subType":  "kuaför",
+        "category":  "Genel Dükkân / Sarf",
+        "desc":  "kuaför",
+        "amount":  750,
+        "vatRate":  20,
+        "vatAmount":  125,
+        "deductibleVat":  125,
+        "paymentMethod":  "Kasa (Nakit)",
+        "source":  "Kasa (Nakit)",
+        "hasInvoice":  true,
+        "isInvoice":  true,
+        "invoiceStatus":  "🧾 Faturalı",
+        "taxDeduction":  625,
+        "kkeg":  0,
+        "withholdingTax":  0,
+        "expenseType":  "daily"
+    },
+    {
+        "id":  1789456031763,
+        "date":  "15.09.2026",
+        "time":  "10:07",
+        "mainCategory":  "Genel Dükkân / Sarf",
+        "subType":  "dünki yemek",
+        "category":  "Genel Dükkân / Sarf",
+        "desc":  "dünki yemek",
+        "amount":  750,
+        "vatRate":  20,
+        "vatAmount":  125,
+        "deductibleVat":  125,
+        "paymentMethod":  "Kasa (Nakit)",
+        "source":  "Kasa (Nakit)",
+        "hasInvoice":  true,
+        "isInvoice":  true,
+        "invoiceStatus":  "🧾 Faturalı",
+        "taxDeduction":  625,
+        "kkeg":  0,
+        "withholdingTax":  0,
+        "expenseType":  "daily"
+    },
+    {
+        "id":  1789455770685,
+        "date":  "15.09.2026",
+        "time":  "10:02",
+        "mainCategory":  "Genel Dükkân / Sarf",
+        "subType":  "ev alışveriş",
+        "category":  "Genel Dükkân / Sarf",
+        "desc":  "ev alışveriş",
+        "amount":  2000,
+        "vatRate":  20,
+        "vatAmount":  333.33,
+        "deductibleVat":  333.33,
+        "paymentMethod":  "Kasa (Nakit)",
+        "source":  "Kasa (Nakit)",
+        "hasInvoice":  true,
+        "isInvoice":  true,
+        "invoiceStatus":  "🧾 Faturalı",
+        "taxDeduction":  1666.67,
+        "kkeg":  0,
+        "withholdingTax":  0,
+        "expenseType":  "daily"
+    },
+    {
+        "id":  1789455759223,
+        "date":  "15.09.2026",
+        "time":  "10:02",
+        "mainCategory":  "Genel Dükkân / Sarf",
+        "subType":  "benzin",
+        "category":  "Genel Dükkân / Sarf",
+        "desc":  "benzin",
+        "amount":  1000,
+        "vatRate":  20,
+        "vatAmount":  166.67,
+        "deductibleVat":  166.67,
+        "paymentMethod":  "Kasa (Nakit)",
+        "source":  "Kasa (Nakit)",
+        "hasInvoice":  true,
+        "isInvoice":  true,
+        "invoiceStatus":  "🧾 Faturalı",
+        "taxDeduction":  833.33,
+        "kkeg":  0,
+        "withholdingTax":  0,
+        "expenseType":  "daily"
+    },
+    {
+        "id":  1789455748955,
+        "date":  "15.09.2026",
+        "time":  "10:02",
+        "mainCategory":  "Genel Dükkân / Sarf",
+        "subType":  "serkan nişan",
+        "category":  "Genel Dükkân / Sarf",
+        "desc":  "serkan nişan",
+        "amount":  2000,
+        "vatRate":  20,
+        "vatAmount":  333.33,
+        "deductibleVat":  333.33,
+        "paymentMethod":  "Kasa (Nakit)",
+        "source":  "Kasa (Nakit)",
+        "hasInvoice":  true,
+        "isInvoice":  true,
+        "invoiceStatus":  "🧾 Faturalı",
+        "taxDeduction":  1666.67,
+        "kkeg":  0,
+        "withholdingTax":  0,
+        "expenseType":  "daily"
+    },
     {
         "id":  1789310812182,
         "date":  "13.09.2026",
@@ -178,6 +491,2264 @@ const sampleExpenses = [
 
 // ── Unified Sample Sales History ──
 const sampleSalesHistory = [
+    {
+        "id":  1789490688250,
+        "date":  "15.09.2026",
+        "time":  "19:44",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "2x Supreme Kıyılmış Ton Balıklı Mus (35.00 ₺), 2x Plaisir Yaş Mama (55.00 ₺), 1x Motto Kedi Yaş Mama 3 Tane (160.00 ₺), 1x Taşıma çantası kutu (400.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788868753596,
+                              "name":  "Supreme Kıyılmış Ton Balıklı Mus",
+                              "category":  "Kedi",
+                              "price":  35,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  2,
+                              "customPrice":  35,
+                              "originalPrice":  35
+                          },
+                          {
+                              "id":  1789490540450,
+                              "name":  "Plaisir Yaş Mama",
+                              "category":  "Kedi",
+                              "price":  55,
+                              "cost":  0,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "vatRate":  20,
+                              "batches":  [
+
+                                          ],
+                              "qty":  2,
+                              "customPrice":  55,
+                              "originalPrice":  55
+                          },
+                          {
+                              "id":  1788881627839,
+                              "name":  "Motto Kedi Yaş Mama 3 Tane",
+                              "category":  "Kedi",
+                              "price":  160,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  160,
+                              "originalPrice":  160
+                          },
+                          {
+                              "id":  1789490676172,
+                              "name":  "Taşıma çantası kutu",
+                              "category":  "Kedi",
+                              "price":  400,
+                              "cost":  0,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "vatRate":  20,
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  400,
+                              "originalPrice":  400
+                          }
+                      ],
+        "total":  740,
+        "vatTotal":  123.33,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  740,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789490338732,
+        "date":  "15.09.2026",
+        "time":  "19:38",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x Akkum İnce Pudra Kokulu 10 kg (340.00 ₺), 1x Tarak (380.00 ₺), 1x Tırmalama (250.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788867721864,
+                              "name":  "Akkum İnce Pudra Kokulu 10 kg",
+                              "category":  "Kum / Kozmetik",
+                              "price":  340,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  340,
+                              "originalPrice":  340
+                          },
+                          {
+                              "id":  1789490317741,
+                              "name":  "Tarak",
+                              "category":  "elekli paspas",
+                              "price":  380,
+                              "cost":  0,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "vatRate":  20,
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  380,
+                              "originalPrice":  380
+                          },
+                          {
+                              "id":  1789490271278,
+                              "name":  "Tırmalama",
+                              "category":  "elekli paspas",
+                              "price":  250,
+                              "cost":  0,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "vatRate":  20,
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  250,
+                              "originalPrice":  250
+                          }
+                      ],
+        "total":  970,
+        "vatTotal":  161.67,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  970,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789488053483,
+        "date":  "15.09.2026",
+        "time":  "19:00",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "2x Garden Mix Kristal Kedi Kumu (275.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  32,
+                              "name":  "Garden Mix Kristal Kedi Kumu",
+                              "category":  "Kum / Kozmetik",
+                              "price":  275,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  2,
+                              "customPrice":  275,
+                              "originalPrice":  275
+                          }
+                      ],
+        "total":  550,
+        "vatTotal":  91.67,
+        "paymentType":  "Nakit",
+        "splitCash":  550,
+        "splitCard":  0,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  false
+    },
+    {
+        "id":  1789487826513,
+        "date":  "15.09.2026",
+        "time":  "18:57",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x AÇIK proplan köpek kuzu 1 kg (480.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788957875508,
+                              "name":  "AÇIK proplan köpek kuzu 1 kg",
+                              "category":  "Açık Mama",
+                              "price":  480,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  480,
+                              "originalPrice":  480
+                          }
+                      ],
+        "total":  480,
+        "vatTotal":  80,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  480,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789483295965,
+        "date":  "15.09.2026",
+        "time":  "17:41",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x nutri feline TonBalığı\u0026tavuk\u0026ciğer yaş mama (65.00 ₺), 1x Wanpy Somon, Tavuk ve Havuçlu Sıvı Kedi Ödül Ezmesi (85.00 ₺), 1x Royal Canın Yaş mama Kedi Kısır (75.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1789111205953,
+                              "name":  "nutri feline TonBalığı\u0026tavuk\u0026ciğer yaş mama",
+                              "category":  "Kedi",
+                              "price":  65,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  65,
+                              "originalPrice":  65
+                          },
+                          {
+                              "id":  170,
+                              "name":  "Wanpy Somon, Tavuk ve Havuçlu Sıvı Kedi Ödül Ezmesi",
+                              "category":  "Kedi",
+                              "price":  0,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  85,
+                              "originalPrice":  0
+                          },
+                          {
+                              "id":  1789466120035,
+                              "name":  "Royal Canın Yaş mama Kedi Kısır",
+                              "category":  "Kedi",
+                              "price":  75,
+                              "cost":  0,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "vatRate":  20,
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  75,
+                              "originalPrice":  75
+                          }
+                      ],
+        "total":  225,
+        "vatTotal":  37.5,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  225,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789482614994,
+        "date":  "15.09.2026",
+        "time":  "17:30",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x AÇIK Proplan Köpek somon 1 kg (480.00 ₺), 4x Nutri Köpek yaş mama 400 gr (270.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788936612741,
+                              "name":  "AÇIK Proplan Köpek somon 1 kg",
+                              "category":  "Açık Mama",
+                              "price":  480,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  480,
+                              "originalPrice":  480
+                          },
+                          {
+                              "id":  1789233619229,
+                              "name":  "Nutri Köpek yaş mama 400 gr",
+                              "category":  "Köpek",
+                              "price":  270,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  4,
+                              "customPrice":  270,
+                              "originalPrice":  270
+                          }
+                      ],
+        "total":  1560,
+        "vatTotal":  260,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  1560,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789481611466,
+        "date":  "15.09.2026",
+        "time":  "17:13",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x AÇIK mito tavuk 1 kg (155.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788973827325,
+                              "name":  "AÇIK mito tavuk 1 kg",
+                              "category":  "Açık Mama",
+                              "price":  155,
+                              "cost":  100,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  155,
+                              "originalPrice":  155
+                          }
+                      ],
+        "total":  155,
+        "vatTotal":  25.83,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  155,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789481554696,
+        "date":  "15.09.2026",
+        "time":  "17:12",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x Wanpy Ton Balığı, Tavuk ve Havuçlu Sıvı Kedi Ödül Ezmesi (85.00 ₺), 1x Wanpy Kuzu, Tavuk, Ördek, Havuç ve Bezelyeli Sıvı Kedi Ödül Ezmesi (85.00 ₺), 1x wampy tekli hüptürük (25.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  87,
+                              "name":  "Wanpy Ton Balığı, Tavuk ve Havuçlu Sıvı Kedi Ödül Ezmesi",
+                              "category":  "Kedi",
+                              "price":  0,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  85,
+                              "originalPrice":  0
+                          },
+                          {
+                              "id":  132,
+                              "name":  "Wanpy Kuzu, Tavuk, Ördek, Havuç ve Bezelyeli Sıvı Kedi Ödül Ezmesi",
+                              "category":  "Kedi",
+                              "price":  0,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  85,
+                              "originalPrice":  0
+                          },
+                          {
+                              "id":  1788935901980,
+                              "name":  "wampy tekli hüptürük",
+                              "category":  "Kedi",
+                              "price":  25,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  25,
+                              "originalPrice":  25
+                          }
+                      ],
+        "total":  195,
+        "vatTotal":  32.5,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  195,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789477235641,
+        "date":  "15.09.2026",
+        "time":  "16:00",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x AÇIK mito tavuk 1 kg (160.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788973827325,
+                              "name":  "AÇIK mito tavuk 1 kg",
+                              "category":  "Açık Mama",
+                              "price":  155,
+                              "cost":  100,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  160,
+                              "originalPrice":  155
+                          }
+                      ],
+        "total":  160,
+        "vatTotal":  26.67,
+        "paymentType":  "Nakit",
+        "splitCash":  160,
+        "splitCard":  0,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  false
+    },
+    {
+        "id":  1789472644207,
+        "date":  "15.09.2026",
+        "time":  "14:44",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "2x Muhabbet Kuşu Yemi (500 gr) (85.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  3,
+                              "name":  "Muhabbet Kuşu Yemi (500 gr)",
+                              "category":  "Kuş / Kemirgen",
+                              "price":  85,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  2,
+                              "customPrice":  85,
+                              "originalPrice":  85
+                          }
+                      ],
+        "total":  170,
+        "vatTotal":  28.33,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  170,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789469645751,
+        "date":  "15.09.2026",
+        "time":  "13:54",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x Proline Bebe Pudra Kedi Kumu (260.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1789403301917,
+                              "name":  "Proline Bebe Pudra Kedi Kumu",
+                              "category":  "Kum / Kozmetik",
+                              "price":  260,
+                              "cost":  0,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "vatRate":  20,
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  260,
+                              "originalPrice":  260
+                          }
+                      ],
+        "total":  260,
+        "vatTotal":  43.33,
+        "paymentType":  "Nakit",
+        "splitCash":  260,
+        "splitCard":  0,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  false
+    },
+    {
+        "id":  1789468957852,
+        "date":  "15.09.2026",
+        "time":  "13:42",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x Supravet süt tozu (350.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1789468954499,
+                              "name":  "Supravet süt tozu",
+                              "category":  "Kedi",
+                              "price":  350,
+                              "cost":  0,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "vatRate":  20,
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  350,
+                              "originalPrice":  350
+                          }
+                      ],
+        "total":  350,
+        "vatTotal":  58.33,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  350,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789468458828,
+        "date":  "15.09.2026",
+        "time":  "13:34",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x Anatolian Somon Pate 400 gr (85.00 ₺), 1x Anatolian Tavuk Pate 400 gr (85.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788867362572,
+                              "name":  "Anatolian Somon Pate 400 gr",
+                              "category":  "Kedi",
+                              "price":  85,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  85,
+                              "originalPrice":  85
+                          },
+                          {
+                              "id":  1788867324448,
+                              "name":  "Anatolian Tavuk Pate 400 gr",
+                              "category":  "Kedi",
+                              "price":  85,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  85,
+                              "originalPrice":  85
+                          }
+                      ],
+        "total":  170,
+        "vatTotal":  28.33,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  170,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789466810744,
+        "date":  "15.09.2026",
+        "time":  "13:06",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x Motto Köpek yaş mama 400gr (60.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1789233694327,
+                              "name":  "Motto Köpek yaş mama 400gr",
+                              "category":  "Köpek",
+                              "price":  60,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  60,
+                              "originalPrice":  60
+                          }
+                      ],
+        "total":  60,
+        "vatTotal":  10,
+        "paymentType":  "Nakit",
+        "splitCash":  60,
+        "splitCard":  0,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  false
+    },
+    {
+        "id":  1789466483165,
+        "date":  "15.09.2026",
+        "time":  "13:01",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "5x AÇIK mito mix 1 kg (160.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788973852251,
+                              "name":  "AÇIK mito mix 1 kg",
+                              "category":  "Açık Mama",
+                              "price":  160,
+                              "cost":  110,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  5,
+                              "customPrice":  160,
+                              "originalPrice":  160
+                          }
+                      ],
+        "total":  800,
+        "vatTotal":  133.33,
+        "paymentType":  "Havale / IBAN",
+        "splitCash":  0,
+        "splitCard":  0,
+        "splitTransfer":  800,
+        "splitCredit":  0,
+        "isOfficial":  false
+    },
+    {
+        "id":  1789466324966,
+        "date":  "15.09.2026",
+        "time":  "12:58",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x AÇIK Royal Canin Kısır 1 kg (600.00 ₺), 1x Quik Doğal Kedi Çimi (Koruyucu File Hediyeli) (250.00 ₺), 1x wampy crunchy pocker chicken (85.00 ₺), 1x Royal Canın Yaş mama Kedi Kısır (75.00 ₺), 1x Motto Kedi Yaş Mama 3 Tane (140.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788856842402,
+                              "name":  "AÇIK Royal Canin Kısır 1 kg",
+                              "category":  "Açık Mama",
+                              "price":  600,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  600,
+                              "originalPrice":  600
+                          },
+                          {
+                              "id":  136,
+                              "name":  "Quik Doğal Kedi Çimi (Koruyucu File Hediyeli)",
+                              "category":  "Kedi",
+                              "price":  250,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  250,
+                              "originalPrice":  250
+                          },
+                          {
+                              "id":  1788957625588,
+                              "name":  "wampy crunchy pocker chicken",
+                              "category":  "Kedi",
+                              "price":  85,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  85,
+                              "originalPrice":  85
+                          },
+                          {
+                              "id":  1789466120035,
+                              "name":  "Royal Canın Yaş mama Kedi Kısır",
+                              "category":  "Kedi",
+                              "price":  75,
+                              "cost":  0,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "vatRate":  20,
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  75,
+                              "originalPrice":  75
+                          },
+                          {
+                              "id":  1788881627839,
+                              "name":  "Motto Kedi Yaş Mama 3 Tane",
+                              "category":  "Kedi",
+                              "price":  160,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  140,
+                              "originalPrice":  160
+                          }
+                      ],
+        "total":  1150,
+        "vatTotal":  191.67,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  1150,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789463256067,
+        "date":  "15.09.2026",
+        "time":  "12:07",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x reflex yaş mama 85 GR (40.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1789463184697,
+                              "name":  "reflex yaş mama 85 GR",
+                              "category":  "Kedi",
+                              "price":  40,
+                              "cost":  0,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "vatRate":  20,
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  40,
+                              "originalPrice":  40
+                          }
+                      ],
+        "total":  40,
+        "vatTotal":  6.67,
+        "paymentType":  "Nakit",
+        "splitCash":  40,
+        "splitCard":  0,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  false
+    },
+    {
+        "id":  1789462808890,
+        "date":  "15.09.2026",
+        "time":  "12:00",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x Akkum İnce Pudra Kokulu 10 kg (340.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788867721864,
+                              "name":  "Akkum İnce Pudra Kokulu 10 kg",
+                              "category":  "Kum / Kozmetik",
+                              "price":  340,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  340,
+                              "originalPrice":  340
+                          }
+                      ],
+        "total":  340,
+        "vatTotal":  56.67,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  340,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789459313074,
+        "date":  "15.09.2026",
+        "time":  "11:01",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "2x AÇIK Micho 1 kg (165.00 ₺), 1x Motto Kedi Yaş Mama 3 Tane (160.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788868067469,
+                              "name":  "AÇIK Micho 1 kg",
+                              "category":  "Açık Mama",
+                              "price":  165,
+                              "cost":  116,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  2,
+                              "customPrice":  165,
+                              "originalPrice":  165
+                          },
+                          {
+                              "id":  1788881627839,
+                              "name":  "Motto Kedi Yaş Mama 3 Tane",
+                              "category":  "Kedi",
+                              "price":  160,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  160,
+                              "originalPrice":  160
+                          }
+                      ],
+        "total":  490,
+        "vatTotal":  81.67,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  490,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789458350441,
+        "date":  "15.09.2026",
+        "time":  "10:45",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x AÇIK Royal Canin Kısır 1 kg (600.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788856842402,
+                              "name":  "AÇIK Royal Canin Kısır 1 kg",
+                              "category":  "Açık Mama",
+                              "price":  600,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  600,
+                              "originalPrice":  600
+                          }
+                      ],
+        "total":  600,
+        "vatTotal":  100,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  600,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789455951657,
+        "date":  "15.09.2026",
+        "time":  "10:05",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x Motto Kedi Yaş Mama 3 Tane (154.77 ₺), 1x Royal Canın köpek 400 gr yaş mama maxi (222.48 ₺), 1x Proline Bebe Pudra Kedi Kumu (251.50 ₺), 1x Proline Kokusuz Kedi Kumu (251.50 ₺), 1x Oyuncak Kemik Kumaş Dikme (154.75 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788881627839,
+                              "name":  "Motto Kedi Yaş Mama 3 Tane",
+                              "category":  "Kedi",
+                              "price":  160,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  154.77,
+                              "originalPrice":  160
+                          },
+                          {
+                              "id":  1789455873657,
+                              "name":  "Royal Canın köpek 400 gr yaş mama maxi",
+                              "category":  "Köpek",
+                              "price":  230,
+                              "cost":  0,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "vatRate":  20,
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  222.48,
+                              "originalPrice":  230
+                          },
+                          {
+                              "id":  1789403301917,
+                              "name":  "Proline Bebe Pudra Kedi Kumu",
+                              "category":  "Kum / Kozmetik",
+                              "price":  260,
+                              "cost":  0,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "vatRate":  20,
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  251.5,
+                              "originalPrice":  260
+                          },
+                          {
+                              "id":  1789403236149,
+                              "name":  "Proline Kokusuz Kedi Kumu",
+                              "category":  "Kum / Kozmetik",
+                              "price":  260,
+                              "cost":  0,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "vatRate":  20,
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  251.5,
+                              "originalPrice":  260
+                          },
+                          {
+                              "id":  1789402564134,
+                              "name":  "Oyuncak Kemik Kumaş Dikme",
+                              "category":  "Kedi",
+                              "price":  160,
+                              "cost":  0,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "vatRate":  20,
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  154.75,
+                              "originalPrice":  160
+                          }
+                      ],
+        "total":  1035,
+        "vatTotal":  172.5,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  1035,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789455735181,
+        "date":  "15.09.2026",
+        "time":  "10:02",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x AÇIK Royal Canin Kısır 1 kg (600.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788856842402,
+                              "name":  "AÇIK Royal Canin Kısır 1 kg",
+                              "category":  "Açık Mama",
+                              "price":  600,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  600,
+                              "originalPrice":  600
+                          }
+                      ],
+        "total":  600,
+        "vatTotal":  100,
+        "paymentType":  "Havale / IBAN",
+        "splitCash":  0,
+        "splitCard":  0,
+        "splitTransfer":  600,
+        "splitCredit":  0,
+        "isOfficial":  false
+    },
+    {
+        "id":  1789404618032,
+        "date":  "14.09.2026",
+        "time":  "19:50",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x Muhabbet Kuşu Yemi (500 gr) (85.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  3,
+                              "name":  "Muhabbet Kuşu Yemi (500 gr)",
+                              "category":  "Kuş / Kemirgen",
+                              "price":  85,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  85,
+                              "originalPrice":  85
+                          }
+                      ],
+        "total":  85,
+        "vatTotal":  14.17,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  85,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789404606662,
+        "date":  "14.09.2026",
+        "time":  "19:50",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "3x Motto Köpek yaş mama 400gr (55.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1789233694327,
+                              "name":  "Motto Köpek yaş mama 400gr",
+                              "category":  "Köpek",
+                              "price":  60,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  3,
+                              "customPrice":  55,
+                              "originalPrice":  60
+                          }
+                      ],
+        "total":  165,
+        "vatTotal":  27.5,
+        "paymentType":  "Nakit",
+        "splitCash":  165,
+        "splitCard":  0,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  false
+    },
+    {
+        "id":  1789404304866,
+        "date":  "14.09.2026",
+        "time":  "19:45",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "2x Muhabbet Kuşu Yemi (500 gr) (85.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  3,
+                              "name":  "Muhabbet Kuşu Yemi (500 gr)",
+                              "category":  "Kuş / Kemirgen",
+                              "price":  85,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  2,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  2,
+                              "customPrice":  85,
+                              "originalPrice":  85
+                          }
+                      ],
+        "total":  170,
+        "vatTotal":  28.33,
+        "paymentType":  "Nakit",
+        "splitCash":  170,
+        "splitCard":  0,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  false
+    },
+    {
+        "id":  1789403146164,
+        "date":  "14.09.2026",
+        "time":  "19:25",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x AÇIK Royal Canin Kısır 1 kg (600.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788856842402,
+                              "name":  "AÇIK Royal Canin Kısır 1 kg",
+                              "category":  "Açık Mama",
+                              "price":  600,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  600,
+                              "originalPrice":  600
+                          }
+                      ],
+        "total":  600,
+        "vatTotal":  100,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  600,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789402580787,
+        "date":  "14.09.2026",
+        "time":  "19:16",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x Oyuncak Kemik Kumaş Dikme (160.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1789402564134,
+                              "name":  "Oyuncak Kemik Kumaş Dikme",
+                              "category":  "Kedi",
+                              "price":  160,
+                              "cost":  0,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "vatRate":  20,
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  160,
+                              "originalPrice":  160
+                          }
+                      ],
+        "total":  160,
+        "vatTotal":  26.67,
+        "paymentType":  "Nakit",
+        "splitCash":  160,
+        "splitCard":  0,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  false
+    },
+    {
+        "id":  1789402496480,
+        "date":  "14.09.2026",
+        "time":  "19:14",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x Stick (70.00 ₺), 1x Purina Gourmet Gold Sığır Etli Soslu Yaş Kedi Maması (65.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1789402471185,
+                              "name":  "Stick",
+                              "category":  "Kedi",
+                              "price":  70,
+                              "cost":  0,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "vatRate":  20,
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  70,
+                              "originalPrice":  70
+                          },
+                          {
+                              "id":  150,
+                              "name":  "Purina Gourmet Gold Sığır Etli Soslu Yaş Kedi Maması",
+                              "category":  "Kedi",
+                              "price":  65,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  65,
+                              "originalPrice":  65
+                          }
+                      ],
+        "total":  135,
+        "vatTotal":  22.5,
+        "paymentType":  "Nakit",
+        "splitCash":  135,
+        "splitCard":  0,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  false
+    },
+    {
+        "id":  1789402428819,
+        "date":  "14.09.2026",
+        "time":  "19:13",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x Motto Kedi Yaş Mama 3 Tane (160.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788881627839,
+                              "name":  "Motto Kedi Yaş Mama 3 Tane",
+                              "category":  "Kedi",
+                              "price":  160,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  160,
+                              "originalPrice":  160
+                          }
+                      ],
+        "total":  160,
+        "vatTotal":  26.67,
+        "paymentType":  "Nakit",
+        "splitCash":  160,
+        "splitCard":  0,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  false
+    },
+    {
+        "id":  1789402416447,
+        "date":  "14.09.2026",
+        "time":  "19:13",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x Felix Yaş Mama 4 lü (130.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1789313014268,
+                              "name":  "Felix Yaş Mama 4 lü",
+                              "category":  "Kedi",
+                              "price":  130,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  130,
+                              "originalPrice":  130
+                          }
+                      ],
+        "total":  130,
+        "vatTotal":  21.67,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  130,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789402402658,
+        "date":  "14.09.2026",
+        "time":  "19:13",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x Royal Canin Mini Köpek 2 kg (1400.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1789402298260,
+                              "name":  "Royal Canin Mini Köpek 2 kg",
+                              "category":  "Köpek",
+                              "price":  1400,
+                              "cost":  0,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "vatRate":  20,
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  1400,
+                              "originalPrice":  1400
+                          }
+                      ],
+        "total":  1400,
+        "vatTotal":  233.33,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  1400,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789402078668,
+        "date":  "14.09.2026",
+        "time":  "19:07",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x Pro Line kokusuz %100 Doğal Bentonit Kedi Kumu (260.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788973938032,
+                              "name":  "Pro Line kokusuz %100 Doğal Bentonit Kedi Kumu",
+                              "category":  "Kum / Kozmetik",
+                              "price":  260,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  260,
+                              "originalPrice":  260
+                          }
+                      ],
+        "total":  260,
+        "vatTotal":  43.33,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  260,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789402048124,
+        "date":  "14.09.2026",
+        "time":  "19:07",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x AÇIK Bono kitten (240.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1789317572118,
+                              "name":  "AÇIK Bono kitten",
+                              "category":  "Köpek",
+                              "price":  220,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  1,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  240,
+                              "originalPrice":  220
+                          }
+                      ],
+        "total":  240,
+        "vatTotal":  40,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  240,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789402002155,
+        "date":  "14.09.2026",
+        "time":  "19:06",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x GimCat Malt-Soft Extra Profesyonel Tüy Yumağı Önleyici Kedi Macunu (650.00 ₺), 1x Nutri Kedi ödül (180.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  48,
+                              "name":  "GimCat Malt-Soft Extra Profesyonel Tüy Yumağı Önleyici Kedi Macunu",
+                              "category":  "Kedi",
+                              "price":  650,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  650,
+                              "originalPrice":  650
+                          },
+                          {
+                              "id":  1789401992428,
+                              "name":  "Nutri Kedi ödül",
+                              "category":  "Kedi",
+                              "price":  180,
+                              "cost":  0,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "vatRate":  20,
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  180,
+                              "originalPrice":  180
+                          }
+                      ],
+        "total":  830,
+        "vatTotal":  138.33,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  830,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789401859751,
+        "date":  "14.09.2026",
+        "time":  "19:04",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x AÇIK Proplan Köpek somon 1 kg (480.00 ₺), 4x AÇIK Micho 1 kg (165.00 ₺), 1x Motto Köpek yaş mama 400gr (60.00 ₺), 1x motto kedi tek konserve 400 gr (60.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788936612741,
+                              "name":  "AÇIK Proplan Köpek somon 1 kg",
+                              "category":  "Açık Mama",
+                              "price":  480,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  480,
+                              "originalPrice":  480
+                          },
+                          {
+                              "id":  1788868067469,
+                              "name":  "AÇIK Micho 1 kg",
+                              "category":  "Açık Mama",
+                              "price":  165,
+                              "cost":  116,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  4,
+                              "customPrice":  165,
+                              "originalPrice":  165
+                          },
+                          {
+                              "id":  1789233694327,
+                              "name":  "Motto Köpek yaş mama 400gr",
+                              "category":  "Köpek",
+                              "price":  60,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  60,
+                              "originalPrice":  60
+                          },
+                          {
+                              "id":  1789058545314,
+                              "name":  "motto kedi tek konserve 400 gr",
+                              "category":  "Kedi",
+                              "price":  60,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  60,
+                              "originalPrice":  60
+                          }
+                      ],
+        "total":  1260,
+        "vatTotal":  210,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  1260,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789401790635,
+        "date":  "14.09.2026",
+        "time":  "19:03",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x Purina Gourmet Gold Ton Balıklı Kıyılmış Yaş Kedi Maması (65.00 ₺), 1x Purina Gourmet Gold Hindi Etli Kıyılmış Yaş Kedi Maması (65.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  57,
+                              "name":  "Purina Gourmet Gold Ton Balıklı Kıyılmış Yaş Kedi Maması",
+                              "category":  "Kedi",
+                              "price":  65,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  65,
+                              "originalPrice":  65
+                          },
+                          {
+                              "id":  42,
+                              "name":  "Purina Gourmet Gold Hindi Etli Kıyılmış Yaş Kedi Maması",
+                              "category":  "Kedi",
+                              "price":  65,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  65,
+                              "originalPrice":  65
+                          }
+                      ],
+        "total":  130,
+        "vatTotal":  21.67,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  130,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789401767325,
+        "date":  "14.09.2026",
+        "time":  "19:02",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x AÇIK mito tavuk 1 kg (155.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788973827325,
+                              "name":  "AÇIK mito tavuk 1 kg",
+                              "category":  "Açık Mama",
+                              "price":  155,
+                              "cost":  100,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  155,
+                              "originalPrice":  155
+                          }
+                      ],
+        "total":  155,
+        "vatTotal":  25.83,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  155,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789397960355,
+        "date":  "14.09.2026",
+        "time":  "17:59",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x AÇIK mito tavuk 1 kg (155.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788973827325,
+                              "name":  "AÇIK mito tavuk 1 kg",
+                              "category":  "Açık Mama",
+                              "price":  155,
+                              "cost":  100,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  155,
+                              "originalPrice":  155
+                          }
+                      ],
+        "total":  155,
+        "vatTotal":  25.83,
+        "paymentType":  "Nakit",
+        "splitCash":  155,
+        "splitCard":  0,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  false
+    },
+    {
+        "id":  1789390803272,
+        "date":  "14.09.2026",
+        "time":  "16:00",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x Loi Life Aktif Karbonlu Yeni Nesil Topaklanan Kedi Kumu (350.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  174,
+                              "name":  "Loi Life Aktif Karbonlu Yeni Nesil Topaklanan Kedi Kumu",
+                              "category":  "Kum / Kozmetik",
+                              "price":  350,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  350,
+                              "originalPrice":  350
+                          }
+                      ],
+        "total":  350,
+        "vatTotal":  58.33,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  350,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789390745165,
+        "date":  "14.09.2026",
+        "time":  "15:59",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x AÇIK Royal Canın kitten 1 kg (620.00 ₺), 2x wampy crunchy pocker chicken (85.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1789142185625,
+                              "name":  "AÇIK Royal Canın kitten 1 kg",
+                              "category":  "Açık Mama",
+                              "price":  620,
+                              "cost":  0,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  620,
+                              "originalPrice":  620
+                          },
+                          {
+                              "id":  1788957625588,
+                              "name":  "wampy crunchy pocker chicken",
+                              "category":  "Kedi",
+                              "price":  85,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  2,
+                              "customPrice":  85,
+                              "originalPrice":  85
+                          }
+                      ],
+        "total":  790,
+        "vatTotal":  131.67,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  790,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789390554370,
+        "date":  "14.09.2026",
+        "time":  "15:55",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x AÇIK proplan köpek kuzu 1 kg (480.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788957875508,
+                              "name":  "AÇIK proplan köpek kuzu 1 kg",
+                              "category":  "Açık Mama",
+                              "price":  480,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  480,
+                              "originalPrice":  480
+                          }
+                      ],
+        "total":  480,
+        "vatTotal":  80,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  480,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789390532367,
+        "date":  "14.09.2026",
+        "time":  "15:55",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "4x Motto Kedi Yaş Mama 3 Tane (160.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788881627839,
+                              "name":  "Motto Kedi Yaş Mama 3 Tane",
+                              "category":  "Kedi",
+                              "price":  160,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  4,
+                              "customPrice":  160,
+                              "originalPrice":  160
+                          }
+                      ],
+        "total":  640,
+        "vatTotal":  106.67,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  640,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789388832682,
+        "date":  "14.09.2026",
+        "time":  "15:27",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x AÇIK Micho 1 kg (165.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788868067469,
+                              "name":  "AÇIK Micho 1 kg",
+                              "category":  "Açık Mama",
+                              "price":  165,
+                              "cost":  116,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  165,
+                              "originalPrice":  165
+                          }
+                      ],
+        "total":  165,
+        "vatTotal":  27.5,
+        "paymentType":  "Nakit",
+        "splitCash":  165,
+        "splitCard":  0,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  false
+    },
+    {
+        "id":  1789381176314,
+        "date":  "14.09.2026",
+        "time":  "13:19",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x Pro Line Bebek Pudrası Kokulu %100 Doğal Bentonit Kedi Kumu (260.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  65,
+                              "name":  "Pro Line Bebek Pudrası Kokulu %100 Doğal Bentonit Kedi Kumu",
+                              "category":  "Kum / Kozmetik",
+                              "price":  260,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  260,
+                              "originalPrice":  260
+                          }
+                      ],
+        "total":  260,
+        "vatTotal":  43.33,
+        "paymentType":  "Nakit",
+        "splitCash":  260,
+        "splitCard":  0,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  false
+    },
+    {
+        "id":  1789381086529,
+        "date":  "14.09.2026",
+        "time":  "13:18",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x AÇIK Proplan Köpek somon 1 kg (480.00 ₺), 1x Nutri Dental (335.00 ₺), 1x Terry Bit Sprey (60.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788936612741,
+                              "name":  "AÇIK Proplan Köpek somon 1 kg",
+                              "category":  "Açık Mama",
+                              "price":  480,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  480,
+                              "originalPrice":  480
+                          },
+                          {
+                              "id":  1789380990458,
+                              "name":  "Nutri Dental",
+                              "category":  "Kedi",
+                              "price":  335,
+                              "cost":  0,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  335,
+                              "originalPrice":  335
+                          },
+                          {
+                              "id":  1789381053875,
+                              "name":  "Terry Bit Sprey",
+                              "category":  "Kedi",
+                              "price":  60,
+                              "cost":  0,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  60,
+                              "originalPrice":  60
+                          }
+                      ],
+        "total":  875,
+        "vatTotal":  145.83,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  875,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789380765126,
+        "date":  "14.09.2026",
+        "time":  "13:12",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x Loi Life Aktif Karbonlu Yeni Nesil Topaklanan Kedi Kumu (350.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  174,
+                              "name":  "Loi Life Aktif Karbonlu Yeni Nesil Topaklanan Kedi Kumu",
+                              "category":  "Kum / Kozmetik",
+                              "price":  350,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  350,
+                              "originalPrice":  350
+                          }
+                      ],
+        "total":  350,
+        "vatTotal":  58.33,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  350,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789380715775,
+        "date":  "14.09.2026",
+        "time":  "13:11",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x nutri kuzu küp ödül (240.00 ₺), 1x AÇIK Royal Canin Kısır 1 kg (600.00 ₺), 1x Crocus Cat Cream Somonlu \u0026 Karidesli Krema Kedi Ödülü (90.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1789024007791,
+                              "name":  "nutri kuzu küp ödül",
+                              "category":  "Köpek",
+                              "price":  240,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  240,
+                              "originalPrice":  240
+                          },
+                          {
+                              "id":  1788856842402,
+                              "name":  "AÇIK Royal Canin Kısır 1 kg",
+                              "category":  "Açık Mama",
+                              "price":  600,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  600,
+                              "originalPrice":  600
+                          },
+                          {
+                              "id":  18,
+                              "name":  "Crocus Cat Cream Somonlu \u0026 Karidesli Krema Kedi Ödülü",
+                              "category":  "Kedi",
+                              "price":  90,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  90,
+                              "originalPrice":  90
+                          }
+                      ],
+        "total":  930,
+        "vatTotal":  155,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  930,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789380143834,
+        "date":  "14.09.2026",
+        "time":  "13:02",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "2x Royal Canın Yaş Mama Kitten 85gr (80.00 ₺), 1x Ranova Yoğurt (35.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1789380115968,
+                              "name":  "Royal Canın Yaş Mama Kitten 85gr",
+                              "category":  "Kum / Kozmetik",
+                              "price":  80,
+                              "cost":  0,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "vatRate":  20,
+                              "batches":  [
+
+                                          ],
+                              "qty":  2,
+                              "customPrice":  80,
+                              "originalPrice":  80
+                          },
+                          {
+                              "id":  1789379364872,
+                              "name":  "Ranova Yoğurt",
+                              "category":  "Kum / Kozmetik",
+                              "price":  35,
+                              "cost":  0,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "vatRate":  20,
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  35,
+                              "originalPrice":  35
+                          }
+                      ],
+        "total":  195,
+        "vatTotal":  32.5,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  195,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789379274948,
+        "date":  "14.09.2026",
+        "time":  "12:47",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x NaturaPel by Trope Kedi ve Köpek Temizleme Islak Mendili (100 Adet) (150.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  33,
+                              "name":  "NaturaPel by Trope Kedi ve Köpek Temizleme Islak Mendili (100 Adet)",
+                              "category":  "Kum / Kozmetik",
+                              "price":  150,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  150,
+                              "originalPrice":  150
+                          }
+                      ],
+        "total":  150,
+        "vatTotal":  25,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  150,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789379181834,
+        "date":  "14.09.2026",
+        "time":  "12:46",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x BioFeline Prebiyotik Tüy Yumağı Önleyici Malt Macun (320.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  21,
+                              "name":  "BioFeline Prebiyotik Tüy Yumağı Önleyici Malt Macun",
+                              "category":  "Kedi",
+                              "price":  320,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  320,
+                              "originalPrice":  320
+                          }
+                      ],
+        "total":  320,
+        "vatTotal":  53.33,
+        "paymentType":  "Kredi Kartı",
+        "splitCash":  0,
+        "splitCard":  320,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  true
+    },
+    {
+        "id":  1789379083759,
+        "date":  "14.09.2026",
+        "time":  "12:44",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x AÇIK Royal Canin Sensible 1 kg (600.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788883571561,
+                              "name":  "AÇIK Royal Canin Sensible 1 kg",
+                              "category":  "Açık Mama",
+                              "price":  600,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  600,
+                              "originalPrice":  600
+                          }
+                      ],
+        "total":  600,
+        "vatTotal":  100,
+        "paymentType":  "Nakit",
+        "splitCash":  600,
+        "splitCard":  0,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  false
+    },
+    {
+        "id":  1789379056239,
+        "date":  "14.09.2026",
+        "time":  "12:44",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x Motto Köpek yaş mama 400gr (60.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1789233694327,
+                              "name":  "Motto Köpek yaş mama 400gr",
+                              "category":  "Köpek",
+                              "price":  60,
+                              "cost":  0,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  60,
+                              "originalPrice":  60
+                          }
+                      ],
+        "total":  60,
+        "vatTotal":  10,
+        "paymentType":  "Nakit",
+        "splitCash":  60,
+        "splitCard":  0,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  false
+    },
+    {
+        "id":  1789369651252,
+        "date":  "14.09.2026",
+        "time":  "10:07",
+        "customerName":  "Tezgâh",
+        "itemsSummary":  "1x AÇIK mito mix 1 kg (160.00 ₺)",
+        "soldItems":  [
+                          {
+                              "id":  1788973852251,
+                              "name":  "AÇIK mito mix 1 kg",
+                              "category":  "Açık Mama",
+                              "price":  160,
+                              "cost":  110,
+                              "vatRate":  20,
+                              "stock":  0,
+                              "supplier":  "-",
+                              "batches":  [
+
+                                          ],
+                              "qty":  1,
+                              "customPrice":  160,
+                              "originalPrice":  160
+                          }
+                      ],
+        "total":  160,
+        "vatTotal":  26.67,
+        "paymentType":  "Nakit",
+        "splitCash":  160,
+        "splitCard":  0,
+        "splitTransfer":  0,
+        "splitCredit":  0,
+        "isOfficial":  false
+    },
     {
         "id":  1789317851929,
         "date":  "13.09.2026",
@@ -554,9 +3125,9 @@ const sampleSalesHistory = [
                               "category":  "Kedi",
                               "price":  130,
                               "cost":  0,
+                              "vatRate":  20,
                               "stock":  0,
                               "supplier":  "-",
-                              "vatRate":  20,
                               "batches":  [
 
                                           ],
@@ -586,9 +3157,9 @@ const sampleSalesHistory = [
                               "category":  "Kedi",
                               "price":  1400,
                               "cost":  0,
+                              "vatRate":  20,
                               "stock":  0,
                               "supplier":  "-",
-                              "vatRate":  20,
                               "batches":  [
 
                                           ],
@@ -633,9 +3204,9 @@ const sampleSalesHistory = [
                               "category":  "Kedi",
                               "price":  2400,
                               "cost":  0,
+                              "vatRate":  20,
                               "stock":  0,
                               "supplier":  "-",
-                              "vatRate":  20,
                               "batches":  [
 
                                           ],
@@ -729,9 +3300,9 @@ const sampleSalesHistory = [
                               "category":  "Açık Mama",
                               "price":  600,
                               "cost":  0,
+                              "vatRate":  20,
                               "stock":  0,
                               "supplier":  "-",
-                              "vatRate":  20,
                               "batches":  [
 
                                           ],
@@ -744,9 +3315,9 @@ const sampleSalesHistory = [
                               "category":  "Köpek",
                               "price":  850,
                               "cost":  0,
+                              "vatRate":  20,
                               "stock":  0,
                               "supplier":  "-",
-                              "vatRate":  20,
                               "batches":  [
 
                                           ],
@@ -776,6 +3347,7 @@ const sampleSalesHistory = [
                               "category":  "Kedi",
                               "price":  1425,
                               "cost":  0,
+                              "vatRate":  20,
                               "stock":  0,
                               "supplier":  "-",
                               "batches":  [
@@ -839,9 +3411,9 @@ const sampleSalesHistory = [
                               "category":  "Açık Mama",
                               "price":  480,
                               "cost":  0,
+                              "vatRate":  20,
                               "stock":  0,
                               "supplier":  "-",
-                              "vatRate":  20,
                               "batches":  [
 
                                           ],
@@ -903,6 +3475,7 @@ const sampleSalesHistory = [
                               "category":  "Köpek",
                               "price":  270,
                               "cost":  0,
+                              "vatRate":  20,
                               "stock":  0,
                               "supplier":  "-",
                               "batches":  [
@@ -998,9 +3571,9 @@ const sampleSalesHistory = [
                               "category":  "Köpek",
                               "price":  60,
                               "cost":  0,
+                              "vatRate":  20,
                               "stock":  0,
                               "supplier":  "-",
-                              "vatRate":  20,
                               "batches":  [
 
                                           ],
@@ -1030,9 +3603,9 @@ const sampleSalesHistory = [
                               "category":  "Köpek",
                               "price":  60,
                               "cost":  0,
+                              "vatRate":  20,
                               "stock":  0,
                               "supplier":  "-",
-                              "vatRate":  20,
                               "batches":  [
 
                                           ],
@@ -1077,9 +3650,9 @@ const sampleSalesHistory = [
                               "category":  "Köpek",
                               "price":  60,
                               "cost":  0,
+                              "vatRate":  20,
                               "stock":  0,
                               "supplier":  "-",
-                              "vatRate":  20,
                               "batches":  [
 
                                           ],
@@ -1141,9 +3714,9 @@ const sampleSalesHistory = [
                               "category":  "Köpek",
                               "price":  60,
                               "cost":  0,
+                              "vatRate":  20,
                               "stock":  0,
                               "supplier":  "-",
-                              "vatRate":  20,
                               "batches":  [
 
                                           ],
@@ -1156,6 +3729,7 @@ const sampleSalesHistory = [
                               "category":  "Köpek",
                               "price":  270,
                               "cost":  0,
+                              "vatRate":  20,
                               "stock":  0,
                               "supplier":  "-",
                               "batches":  [
@@ -1219,9 +3793,9 @@ const sampleSalesHistory = [
                               "category":  "Kedi",
                               "price":  25,
                               "cost":  0,
+                              "vatRate":  20,
                               "stock":  0,
                               "supplier":  "-",
-                              "vatRate":  20,
                               "batches":  [
 
                                           ],
@@ -1234,9 +3808,9 @@ const sampleSalesHistory = [
                               "category":  "Kedi",
                               "price":  65,
                               "cost":  0,
+                              "vatRate":  20,
                               "stock":  0,
                               "supplier":  "-",
-                              "vatRate":  20,
                               "batches":  [
 
                                           ],
@@ -1298,9 +3872,9 @@ const sampleSalesHistory = [
                               "category":  "Açık Mama",
                               "price":  600,
                               "cost":  0,
+                              "vatRate":  20,
                               "stock":  0,
                               "supplier":  "-",
-                              "vatRate":  20,
                               "batches":  [
 
                                           ],
@@ -1519,9 +4093,9 @@ const sampleSalesHistory = [
                               "category":  "Köpek",
                               "price":  250,
                               "cost":  0,
+                              "vatRate":  20,
                               "stock":  0,
                               "supplier":  "-",
-                              "vatRate":  20,
                               "batches":  [
 
                                           ],
@@ -1802,9 +4376,9 @@ const sampleSalesHistory = [
                               "category":  "Açık Mama",
                               "price":  600,
                               "cost":  0,
+                              "vatRate":  20,
                               "stock":  0,
                               "supplier":  "-",
-                              "vatRate":  20,
                               "batches":  [
 
                                           ],
@@ -1864,9 +4438,9 @@ const sampleSalesHistory = [
                               "category":  "Açık Mama",
                               "price":  650,
                               "cost":  0,
+                              "vatRate":  20,
                               "stock":  10,
                               "supplier":  "-",
-                              "vatRate":  20,
                               "batches":  [
 
                                           ],
@@ -2004,7 +4578,7 @@ function loadState() {
     }
   };
 
-  const CURRENT_CATALOG_VERSION = "2026_09_v13_aybars_all_products_297";
+  const CURRENT_CATALOG_VERSION = "2026_09_v15_aybars_all_products_updated_319";
   const savedVer = localStorage.getItem("ps_catalog_version");
   let prods = raw("ps_products");
 
@@ -2014,7 +4588,7 @@ function loadState() {
       ? catalogProducts
       : (typeof sampleProducts !== "undefined" && Array.isArray(sampleProducts) ? sampleProducts : []));
 
-  if (savedVer !== CURRENT_CATALOG_VERSION || !Array.isArray(prods) || prods.length < 100) {
+  if (savedVer !== CURRENT_CATALOG_VERSION || !Array.isArray(prods) || prods.length < 50) {
     window.products = JSON.parse(JSON.stringify(catalogSource));
     window.products.forEach(p => {
       p.stock = (p.stock !== undefined && !isNaN(Number(p.stock))) ? Number(p.stock) : 0;
@@ -2025,7 +4599,7 @@ function loadState() {
     });
 
     window.categories = [...defaultCategories];
-    window.suppliers = [];
+    window.suppliers = JSON.parse(JSON.stringify(sampleSuppliers));
     window.customers = [];
     window.orders = [];
     window.platformPendingOrders = [];
@@ -2109,7 +4683,8 @@ function loadState() {
 
   window.manualDeficits = raw("ps_deficits") || [];
   window.heldCarts = raw("ps_held_carts") || [];
-  window.dailyCloseRecords = raw("ps_daily_closes") || [];
+  dailyCloseRecords = raw("ps_daily_closes") || [];
+  window.dailyCloseRecords = dailyCloseRecords;
 
   // Runtime state
   window.cart = [];
@@ -2153,7 +4728,6 @@ function saveData() {
   const hldList = window.heldCarts || heldCarts || [];
   const dclList = window.dailyCloseRecords || dailyCloseRecords || [];
 
-  // Keep global sync
   products = pList;
   categories = cList;
   suppliers = supList;
@@ -2255,27 +4829,17 @@ function findMatchingProduct(query) {
   return null;
 }
 
-// ── Reset catalog to default 222 items helper ──
-function forceReload222Products() {
-  localStorage.removeItem("ps_products");
-  localStorage.removeItem("ps_catalog_version");
-  window.products = JSON.parse(JSON.stringify(catalogProducts));
-  saveData();
-  location.reload();
-}
-
 function resetToDefaultCatalog() {
-  if (confirm("Tüm ürün listesini 222 ürünlük varsayılan orijinal listeye sıfırlamak istiyor musunuz?\n\n(DİKKAT: Sonradan girdiğiniz özel fiyat ve stoklar sıfırlanacaktır)")) {
+  if (confirm("Tüm ürün listesini varsayılan orijinal listeye sıfırlamak istiyor musunuz?\\n\\n(DİKKAT: Sonradan girdiğiniz özel fiyat ve stoklar sıfırlanacaktır)")) {
     window.products = JSON.parse(JSON.stringify(sampleProducts));
     saveData();
     if (typeof renderCatalog === "function") renderCatalog();
     if (typeof renderInventoryTable === "function") renderInventoryTable();
     if (typeof renderQuickPricingTable === "function") renderQuickPricingTable();
-    if (typeof toast === "function") toast("✅ Ürün kataloğu 222 ürünlük varsayılan listeye sıfırlandı!");
+    if (typeof toast === "function") toast("✅ Ürün kataloğu varsayılan listeye sıfırlandı!");
   }
 }
 
-// ── Helper to calculate Cash, Card, Transfer (Havale/IBAN) and Credit portions ──
 function getSalePaymentBreakdown(sale) {
   if (!sale) return { cash: 0, card: 0, transfer: 0, credit: 0 };
   const total = Number(sale.total) || 0;
@@ -2293,9 +4857,9 @@ function getSalePaymentBreakdown(sale) {
   
   if (pType.includes("parçalı")) {
     let cash = 0, card = 0, transfer = 0;
-    const cashMatch = pType.match(/([\d.,]+)\s*₺?\s*nakit/i);
-    const cardMatch = pType.match(/([\d.,]+)\s*₺?\s*kart/i);
-    const transferMatch = pType.match(/([\d.,]+)\s*₺?\s*(?:havale|eft|iban)/i);
+    const cashMatch = pType.match(/([\\d.,]+)\\s*₺?\\s*nakit/i);
+    const cardMatch = pType.match(/([\\d.,]+)\\s*₺?\\s*kart/i);
+    const transferMatch = pType.match(/([\\d.,]+)\\s*₺?\\s*(?:havale|eft|iban)/i);
 
     if (cashMatch) cash = parseFloat(cashMatch[1].replace(",", ".")) || 0;
     if (cardMatch) card = parseFloat(cardMatch[1].replace(",", ".")) || 0;
@@ -2322,56 +4886,36 @@ function getSalePaymentBreakdown(sale) {
   return { cash: 0, card: total, transfer: 0, credit: 0 };
 }
 
-/**
- * Ürünler ve kategoriler DIŞINDAKİ tüm operasyonel verileri sıfırlar:
- * - Müşteriler ve Veresiye Kayıtları
- * - Tedarikçiler ve Toptancı Borçları
- * - Satış Geçmişi, Ciro ve Siparişler
- * - Gider Defteri ve Harcamalar
- * - Gün Sonu Kasa Mutabakatları
- * - Askıdaki Sepetler ve Zayi Kayıtları
- */
 function resetTransactionsKeepProducts() {
   const confirmed = confirm(
-    "⚠️ DİKKAT: ÜRÜNLER (222 ÜRÜN) VE KATEGORİLER KORUNACAK!\n\n" +
-    "Aşağıdaki tüm veriler tamamen sıfırlanacaktır:\n" +
-    "• Müşteriler ve Veresiye Kayıtları\n" +
-    "• Tedarikçiler ve Toptancı Borçları\n" +
-    "• Satış Geçmişi, Ciro ve Siparişler\n" +
-    "• Gider Defteri ve Harcamalar\n" +
-    "• Gün Sonu Kasa Mutabakatları\n" +
-    "• Askıdaki Sepetler ve Zayi Kayıtları\n\n" +
+    "⚠️ DİKKAT: ÜRÜNLER VE KATEGORİLER KORUNACAK!\\n\\n" +
+    "Aşağıdaki tüm veriler tamamen sıfırlanacaktır:\\n" +
+    "• Müşteriler ve Veresiye Kayıtları\\n" +
+    "• Tedarikçiler ve Toptancı Borçları\\n" +
+    "• Satış Geçmişi, Ciro ve Siparişler\\n" +
+    "• Gider Defteri ve Harcamalar\\n" +
+    "• Gün Sonu Kasa Mutabakatları\\n" +
+    "• Askıdaki Sepetler ve Zayi Kayıtları\\n\\n" +
     "Bu sıfırlamayı onaylıyor musunuz?"
   );
   if (!confirmed) return;
 
-  // 1. Müşteri & Veresiye sıfırla
   window.customers = [];
   customers = [];
-
-  // 2. Tedarikçi & Toptancı borçları sıfırla
   window.suppliers = [];
   suppliers = [];
-
-  // 3. Satışlar & Gelir geçmişi sıfırla
   window.salesHistory = [];
   salesHistory = [];
-
-  // 4. Siparişler & Teslimatlar sıfırla
   window.orders = [];
   orders = [];
   window.platformPendingOrders = [];
   platformPendingOrders = [];
   window.deliveredOrders = [];
   deliveredOrders = [];
-
-  // 5. Giderler & Alımlar sıfırla
   window.expenses = [];
   expenses = [];
   window.manualDeficits = [];
   manualDeficits = [];
-
-  // 6. Gün Sonu Mutabakatları & Askıdaki sepetler sıfırla
   window.dailyCloseRecords = [];
   dailyCloseRecords = [];
   window.heldCarts = [];
@@ -2383,20 +4927,14 @@ function resetTransactionsKeepProducts() {
   window.cart = [];
   cart = [];
 
-  // 7. Aktif iş gününü sıfırla
   localStorage.removeItem("ps_active_business_date");
-
-  // 8. Kalıcı depolamaya kaydet (Ürünler ve kategoriler aynen korunur)
   saveData();
 
-  // 9. E-Tablo Mali Raporu sıfır gönder
   if (typeof syncTaxReportToSheets === "function") {
     syncTaxReportToSheets();
   }
 
-  alert("✅ Tüm müşteri, tedarikçi, gelir, gider ve kasa kayıtları başarıyla sıfırlandı!\n\nÜrünler ve kategoriler eksiksiz olarak korundu.");
+  alert("✅ Tüm müşteri, tedarikçi, gelir, gider ve kasa kayıtları başarıyla sıfırlandı!\\n\\nÜrünler ve kategoriler eksiksiz olarak korundu.");
   location.reload();
 }
 window.resetTransactionsKeepProducts = resetTransactionsKeepProducts;
-
-
