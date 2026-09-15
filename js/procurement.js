@@ -21,6 +21,60 @@ function saveSupplier() {
   toast(`✅ "${name}" eklendi!`);
 }
 
+function openEditSupplierModal(supId) {
+  const sups = (Array.isArray(window.suppliers) && window.suppliers.length > 0) ? window.suppliers : suppliers;
+  const s = sups.find(item => item.id === supId);
+  if (!s) return toast("Toptancı bulunamadı!", "error");
+  document.getElementById("editSupId").value = s.id;
+  document.getElementById("editSupName").value = s.name || "";
+  document.getElementById("editSupPhone").value = (s.phone && s.phone !== "-") ? s.phone : "";
+  document.getElementById("editSupNotes").value = (s.notes && s.notes !== "-") ? s.notes : "";
+  openModal("editSupplierModal");
+}
+window.openEditSupplierModal = openEditSupplierModal;
+
+function saveEditedSupplier() {
+  const id = Number(document.getElementById("editSupId").value);
+  const sups = (Array.isArray(window.suppliers) && window.suppliers.length > 0) ? window.suppliers : suppliers;
+  const s = sups.find(item => item.id === id);
+  if (!s) return toast("Toptancı bulunamadı!", "error");
+
+  const newName = document.getElementById("editSupName").value.trim();
+  if (!newName) return toast("Toptancı firma adını girin!", "error");
+
+  const oldName = s.name;
+  s.name = newName;
+  s.phone = document.getElementById("editSupPhone").value.trim() || "-";
+  s.notes = document.getElementById("editSupNotes").value.trim() || "-";
+
+  if (oldName && oldName !== newName && Array.isArray(products)) {
+    let updatedProds = false;
+    products.forEach(p => {
+      if (p.supplier === oldName) {
+        p.supplier = newName;
+        updatedProds = true;
+      }
+    });
+    if (updatedProds && typeof renderProductsTable === "function") {
+      renderProductsTable();
+    }
+  }
+
+  closeModal("editSupplierModal");
+  saveData();
+  renderSuppliersTable();
+  populateSupplierDropdowns();
+  toast(`✅ Toptancı "${newName}" bilgileri güncellendi!`);
+}
+window.saveEditedSupplier = saveEditedSupplier;
+
+function editSupplierFromHistory() {
+  if (!activeHistorySupplierId) return;
+  closeModal("supplierHistoryModal");
+  openEditSupplierModal(activeHistorySupplierId);
+}
+window.editSupplierFromHistory = editSupplierFromHistory;
+
 function deleteSupplier(id) {
   if (confirm("Bu toptancıyı silmek istediğinize emin misiniz?")) {
     const list = Array.isArray(window.suppliers) ? window.suppliers : suppliers;
@@ -43,7 +97,20 @@ function renderSuppliersTable() {
     tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Henüz toptancı eklenmedi.</td></tr>`;
     return;
   }
-  sups.forEach(s => {
+
+  const q = (document.getElementById("suppliersSearchInput")?.value || "").trim().toLowerCase();
+  const list = q ? sups.filter(s =>
+    (s.name || "").toLowerCase().includes(q) ||
+    (s.phone || "").toLowerCase().includes(q) ||
+    (s.notes || "").toLowerCase().includes(q)
+  ) : sups;
+
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Aramaya uygun toptancı bulunamadı.</td></tr>`;
+    return;
+  }
+
+  list.forEach(s => {
     tbody.innerHTML += `
       <tr>
         <td><b>${s.name}</b></td>
@@ -51,6 +118,7 @@ function renderSuppliersTable() {
         <td class="text-sm">${s.notes || '-'}</td>
         <td><b style="color:${s.balance > 0 ? 'var(--danger)' : 'var(--success)'}; font-size:14px;">${Number(s.balance || 0).toFixed(2)} ₺</b></td>
         <td class="flex gap-1" style="flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-xs" onclick="openEditSupplierModal(${s.id})" title="Bilgileri Düzenle / Tel Ekle">✏️ Düzenle</button>
           <button class="btn btn-success btn-xs" style="background:linear-gradient(135deg,#047857,#065f46);" onclick="openAddProductModal('${s.name}')">+ Ürün Ekle</button>
           <button class="btn btn-ghost btn-xs" onclick="openSupplierHistoryModal(${s.id})">📜 Geçmiş</button>
           <button class="btn btn-success btn-xs" onclick="openQuickPaySupplier(${s.id})">💸 Ödeme</button>
@@ -490,11 +558,16 @@ function saveSupplierIntake() {
 
 // ── Supplier History ──
 function openSupplierHistoryModal(supId) {
-  const s = suppliers.find(sup => sup.id === supId);
+  const sups = (Array.isArray(window.suppliers) && window.suppliers.length > 0) ? window.suppliers : suppliers;
+  const s = sups.find(sup => sup.id === supId);
   if (!s) return;
   activeHistorySupplierId = supId;
   document.getElementById("shSupName").innerText = s.name;
   document.getElementById("shTotalDebt").innerText = (s.balance || 0).toFixed(2) + " ₺";
+  const contactEl = document.getElementById("shSupContact");
+  if (contactEl) {
+    contactEl.innerText = `Tel: ${s.phone || '-'} | Çalışma Şartları / Not: ${s.notes || '-'}`;
+  }
 
   const container = document.getElementById("supplierHistoryList");
   container.innerHTML = "";

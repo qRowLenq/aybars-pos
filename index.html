@@ -458,6 +458,9 @@
             <button class="btn btn-success" onclick="openSupplierIntakeModal()">📥 Toptancıdan Mal Girişi (Fatura İşle)</button>
           </div>
         </div>
+        <div class="flex gap-2 mb-3">
+          <input type="text" id="suppliersSearchInput" class="search-input" placeholder="🔍 Toptancı Adı, Telefon veya Not Ara..." oninput="renderSuppliersTable()">
+        </div>
         <table class="data-table">
           <thead><tr><th>Firma Adı</th><th>İletişim</th><th>Çalışma Şartları / Not</th><th>Bakiye (Borcumuz)</th><th>İşlemler</th></tr></thead>
           <tbody id="suppliersTableBody"></tbody>
@@ -1092,12 +1095,28 @@
     <div class="modal-box" style="max-width:400px;">
       <div class="modal-title">👥 Yeni Müşteri Ekle</div>
       <div class="fg"><label>Müşteri Adı Soyadı</label><input type="text" id="custNameInput" class="fc"></div>
-      <div class="fg"><label>Telefon</label><input type="text" id="custPhoneInput" class="fc"></div>
+      <div class="fg"><label>Telefon</label><input type="text" id="custPhoneInput" class="fc" placeholder="05xx xxx xx xx"></div>
       <div class="fg"><label>Açık Adres</label><textarea id="custAddressInput" class="fc" rows="2"></textarea></div>
       <div class="fg"><label>Evcil Hayvan / Notlar</label><input type="text" id="custPetInput" class="fc" placeholder="Örn: Tekir Kedi (Mişa)"></div>
       <div class="modal-actions">
         <button class="btn btn-ghost" onclick="closeModal('addCustomerModal')">İptal</button>
         <button class="btn btn-primary" onclick="saveNewCustomer()">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Customer -->
+  <div class="modal-overlay" id="editCustomerModal">
+    <div class="modal-box" style="max-width:400px;">
+      <div class="modal-title">✏️ Müşteri Bilgilerini Düzenle</div>
+      <input type="hidden" id="editCustId">
+      <div class="fg"><label>Müşteri Adı Soyadı</label><input type="text" id="editCustNameInput" class="fc"></div>
+      <div class="fg"><label>Telefon</label><input type="text" id="editCustPhoneInput" class="fc" placeholder="05xx xxx xx xx"></div>
+      <div class="fg"><label>Açık Adres</label><textarea id="editCustAddressInput" class="fc" rows="2"></textarea></div>
+      <div class="fg"><label>Evcil Hayvan / Notlar</label><input type="text" id="editCustPetInput" class="fc" placeholder="Örn: Tekir Kedi (Mişa)"></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('editCustomerModal')">İptal</button>
+        <button class="btn btn-primary" onclick="saveEditedCustomer()">Güncelle</button>
       </div>
     </div>
   </div>
@@ -1108,7 +1127,10 @@
       <div class="modal-title">📜 <span id="chCustName"></span> — Alışveriş Geçmişi</div>
       <div id="chCustContact" class="text-sm text-muted mb-3 pb-3 border-b border-border"></div>
       <div id="customerHistoryList" class="flex-col gap-2 max-h-60 overflow-y-auto"></div>
-      <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('customerHistoryModal')">Kapat</button></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('customerHistoryModal')">Kapat</button>
+        <button class="btn btn-primary btn-sm" id="chEditBtn" onclick="editCustomerFromHistory()">✏️ Bilgileri Düzenle</button>
+      </div>
     </div>
   </div>
 
@@ -1168,11 +1190,26 @@
     <div class="modal-box" style="max-width:400px;">
       <div class="modal-title">🏢 Yeni Toptancı Firma Ekle</div>
       <div class="fg"><label>Firma / Plasiyer Adı</label><input type="text" id="supName" class="fc"></div>
-      <div class="fg"><label>Telefon</label><input type="text" id="supPhone" class="fc"></div>
+      <div class="fg"><label>Telefon</label><input type="text" id="supPhone" class="fc" placeholder="05xx xxx xx xx"></div>
       <div class="fg"><label>Çalışma Şartları / Vadeler / Notlar</label><textarea id="supNotes" class="fc" rows="2"></textarea></div>
       <div class="modal-actions">
         <button class="btn btn-ghost" onclick="closeModal('addSupplierModal')">İptal</button>
         <button class="btn btn-primary" onclick="saveSupplier()">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Supplier -->
+  <div class="modal-overlay" id="editSupplierModal">
+    <div class="modal-box" style="max-width:400px;">
+      <div class="modal-title">✏️ Toptancı Firma / Tedarikçi Düzenle</div>
+      <input type="hidden" id="editSupId">
+      <div class="fg"><label>Firma / Plasiyer Adı</label><input type="text" id="editSupName" class="fc"></div>
+      <div class="fg"><label>Telefon</label><input type="text" id="editSupPhone" class="fc" placeholder="05xx xxx xx xx"></div>
+      <div class="fg"><label>Çalışma Şartları / Vadeler / Notlar</label><textarea id="editSupNotes" class="fc" rows="2"></textarea></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('editSupplierModal')">İptal</button>
+        <button class="btn btn-primary" onclick="saveEditedSupplier()">Güncelle</button>
       </div>
     </div>
   </div>
@@ -1303,10 +1340,14 @@
   <div class="modal-overlay" id="supplierHistoryModal">
     <div class="modal-box">
       <div class="modal-title">📜 <span id="shSupName"></span> Cari Ekstresi</div>
+      <div id="shSupContact" class="text-xs text-muted mb-2"></div>
       <div class="flex justify-between items-center mb-3 pb-3 border-b border-border">
         <div class="text-sm">Güncel Bakiye (Borcumuz):</div>
         <div id="shTotalDebt" class="text-danger font-black text-lg">0.00 ₺</div>
-        <button class="btn btn-success btn-sm" onclick="openPaySupplierModal()">💸 Ödeme Yap</button>
+        <div class="flex gap-1">
+          <button class="btn btn-ghost btn-sm" onclick="editSupplierFromHistory()">✏️ Düzenle</button>
+          <button class="btn btn-success btn-sm" onclick="openPaySupplierModal()">💸 Ödeme Yap</button>
+        </div>
       </div>
       <div id="supplierHistoryList" class="flex-col gap-2 max-h-60 overflow-y-auto"></div>
       <div class="modal-actions mt-3"><button class="btn btn-ghost" onclick="closeModal('supplierHistoryModal')">Kapat</button></div>

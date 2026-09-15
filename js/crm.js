@@ -15,14 +15,62 @@ function saveNewCustomer() {
   if (!name) return toast("Müşteri adını girin!", "error");
   customers.push({
     id: Date.now(), name,
-    phone: document.getElementById("custPhoneInput").value,
-    address: document.getElementById("custAddressInput").value,
-    pet: document.getElementById("custPetInput").value,
+    phone: document.getElementById("custPhoneInput").value.trim(),
+    address: document.getElementById("custAddressInput").value.trim(),
+    pet: document.getElementById("custPetInput").value.trim(),
     balance: 0, purchaseHistory: []
   });
   closeModal("addCustomerModal"); saveData(); renderCRM(); updateCustomerDropdown();
   toast(`✅ "${name}" müşteri listesine eklendi!`);
 }
+
+function openEditCustomerModal(id) {
+  const c = customers.find(item => item.id === id);
+  if (!c) return toast("Müşteri bulunamadı!", "error");
+  document.getElementById("editCustId").value = c.id;
+  document.getElementById("editCustNameInput").value = c.name || "";
+  document.getElementById("editCustPhoneInput").value = c.phone || "";
+  document.getElementById("editCustAddressInput").value = c.address || "";
+  document.getElementById("editCustPetInput").value = c.pet || "";
+  openModal("editCustomerModal");
+}
+window.openEditCustomerModal = openEditCustomerModal;
+
+function saveEditedCustomer() {
+  const id = Number(document.getElementById("editCustId").value);
+  const c = customers.find(item => item.id === id);
+  if (!c) return toast("Müşteri bulunamadı!", "error");
+  const name = document.getElementById("editCustNameInput").value.trim();
+  if (!name) return toast("Müşteri adını girin!", "error");
+
+  const oldName = c.name;
+  c.name = name;
+  c.phone = document.getElementById("editCustPhoneInput").value.trim();
+  c.address = document.getElementById("editCustAddressInput").value.trim();
+  c.pet = document.getElementById("editCustPetInput").value.trim();
+
+  if (oldName !== name && Array.isArray(window.heldCarts)) {
+    window.heldCarts.forEach(hc => {
+      if (hc.customerName === oldName) hc.customerName = name;
+    });
+  }
+
+  closeModal("editCustomerModal");
+  saveData();
+  renderCRM();
+  if (typeof renderCreditBook === "function") renderCreditBook();
+  updateCustomerDropdown();
+  toast(`✅ Müşteri "${name}" bilgileri güncellendi!`);
+}
+window.saveEditedCustomer = saveEditedCustomer;
+
+var activeHistoryCustId = null;
+function editCustomerFromHistory() {
+  if (!activeHistoryCustId) return;
+  closeModal("customerHistoryModal");
+  openEditCustomerModal(activeHistoryCustId);
+}
+window.editCustomerFromHistory = editCustomerFromHistory;
 
 function deleteCustomer(id) {
   if (confirm("Müşteriyi silmek istiyor musunuz?")) {
@@ -51,6 +99,7 @@ function renderCRM() {
         <td>${c.pet || '-'}</td>
         <td><b style="color:${c.balance > 0 ? 'var(--danger)' : 'var(--text)'};">${(c.balance || 0).toFixed(2)} ₺</b></td>
         <td class="flex gap-1">
+          <button class="btn btn-ghost btn-xs" onclick="openEditCustomerModal(${c.id})" title="Bilgileri Düzenle / Tel Ekle">✏️ Düzenle</button>
           <button class="btn btn-ghost btn-xs" onclick="openCustomerHistoryModal(${c.id})">📜 Geçmiş</button>
           <button class="btn btn-danger btn-xs" onclick="deleteCustomer(${c.id})">Sil</button>
         </td>
@@ -62,6 +111,7 @@ function renderCRM() {
 function openCustomerHistoryModal(custId) {
   const c = customers.find(item => item.id === custId);
   if (!c) return;
+  activeHistoryCustId = custId;
   document.getElementById("chCustName").innerText = c.name;
   document.getElementById("chCustContact").innerText = `Tel: ${c.phone || '-'} | Adres: ${c.address || '-'} | Not: ${c.pet || '-'}`;
 
@@ -104,7 +154,10 @@ function renderCreditBook() {
         <td>${c.phone || '-'}</td>
         <td><b class="text-danger">${Number(c.balance || 0).toFixed(2)} ₺</b></td>
         <td>${c.lastPurchaseDate || '-'}</td>
-        <td><button class="btn btn-success btn-sm" onclick="openDebtCollectModal(${c.id})">Tahsil Et</button></td>
+        <td class="flex gap-1" style="align-items:center;">
+          <button class="btn btn-ghost btn-xs" onclick="openEditCustomerModal(${c.id})" title="Müşteri Bilgilerini / Telefonu Düzenle">✏️ Düzenle</button>
+          <button class="btn btn-success btn-sm" onclick="openDebtCollectModal(${c.id})">Tahsil Et</button>
+        </td>
       </tr>`;
   });
   updateAllBadges();
