@@ -6,7 +6,7 @@ var selectedCategory = (typeof window !== "undefined" && window.selectedCategory
 if (typeof window !== "undefined") window.selectedCategory = selectedCategory;
 
 function getActiveCategories() {
-  const def = ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum / Kozmetik", "Kampanyalar"];
+  const def = ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum", "Kozmetik", "Kampanyalar", "elekli paspas"];
   let list = (typeof window !== "undefined" && Array.isArray(window.categories) && window.categories.length > 0)
     ? window.categories
     : ((typeof categories !== "undefined" && Array.isArray(categories) && categories.length > 0) ? categories : def);
@@ -22,7 +22,8 @@ function getCatBadgeClass(cat) {
   if (c.includes("köpek") || c.includes("kopek")) return "cat-badge-dog";
   if (c.includes("kuş") || c.includes("kus") || c.includes("kemirgen")) return "cat-badge-bird";
   if (c.includes("açık") || c.includes("acik") || c.includes("mama")) return "cat-badge-food";
-  if (c.includes("kum") || c.includes("kozmetik")) return "cat-badge-care";
+  if (c.includes("kum")) return "cat-badge-sand";
+  if (c.includes("kozmetik") || c.includes("bakım") || c.includes("bakim")) return "cat-badge-cosmetic";
   return "cat-badge-default";
 }
 
@@ -41,7 +42,8 @@ function initCategoryBar() {
     catList.forEach(cat => {
       html += `<button class="cat-chip ${selectedCategory === cat ? 'active' : ''}" onclick="filterCategory('${cat}')">${cat}</button>`;
     });
-    html += `<button class="btn btn-ghost btn-xs" style="border-radius:var(--radius-full); margin-left:4px;" onclick="promptNewCategory()">+ Kategori</button>`;
+    html += `<button class="btn btn-ghost btn-xs" style="border-radius:var(--radius-full); margin-left:4px;" onclick="promptNewCategory()" title="Yeni Kategori Ekle">+ Kategori</button>`;
+    html += `<button class="btn btn-ghost btn-xs" style="border-radius:var(--radius-full); margin-left:2px;" onclick="openCategoryManageModal()" title="Kategorileri Düzenle / Değiştir">⚙️ Düzenle</button>`;
     bar.innerHTML = html;
   }
 
@@ -56,18 +58,129 @@ function initCategoryBar() {
 function promptNewCategory() {
   const newCat = prompt("Yeni kategori adı:");
   if (newCat && newCat.trim()) {
-    const trimmed = newCat.trim();
-    const catList = getActiveCategories();
-    if (!catList.includes(trimmed)) {
-      catList.push(trimmed);
-      if (typeof window !== "undefined") window.categories = catList;
-      if (typeof categories !== "undefined") categories = catList;
-      saveData();
-      initCategoryBar();
-      populateCategoryDropdowns();
-    }
+    addNewCategory(newCat.trim());
   }
 }
+
+function addNewCategory(name) {
+  if (!name || !name.trim()) return;
+  const trimmed = name.trim();
+  const catList = getActiveCategories();
+  if (catList.map(c => c.toLowerCase()).includes(trimmed.toLowerCase())) {
+    toast(`⚠️ "${trimmed}" kategorisi zaten mevcut!`, "error");
+    return;
+  }
+  catList.push(trimmed);
+  window.categories = catList;
+  categories = catList;
+  saveData();
+  initCategoryBar();
+  populateCategoryDropdowns();
+  renderCategoryManageModal();
+  toast(`✅ "${trimmed}" kategorisi eklendi!`, "success");
+}
+window.addNewCategory = addNewCategory;
+
+// ── Category Management Modal Functions ──
+function renderCategoryManageModal() {
+  const listEl = document.getElementById("categoryManageList");
+  if (!listEl) return;
+  const catList = getActiveCategories();
+  const pList = window.products || products || [];
+
+  listEl.innerHTML = catList.map(c => {
+    const count = pList.filter(p => p && (p.category || "").toLowerCase() === c.toLowerCase()).length;
+    const safeCat = c.replace(/'/g, "\\'");
+    return `
+      <div class="flex items-center justify-between p-2 mb-2" style="background:var(--card-bg); border:1px solid var(--border); border-radius:8px;">
+        <div class="flex items-center gap-2">
+          <span class="badge ${getCatBadgeClass(c)}" style="font-size:13px; font-weight:600;">${c}</span>
+          <span class="text-xs" style="color:var(--text-muted);">(${count} ürün)</span>
+        </div>
+        <div class="flex gap-1">
+          <button class="btn btn-ghost btn-xs" onclick="renameCategory('${safeCat}')" title="Kategori Adını Değiştir">✏️ Değiştir</button>
+          <button class="btn btn-danger btn-xs" onclick="deleteCategory('${safeCat}')" title="Kategoriyi Sil">🗑️ Sil</button>
+        </div>
+      </div>`;
+  }).join("");
+}
+window.renderCategoryManageModal = renderCategoryManageModal;
+
+function openCategoryManageModal() {
+  renderCategoryManageModal();
+  openModal("categoryManageModal");
+}
+window.openCategoryManageModal = openCategoryManageModal;
+
+function renameCategory(oldName) {
+  const newName = prompt(`"${oldName}" kategorisinin yeni adını girin:`, oldName);
+  if (!newName || !newName.trim() || newName.trim() === oldName) return;
+  const trimmed = newName.trim();
+
+  let catList = getActiveCategories();
+  const idx = catList.indexOf(oldName);
+  if (idx !== -1) {
+    catList[idx] = trimmed;
+  } else if (!catList.includes(trimmed)) {
+    catList.push(trimmed);
+  }
+  window.categories = catList;
+  categories = catList;
+
+  // Update category of all products belonging to oldName
+  const pList = window.products || products || [];
+  let updatedCount = 0;
+  pList.forEach(p => {
+    if (p && (p.category || "").trim().toLowerCase() === oldName.toLowerCase()) {
+      p.category = trimmed;
+      updatedCount++;
+    }
+  });
+
+  saveData();
+  initCategoryBar();
+  populateCategoryDropdowns();
+  if (typeof renderInventoryTable === "function") renderInventoryTable();
+  if (typeof renderQuickPricingTable === "function") renderQuickPricingTable();
+  renderCategoryManageModal();
+  toast(`✅ "${oldName}" kategorisi "${trimmed}" olarak güncellendi (${updatedCount} ürün etkilendi)!`, "success");
+}
+window.renameCategory = renameCategory;
+
+function deleteCategory(catName) {
+  const pList = window.products || products || [];
+  const prodCount = pList.filter(p => p && (p.category || "").trim().toLowerCase() === catName.toLowerCase()).length;
+  const msg = prodCount > 0
+    ? `"${catName}" kategorisini silmek istediğinize emin misiniz?\n\nBu kategorideki ${prodCount} ürün "Genel" kategorisine aktarılacaktır.`
+    : `"${catName}" kategorisini silmek istediğinize emin misiniz?`;
+
+  if (!confirm(msg)) return;
+
+  let catList = getActiveCategories();
+  window.categories = catList.filter(c => c !== catName);
+  categories = window.categories;
+
+  if (prodCount > 0) {
+    if (!window.categories.includes("Genel")) {
+      window.categories.push("Genel");
+      categories = window.categories;
+    }
+    pList.forEach(p => {
+      if (p && (p.category || "").trim().toLowerCase() === catName.toLowerCase()) {
+        p.category = "Genel";
+      }
+    });
+  }
+
+  saveData();
+  initCategoryBar();
+  populateCategoryDropdowns();
+  if (typeof renderInventoryTable === "function") renderInventoryTable();
+  if (typeof renderQuickPricingTable === "function") renderQuickPricingTable();
+  renderCategoryManageModal();
+  toast(`🗑️ "${catName}" kategorisi silindi!`);
+}
+window.deleteCategory = deleteCategory;
 
 function filterCategory(cat) {
   selectedCategory = cat || "TÜMÜ";
@@ -124,9 +237,11 @@ function renderCatalog() {
     if (!catMatch) {
       if ((sCat.includes("açık") || sCat.includes("acik")) && (pCat.includes("açık") || pCat.includes("acik") || pName.includes("açık") || pName.includes("acik"))) {
         catMatch = true;
-      } else if (sCat.includes("kum") && (pCat.includes("kum") || pName.includes("kum") || pName.includes("paspas") || pName.includes("tuvalet") || pName.includes("akkum"))) {
+      } else if (sCat.includes("kum") && (pCat.includes("kum") || pName.includes("kum") || pName.includes("bentonit") || pName.includes("pellet") || pName.includes("tuvalet") || pName.includes("akkum"))) {
         catMatch = true;
-      } else if (sCat === "kedi" && (pCat === "kedi" || pName.includes("kedi") || pName.includes("cat") || pName.includes("kitten") || pName.includes("felicia") || pName.includes("royal canin") || pName.includes("micho") || pName.includes("supreme") || pName.includes("anatolian") || pName.includes("gourmet") || pName.includes("dreamies") || pName.includes("akkum") || pName.includes("motto") || pName.includes("proplan"))) {
+      } else if (sCat.includes("kozmetik") && (pCat.includes("kozmetik") || pName.includes("şampuan") || pName.includes("sampuan") || pName.includes("parfüm") || pName.includes("parfum") || pName.includes("sprey") || pName.includes("tarak") || pName.includes("fırça") || pName.includes("firca") || pName.includes("mendil") || pName.includes("deodorant") || pName.includes("koku giderici") || pName.includes("pudra") || pName.includes("damla"))) {
+        catMatch = true;
+      } else if (sCat === "kedi" && (pCat === "kedi" || pName.includes("kedi") || pName.includes("cat") || pName.includes("kitten") || pName.includes("felicia") || pName.includes("royal canin") || pName.includes("micho") || pName.includes("supreme") || pName.includes("anatolian") || pName.includes("gourmet") || pName.includes("dreamies") || pName.includes("motto") || pName.includes("proplan"))) {
         catMatch = true;
       } else if ((sCat === "köpek" || sCat === "kopek") && (pCat === "köpek" || pCat === "kopek" || pName.includes("köpek") || pName.includes("dog") || pName.includes("kemik") || pName.includes("pedigree") || pName.includes("puppy"))) {
         catMatch = true;

@@ -3,7 +3,7 @@
    =================================================================== */
 
 // Global variables for universal compatibility
-var defaultCategories = ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum / Kozmetik", "Kampanyalar", "elekli paspas"];
+var defaultCategories = ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum", "Kozmetik", "Kampanyalar", "elekli paspas"];
 var categories = [...defaultCategories];
 var selectedCategory = "TÜMÜ";
 window.defaultCategories = defaultCategories;
@@ -4578,7 +4578,7 @@ function loadState() {
     }
   };
 
-  const CURRENT_CATALOG_VERSION = "2026_09_v17_aybars_suppliers_and_data_v17";
+  const CURRENT_CATALOG_VERSION = "2026_09_v18_split_kum_kozmetik_319";
   const savedVer = localStorage.getItem("ps_catalog_version");
   let prods = raw("ps_products");
 
@@ -4643,9 +4643,16 @@ function loadState() {
 
   let cats = raw("ps_categories");
   window.categories = (Array.isArray(cats) && cats.length > 0) ? cats : [...defaultCategories];
+  // Auto-migrate "Kum / Kozmetik" to "Kum" and "Kozmetik"
+  const oldCatIdx = window.categories.indexOf("Kum / Kozmetik");
+  if (oldCatIdx !== -1) {
+    window.categories.splice(oldCatIdx, 1, "Kum", "Kozmetik");
+    localStorage.setItem("ps_categories", JSON.stringify(window.categories));
+  }
   categories = window.categories;
 
-  // Ensure product integrity & default values
+  // Ensure product integrity & default values & migrate old category
+  let hasProductCategoryMigrated = false;
   window.products.forEach(p => {
     if (p.vatRate === undefined || p.vatRate === null) p.vatRate = 20;
     else p.vatRate = Number(p.vatRate);
@@ -4656,7 +4663,18 @@ function loadState() {
     else p.price = Number(p.price);
     if (p.stock === undefined || p.stock === null || isNaN(Number(p.stock))) p.stock = 0;
     else p.stock = Number(p.stock);
+    if (p.category === "Kum / Kozmetik") {
+      const n = (p.name || "").toLowerCase();
+      if (n.includes("elekli paspas")) p.category = "elekli paspas";
+      else if ((n.includes("kum") || n.includes("bentonit") || n.includes("pellet") || n.includes("tuvalet") || n.includes("akkum")) && !n.includes("koku giderici") && !n.includes("deodorant")) p.category = "Kum";
+      else if (n.includes("yaş mama") || n.includes("kitten") || n.includes("yoğurt") || n.includes("tırmalama")) p.category = "Kedi";
+      else p.category = "Kozmetik";
+      hasProductCategoryMigrated = true;
+    }
   });
+  if (hasProductCategoryMigrated) {
+    localStorage.setItem("ps_products", JSON.stringify(window.products));
+  }
   products = window.products;
 
   let sups = raw("ps_suppliers");
@@ -4696,6 +4714,26 @@ function loadState() {
 
   let sls = raw("ps_sales_history");
   window.salesHistory = Array.isArray(sls) ? sls : [...sampleSalesHistory];
+  if (Array.isArray(window.salesHistory)) {
+    let hasSalesCatMigrated = false;
+    window.salesHistory.forEach(s => {
+      if (Array.isArray(s.soldItems)) {
+        s.soldItems.forEach(item => {
+          if (item && item.category === "Kum / Kozmetik") {
+            const n = (item.name || "").toLowerCase();
+            if (n.includes("elekli paspas")) item.category = "elekli paspas";
+            else if ((n.includes("kum") || n.includes("bentonit") || n.includes("pellet") || n.includes("tuvalet") || n.includes("akkum")) && !n.includes("koku giderici") && !n.includes("deodorant")) item.category = "Kum";
+            else if (n.includes("yaş mama") || n.includes("kitten") || n.includes("yoğurt") || n.includes("tırmalama")) item.category = "Kedi";
+            else item.category = "Kozmetik";
+            hasSalesCatMigrated = true;
+          }
+        });
+      }
+    });
+    if (hasSalesCatMigrated) {
+      localStorage.setItem("ps_sales_history", JSON.stringify(window.salesHistory));
+    }
+  }
 
   let exp = raw("ps_expenses");
   window.expenses = Array.isArray(exp) ? exp : [...sampleExpenses];

@@ -382,6 +382,8 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .cat-badge-bird { background: #d1fae5; color: #047857; border: 1px solid #a7f3d0; }
 .cat-badge-food { background: #ede9fe; color: #6d28d9; border: 1px solid #ddd6fe; }
 .cat-badge-care { background: #fce7f3; color: #be185d; border: 1px solid #fbcfe8; }
+.cat-badge-sand { background: #fef9c3; color: #854d0e; border: 1px solid #fef08a; }
+.cat-badge-cosmetic { background: #fce7f3; color: #be185d; border: 1px solid #fbcfe8; }
 .cat-badge-default { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
 
 .product-card .p-name {

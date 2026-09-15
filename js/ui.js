@@ -178,7 +178,7 @@ function populateCategoryDropdowns() {
   try {
     let catList = Array.isArray(window.categories) ? window.categories : (typeof categories !== "undefined" && Array.isArray(categories) ? categories : []);
     if (!catList || catList.length === 0) {
-      catList = ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum / Kozmetik", "Kampanyalar"];
+      catList = ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum", "Kozmetik", "Kampanyalar", "elekli paspas"];
     }
 
     const posSel = document.getElementById("posCatFilter");
@@ -196,6 +196,19 @@ function populateCategoryDropdowns() {
       invSel.innerHTML = `<option value="TÜMÜ">Tüm Kategoriler</option>` + catList.map(c => `<option value="${c}">${c}</option>`).join("");
       if ([...invSel.options].some(o => o.value === prev)) {
         invSel.value = prev;
+      }
+    }
+
+    const qpSel = document.getElementById("qpCategoryFilter");
+    if (qpSel) {
+      const prevQp = qpSel.value || "TÜMÜ";
+      const pList = window.products || (typeof products !== "undefined" ? products : []);
+      qpSel.innerHTML = `<option value="TÜMÜ">Tüm Kategoriler (${pList.length})</option>` + catList.map(c => {
+        const count = pList.filter(p => (p.category || "").toLowerCase() === c.toLowerCase()).length;
+        return `<option value="${c}">${c} (${count})</option>`;
+      }).join("");
+      if ([...qpSel.options].some(o => o.value === prevQp)) {
+        qpSel.value = prevQp;
       }
     }
 

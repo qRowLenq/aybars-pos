@@ -536,6 +536,8 @@ function renderInventoryTable() {
     return (a.name || "").localeCompare(b.name || "", "tr");
   });
 
+  const activeCats = (typeof getActiveCategories === "function") ? getActiveCategories() : (window.categories || categories || ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum", "Kozmetik", "Kampanyalar", "elekli paspas"]);
+
   filtered.forEach(p => {
     const numCost = Number(p.cost) || 0;
     const numPrice = Number(p.price) || 0;
@@ -561,10 +563,16 @@ function renderInventoryTable() {
       }
     }
 
+    const catOptionsHtml = activeCats.map(c => `<option value="${c}" ${(p.category || '').toLowerCase() === c.toLowerCase() ? 'selected' : ''}>${c}</option>`).join('');
+
     tbody.innerHTML += `
       <tr id="inv-row-${p.id}">
         <td><b>${p.name || '-'}</b>${batchTag}</td>
-        <td><span class="badge badge-ghost">${p.category || '-'}</span></td>
+        <td>
+          <select class="fc" style="padding:2px 4px; font-size:11.5px; height:26px; width:125px; font-weight:500;" onchange="updateProductCategoryFast(${p.id}, this.value)" title="Kategori Değiştir">
+            ${catOptionsHtml}
+          </select>
+        </td>
         <td>${p.supplier || '-'}</td>
         <td>
           <div class="quick-cell">
@@ -588,6 +596,21 @@ function renderInventoryTable() {
       </tr>`;
   });
 }
+
+function updateProductCategoryFast(id, newCat) {
+  if (!newCat) return;
+  const pList = window.products || products || [];
+  const p = pList.find(prod => Number(prod.id) === Number(id));
+  if (p) {
+    p.category = newCat.trim();
+    saveData();
+    if (typeof populateCategoryDropdowns === "function") populateCategoryDropdowns();
+    if (typeof renderCatalog === "function") renderCatalog();
+    if (typeof updateQuickPricingStats === "function") updateQuickPricingStats();
+    toast(`✅ "${p.name}" kategorisi "${newCat}" olarak güncellendi!`);
+  }
+}
+window.updateProductCategoryFast = updateProductCategoryFast;
 
 function updateProductCostFast(id, val) {
   const pList = window.products || products || [];
@@ -712,7 +735,7 @@ function renderQuickPricingTable() {
     if (catSelect && catSelect.options.length <= 1) {
       let catList = Array.isArray(window.categories) ? window.categories : (Array.isArray(categories) ? categories : []);
       if (!catList || catList.length === 0) {
-        catList = ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum / Kozmetik", "Kampanyalar"];
+        catList = ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum", "Kozmetik", "Kampanyalar", "elekli paspas"];
       }
       catSelect.innerHTML = `<option value="TÜMÜ">Tüm Kategoriler (${pList.length})</option>` + catList.map(c => {
         const count = pList.filter(p => (p.category || "").toLowerCase() === c.toLowerCase()).length;
@@ -766,7 +789,7 @@ function renderQuickPricingTable() {
     if (filtered.length === 0) {
       tbody.innerHTML = `<tr><td colspan="9" class="empty-state" style="text-align:center; padding:35px 20px; color:var(--text-muted);">
         Filtreye uygun ürün bulunamadı.
-        <div class="mt-2"><button class="btn btn-primary btn-sm" onclick="setQpFilter('all')">👁️ Tüm 222 Ürünü Göster</button></div>
+        <div class="mt-2"><button class="btn btn-primary btn-sm" onclick="setQpFilter('all')">👁️ Tüm Ürünleri Göster</button></div>
       </td></tr>`;
       return;
     }
@@ -782,6 +805,8 @@ function renderQuickPricingTable() {
       if (sortVal === "stock-asc") return (Number(a.stock) || 0) - (Number(b.stock) || 0);
       return (a.name || "").localeCompare(b.name || "", "tr");
     });
+
+    const activeCats = (typeof getActiveCategories === "function") ? getActiveCategories() : (window.categories || categories || ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum", "Kozmetik", "Kampanyalar", "elekli paspas"]);
 
     const rowsHtml = filtered.map(p => {
       const numCost = Number(p.cost) || 0;
@@ -808,7 +833,7 @@ function renderQuickPricingTable() {
       }
 
       const safeName = String(p.name || "").replace(/"/g, '&quot;');
-      const safeCat = String(p.category || '-');
+      const catSelectOpts = activeCats.map(c => `<option value="${c}" ${(p.category || '').toLowerCase() === c.toLowerCase() ? 'selected' : ''}>${c}</option>`).join('');
 
       return `
         <tr id="qp-row-${p.id}">
@@ -816,7 +841,11 @@ function renderQuickPricingTable() {
           <td>
             <div style="font-weight:600; font-size:13px; color:var(--text);">${safeName}</div>
           </td>
-          <td><span class="badge badge-ghost" style="font-size:11px;">${safeCat}</span></td>
+          <td>
+            <select class="fc" style="padding:2px 4px; font-size:11px; height:26px; width:125px; font-weight:500;" onchange="updateProductCategoryFast(${p.id}, this.value)" title="Kategori Değiştir">
+              ${catSelectOpts}
+            </select>
+          </td>
           <td style="text-align:right;">
             <input type="number" step="any" min="0" value="${numCost > 0 ? numCost : ''}" placeholder="0.00" 
               class="qp-bulk-input" data-id="${p.id}" data-field="cost"

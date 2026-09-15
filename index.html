@@ -332,7 +332,7 @@
           <div class="flex items-center gap-2 flex-wrap">
             <input type="text" id="qpSearchInput" class="search-input" placeholder="🔍 Ürün Ara (örn: Felicia, Canin, Kum)..." oninput="renderQuickPricingTable()">
             <select id="qpCategoryFilter" class="fc" style="width:180px;" onchange="renderQuickPricingTable()">
-              <option value="TÜMÜ">Tüm Kategoriler (222)</option>
+              <option value="TÜMÜ">Tüm Kategoriler</option>
             </select>
             <select id="qpSortSelect" class="fc" style="width:150px;" onchange="renderQuickPricingTable()" title="Sıralama">
               <option value="name-asc" selected>🔤 İsim (A-Z)</option>
@@ -929,9 +929,9 @@
       <div class="modal-title" id="addProductModalTitle">+ Yeni Ürün Tanımla / Düzenle</div>
       <input type="hidden" id="npProductId" value="">
       <div class="fg">
-        <label>📦 222 Ürünlük Katalogdan Hızlı Seç (Bilgileri Otomatik Dolar)</label>
+        <label>📦 Katalogdan Hızlı Seç (Bilgileri Otomatik Dolar)</label>
         <select id="quickProductSelect" class="fc" onchange="handleSelectCatalogProductForEdit(this.value)">
-          <option value="">-- Katalogdaki 222 Üründen Birini Seçin --</option>
+          <option value="">-- Katalogdan Bir Ürün Seçin --</option>
         </select>
       </div>
       <div class="fg">
@@ -1034,6 +1034,22 @@
       <div class="modal-actions mt-3">
         <button class="btn btn-ghost" onclick="closeModal('addBundleModal')">İptal</button>
         <button class="btn btn-purple" onclick="saveBundle()">Paketi Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Manage Modal -->
+  <div class="modal-overlay" id="categoryManageModal">
+    <div class="modal-box" style="max-width:520px;">
+      <div class="modal-title">🏷️ Kategori Yönetimi & Düzenleme</div>
+      <p class="text-xs text-muted mb-3">Kategorileri yeniden adlandırabilir veya silebilirsiniz. İsim değiştiğinde bu kategorideki tüm ürünler otomatik güncellenir.</p>
+      <div id="categoryManageList" style="max-height:360px; overflow-y:auto; margin-bottom:15px;"></div>
+      <div class="flex gap-2">
+        <input type="text" id="newCatModalInput" class="fc flex-1" placeholder="Yeni kategori adı..." onkeydown="if(event.key==='Enter'){const v=this.value.trim(); if(v){addNewCategory(v); this.value='';}}">
+        <button class="btn btn-primary" onclick="const v=document.getElementById('newCatModalInput').value.trim(); if(v){addNewCategory(v); document.getElementById('newCatModalInput').value='';}">+ Ekle</button>
+      </div>
+      <div class="modal-actions mt-3">
+        <button class="btn btn-ghost" onclick="closeModal('categoryManageModal')">Kapat</button>
       </div>
     </div>
   </div>
