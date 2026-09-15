@@ -235,18 +235,11 @@ function renderCatalog() {
 
     let catMatch = (sCat === "tümü" || !selectedCategory || pCat === sCat);
     if (!catMatch) {
-      if ((sCat.includes("açık") || sCat.includes("acik")) && (pCat.includes("açık") || pCat.includes("acik") || pName.includes("açık") || pName.includes("acik"))) {
+      const normFn = (typeof normalizeCategoryName === "function") 
+        ? normalizeCategoryName 
+        : s => (s || "").toLowerCase().replace(/ç/g, "c").replace(/ğ/g, "g").replace(/ı/g, "i").replace(/i̇/g, "i").replace(/ö/g, "o").replace(/ş/g, "s").replace(/ü/g, "u").trim();
+      if (normFn(pCat) === normFn(sCat)) {
         catMatch = true;
-      } else if (sCat.includes("kum") && (pCat.includes("kum") || pName.includes("kum") || pName.includes("bentonit") || pName.includes("pellet") || pName.includes("tuvalet") || pName.includes("akkum"))) {
-        catMatch = true;
-      } else if (sCat.includes("kozmetik") && (pCat.includes("kozmetik") || pName.includes("şampuan") || pName.includes("sampuan") || pName.includes("parfüm") || pName.includes("parfum") || pName.includes("sprey") || pName.includes("tarak") || pName.includes("fırça") || pName.includes("firca") || pName.includes("mendil") || pName.includes("deodorant") || pName.includes("koku giderici") || pName.includes("pudra") || pName.includes("damla"))) {
-        catMatch = true;
-      } else if (sCat === "kedi" && (pCat === "kedi" || pName.includes("kedi") || pName.includes("cat") || pName.includes("kitten") || pName.includes("felicia") || pName.includes("royal canin") || pName.includes("micho") || pName.includes("supreme") || pName.includes("anatolian") || pName.includes("gourmet") || pName.includes("dreamies") || pName.includes("motto") || pName.includes("proplan"))) {
-        catMatch = true;
-      } else if ((sCat === "köpek" || sCat === "kopek") && (pCat === "köpek" || pCat === "kopek" || pName.includes("köpek") || pName.includes("dog") || pName.includes("kemik") || pName.includes("pedigree") || pName.includes("puppy"))) {
-        catMatch = true;
-      } else if (sCat.includes("kuş") || sCat.includes("kus") || sCat.includes("kemirgen")) {
-        catMatch = (pCat.includes("kuş") || pCat.includes("kus") || pCat.includes("kemirgen") || pName.includes("kuş") || pName.includes("darı") || pName.includes("tülü") || pName.includes("yonca") || pName.includes("yem"));
       }
     }
 

@@ -509,10 +509,11 @@ function renderInventoryTable() {
   tbody.innerHTML = "";
 
   const pList = window.products || products || [];
+  const normFn = (typeof normalizeCategoryName === "function") ? normalizeCategoryName : s => (s || "").toLowerCase().trim();
   const filtered = pList.filter(p => {
     if (p.isBundle) return false;
     const prodCat = (p.category || "").trim();
-    const catMatch = (cat === "TÜMÜ" || !cat || prodCat.toLowerCase() === cat.toLowerCase());
+    const catMatch = (cat === "TÜMÜ" || !cat || normFn(prodCat) === normFn(cat));
     const prodName = (p.name || "").toLowerCase();
     const nameMatch = prodName.includes(q);
     return catMatch && nameMatch;
@@ -758,11 +759,12 @@ function renderQuickPricingTable() {
       else btn.classList.remove("active");
     });
 
+    const normFn = (typeof normalizeCategoryName === "function") ? normalizeCategoryName : s => (s || "").toLowerCase().trim();
     const filtered = pList.filter(p => {
       if (!p || p.isBundle) return false;
       
       // Category match
-      if (selCat !== "TÜMÜ" && selCat && (p.category || "").toLowerCase() !== selCat.toLowerCase()) {
+      if (selCat !== "TÜMÜ" && selCat && normFn(p.category) !== normFn(selCat)) {
         return false;
       }
       

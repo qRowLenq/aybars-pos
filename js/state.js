@@ -10,6 +10,19 @@ window.defaultCategories = defaultCategories;
 window.categories = categories;
 window.selectedCategory = selectedCategory;
 
+function normalizeCategoryName(cat) {
+  return (cat || "").toString().toLowerCase()
+    .replace(/ç/g, "c")
+    .replace(/ğ/g, "g")
+    .replace(/ı/g, "i")
+    .replace(/i̇/g, "i")
+    .replace(/ö/g, "o")
+    .replace(/ş/g, "s")
+    .replace(/ü/g, "u")
+    .trim();
+}
+window.normalizeCategoryName = normalizeCategoryName;
+
 var catalogProducts = (typeof window !== "undefined" && window.catalogProducts && window.catalogProducts.length > 0)
   ? window.catalogProducts
   : ((typeof catalogProducts !== "undefined" && Array.isArray(catalogProducts)) ? catalogProducts : []);
