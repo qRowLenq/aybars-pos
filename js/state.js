@@ -46,7 +46,7 @@ var cart = [];
 var dailyCloseRecords = [];
 window.dailyCloseRecords = dailyCloseRecords;
 
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4ue2uUwGkZUju68CFkaV6fSUZr1zOb57Q08rsVaeA__a1j214ShzK0H5_a6GOOyl_/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNDieR45rxA2NhEujWi8tQ80UJdXCSBg7RDZFf8h3T-PQ6zOxDSVM2M8BUlkjQev6Phw/exec";
 
 const sampleBundles = [];
 const sampleSuppliers = [
