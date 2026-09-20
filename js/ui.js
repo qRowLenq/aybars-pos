@@ -179,7 +179,7 @@ function populateCategoryDropdowns() {
   try {
     let catList = Array.isArray(window.categories) ? window.categories : (typeof categories !== "undefined" && Array.isArray(categories) ? categories : []);
     if (!catList || catList.length === 0) {
-      catList = ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum", "Kozmetik", "Kampanyalar", "elekli paspas"];
+      catList = ["Açık M.", "Yaş M.", "Kum", "Kedi", "Köpek", "Vitamin/Kozmetik", "Aksesuar", "Oyuncak", "Giyim", "Kuş / Kemirgen", "Kampanyalar"];
     }
 
     const posSel = document.getElementById("posCatFilter");

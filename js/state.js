@@ -3,7 +3,7 @@
    =================================================================== */
 
 // Global variables for universal compatibility
-var defaultCategories = ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum", "Kozmetik", "Kampanyalar", "elekli paspas"];
+var defaultCategories = ["Açık M.", "Yaş M.", "Kum", "Kedi", "Köpek", "Vitamin/Kozmetik", "Aksesuar", "Oyuncak", "Giyim", "Kuş / Kemirgen", "Kampanyalar"];
 var categories = [...defaultCategories];
 var selectedCategory = "TÜMÜ";
 window.defaultCategories = defaultCategories;
@@ -4591,7 +4591,7 @@ function loadState() {
     }
   };
 
-  const CURRENT_CATALOG_VERSION = "2026_09_v18_split_kum_kozmetik_319";
+  const CURRENT_CATALOG_VERSION = "2026_09_v22_full_db_import_327";
   const savedVer = localStorage.getItem("ps_catalog_version");
   let prods = raw("ps_products");
 
@@ -4601,6 +4601,8 @@ function loadState() {
       ? catalogProducts
       : (typeof sampleProducts !== "undefined" && Array.isArray(sampleProducts) ? sampleProducts : []));
 
+  const dbSource = window.catalogDatabase || null;
+
   if (savedVer !== CURRENT_CATALOG_VERSION || !Array.isArray(prods) || prods.length < 50) {
     window.products = JSON.parse(JSON.stringify(catalogSource));
     window.products.forEach(p => {
@@ -4609,20 +4611,45 @@ function loadState() {
       p.cost = Number(p.cost) || 0;
       p.price = Number(p.price) || 0;
       if (!Array.isArray(p.batches)) p.batches = [];
+      if (!p.barcode) p.barcode = "";
     });
 
-    window.categories = [...defaultCategories];
-    window.suppliers = JSON.parse(JSON.stringify(sampleSuppliers));
-    window.customers = [];
-    window.orders = [];
-    window.platformPendingOrders = [];
-    window.deliveredOrders = [];
-    window.salesHistory = JSON.parse(JSON.stringify(sampleSalesHistory));
-    window.expenses = JSON.parse(JSON.stringify(sampleExpenses));
-    window.manualDeficits = [];
-    window.heldCarts = [];
-    window.bundles = [];
-    window.wasteRecords = [];
+    window.categories = (dbSource && Array.isArray(dbSource.categories) && dbSource.categories.length > 0)
+      ? [...dbSource.categories]
+      : [...defaultCategories];
+
+    window.suppliers = (dbSource && Array.isArray(dbSource.suppliers) && dbSource.suppliers.length > 0)
+      ? JSON.parse(JSON.stringify(dbSource.suppliers))
+      : (typeof sampleSuppliers !== "undefined" ? JSON.parse(JSON.stringify(sampleSuppliers)) : []);
+
+    window.customers = (dbSource && Array.isArray(dbSource.customers))
+      ? JSON.parse(JSON.stringify(dbSource.customers))
+      : [];
+
+    window.orders = (dbSource && Array.isArray(dbSource.orders))
+      ? JSON.parse(JSON.stringify(dbSource.orders))
+      : [];
+
+    window.platformPendingOrders = (dbSource && Array.isArray(dbSource.platformPendingOrders))
+      ? JSON.parse(JSON.stringify(dbSource.platformPendingOrders))
+      : [];
+
+    window.deliveredOrders = (dbSource && Array.isArray(dbSource.deliveredOrders))
+      ? JSON.parse(JSON.stringify(dbSource.deliveredOrders))
+      : [];
+
+    window.salesHistory = (dbSource && Array.isArray(dbSource.salesHistory) && dbSource.salesHistory.length > 0)
+      ? JSON.parse(JSON.stringify(dbSource.salesHistory))
+      : (typeof sampleSalesHistory !== "undefined" ? JSON.parse(JSON.stringify(sampleSalesHistory)) : []);
+
+    window.expenses = (dbSource && Array.isArray(dbSource.expenses) && dbSource.expenses.length > 0)
+      ? JSON.parse(JSON.stringify(dbSource.expenses))
+      : (typeof sampleExpenses !== "undefined" ? JSON.parse(JSON.stringify(sampleExpenses)) : []);
+
+    window.manualDeficits = (dbSource && Array.isArray(dbSource.manualDeficits)) ? JSON.parse(JSON.stringify(dbSource.manualDeficits)) : [];
+    window.heldCarts = (dbSource && Array.isArray(dbSource.heldCarts)) ? JSON.parse(JSON.stringify(dbSource.heldCarts)) : [];
+    window.bundles = (dbSource && Array.isArray(dbSource.bundles)) ? JSON.parse(JSON.stringify(dbSource.bundles)) : [];
+    window.wasteRecords = (dbSource && Array.isArray(dbSource.wasteRecords)) ? JSON.parse(JSON.stringify(dbSource.wasteRecords)) : [];
 
     localStorage.setItem("ps_categories", JSON.stringify(window.categories));
     localStorage.setItem("ps_products", JSON.stringify(window.products));
@@ -4715,13 +4742,13 @@ function loadState() {
   suppliers = window.suppliers;
 
   let custs = raw("ps_customers");
-  window.customers = Array.isArray(custs) ? custs : [...sampleCustomers];
+  window.customers = Array.isArray(custs) ? custs : ((dbSource && Array.isArray(dbSource.customers)) ? [...dbSource.customers] : []);
 
   let bnds = raw("ps_bundles");
-  window.bundles = Array.isArray(bnds) ? bnds : [...sampleBundles];
+  window.bundles = Array.isArray(bnds) ? bnds : (typeof sampleBundles !== "undefined" ? [...sampleBundles] : []);
 
   let waste = raw("ps_waste_records");
-  window.wasteRecords = Array.isArray(waste) ? waste : [...sampleWaste];
+  window.wasteRecords = Array.isArray(waste) ? waste : [];
 
   window.orders = raw("ps_orders") || [];
   window.platformPendingOrders = raw("ps_platform_pending") || [];
