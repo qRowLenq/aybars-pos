@@ -1957,7 +1957,7 @@
           <button type="button" class="btn btn-ghost btn-xs" style="font-size:11px;" onclick="generateBarcodeForModal()">🎲 Yeni Barkod Üret</button>
         </label>
         <div class="flex gap-2">
-          <input type="text" id="bmBarcode" class="fc font-mono" placeholder="Barkodu yazın veya okutun..." oninput="updateBarcodePreviewLive(this.value)" autocomplete="off">
+          <input type="text" id="bmBarcode" class="fc font-mono" placeholder="Barkodu yazın veya okutun..." oninput="updateBarcodePreviewLive(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault(); saveBarcodeModal();}" autocomplete="off">
           <button type="button" class="btn btn-ghost btn-sm" onclick="clearBarcodeFromModal()" title="Barkodu Temizle">❌</button>
         </div>
       </div>

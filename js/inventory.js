@@ -1261,7 +1261,7 @@ function generateBarcodeForStockEntryModal() {
 window.generateBarcodeForStockEntryModal = generateBarcodeForStockEntryModal;
 
 function generateBarcodeForBarcodeModal() {
-  const code = generateUniqueBarcode();
+  const code = (typeof generateUniqueBarcode === "function") ? generateUniqueBarcode() : '869' + Date.now().toString().slice(-10);
   const el = document.getElementById("bmBarcode");
   if (el) {
     el.value = code;
@@ -1270,23 +1270,21 @@ function generateBarcodeForBarcodeModal() {
   }
 }
 window.generateBarcodeForBarcodeModal = generateBarcodeForBarcodeModal;
+window.generateBarcodeForModal = generateBarcodeForBarcodeModal;
 
 // 2. Open Dedicated Barcode Modal for Any Product
 function openBarcodeModal(productId) {
   try {
     const pList = window.products || products || [];
-    const p = pList.find(prod => Number(prod.id) === Number(productId));
+    const p = pList.find(prod => String(prod.id) === String(productId) || Number(prod.id) === Number(productId));
     if (!p) return toast("Ürün bulunamadı!", "error");
 
     const idInput = document.getElementById("bmProductId");
     if (idInput) idInput.value = p.id;
 
-    const nameEl = document.getElementById("bmProductName");
-    if (nameEl) nameEl.innerText = p.name || "-";
-
-    const metaEl = document.getElementById("bmProductMeta");
-    if (metaEl) {
-      metaEl.innerText = `Kategori: ${p.category || 'Genel'} | Satış Fiyatı: ${(Number(p.price) || 0).toFixed(2)} ₺ | Stok: ${p.stock || 0} Adet`;
+    const nameEl = document.getElementById("bmProductNameDisplay") || document.getElementById("bmProductName");
+    if (nameEl) {
+      nameEl.innerHTML = `<span style="font-weight:700; color:var(--text-main); font-size:15px;">${p.name || '-'}</span> <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">Kategori: <b>${p.category || 'Genel'}</b> | Satış Fiyatı: <b>${(Number(p.price) || 0).toFixed(2)} ₺</b> | Stok: <b>${p.stock || 0} Adet</b></div>`;
     }
 
     const barcodeInput = document.getElementById("bmBarcode");
@@ -1313,15 +1311,41 @@ window.openBarcodeModal = openBarcodeModal;
 function saveBarcodeModal() {
   try {
     const id = document.getElementById("bmProductId")?.value;
-    if (!id) return toast("Geçersiz ürün!", "error");
-
-    const pList = window.products || products || [];
-    const p = pList.find(prod => Number(prod.id) === Number(id));
-    if (!p) return toast("Ürün bulunamadı!", "error");
-
     const barcode = (document.getElementById("bmBarcode")?.value || "").trim();
 
+    // Eğer id boşsa ve addProductModal açıksa oraya yaz
+    if (!id) {
+      const npBarcode = document.getElementById("npBarcode");
+      if (npBarcode) npBarcode.value = barcode;
+      closeModal("barcodeModal");
+      toast(barcode ? `✅ Barkod (${barcode}) form alanına aktarıldı!` : `ℹ️ Barkod temizlendi.`);
+      return;
+    }
+
+    const pList = window.products || products || [];
+    const p = pList.find(prod => String(prod.id) === String(id) || Number(prod.id) === Number(id));
+    if (!p) return toast("Ürün bulunamadı!", "error");
+
+    // Aynı barkodun başka bir üründe olup olmadığını kontrol et (uyarı amaçlı)
+    if (barcode) {
+      const dup = pList.find(o => o && String(o.id) !== String(id) && o.barcode && String(o.barcode).trim() === barcode);
+      if (dup) {
+        toast(`⚠️ Bilgi: Bu barkod (${barcode}) "${dup.name}" ürününde de kayıtlı.`, "warning");
+      }
+    }
+
     p.barcode = barcode;
+
+    // Eğer düzenleme formları açıksa onların inputlarını da güncelle
+    const npBarcode = document.getElementById("npBarcode");
+    if (npBarcode && document.getElementById("npProductId")?.value == id) {
+      npBarcode.value = barcode;
+    }
+    const seBarcode = document.getElementById("seBarcode");
+    if (seBarcode && document.getElementById("seProductId")?.value == id) {
+      seBarcode.value = barcode;
+    }
+
     saveData();
     closeModal("barcodeModal");
 
@@ -1334,13 +1358,14 @@ function saveBarcodeModal() {
     if (typeof renderCatalog === "function") renderCatalog();
     if (typeof populateAllProductDatalists === "function") populateAllProductDatalists();
 
-    toast(barcode ? `✅ "${p.name}" için barkod (${barcode}) kaydedildi!` : `ℹ️ "${p.name}" barkodu temizlendi.`);
+    toast(barcode ? `✅ "${p.name}" barkodu [${barcode}] olarak güncellendi ve kaydedildi!` : `ℹ️ "${p.name}" barkodu temizlendi.`, "success");
   } catch (err) {
     console.error("saveBarcodeModal error:", err);
     toast("Barkod kaydedilemedi!", "error");
   }
 }
 window.saveBarcodeModal = saveBarcodeModal;
+window.saveBarcodeFromModal = saveBarcodeModal;
 
 function clearBarcodeFromModal() {
   const input = document.getElementById("bmBarcode");
