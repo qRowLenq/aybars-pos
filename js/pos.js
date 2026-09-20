@@ -244,6 +244,44 @@ function deleteCategory(catName) {
 }
 window.deleteCategory = deleteCategory;
 
+function isLightMode() {
+  const stored = localStorage.getItem("ps_performance_mode");
+  if (stored === "light") return true;
+  if (stored === "standard") return false;
+  // Varsayılan: aybars-pos reposu Hafif mod, aybars reposu Standart (eski) sürüm
+  if (typeof window !== "undefined" && window.location && window.location.href.includes("aybars-pos")) {
+    return true;
+  }
+  return false;
+}
+window.isLightMode = isLightMode;
+
+function togglePosPerformanceMode() {
+  const current = isLightMode();
+  const newMode = current ? "standard" : "light";
+  localStorage.setItem("ps_performance_mode", newMode);
+  updateModeBadge();
+  window.posCatalogLimit = 48;
+  renderCatalog();
+  if (typeof toast === "function") {
+    toast(newMode === "light" ? "⚡ Hafif Mod aktif (Hızlı açılış & 48 ürün)" : "🖥️ Standart Mod aktif (Eski sürüm - 327 ürün doğrudan ekranda)", "info");
+  }
+}
+window.togglePosPerformanceMode = togglePosPerformanceMode;
+
+function updateModeBadge() {
+  const btn = document.getElementById("posModeToggleBtn");
+  if (!btn) return;
+  const light = isLightMode();
+  btn.innerHTML = light ? "⚡ Hafif Mod" : "🖥️ Standart Sürüm";
+  btn.title = light 
+    ? "Hafif Mod devrede (Düşük donanımlı cihazlar için optimize). Standart tam sürüme geçmek için tıklayın."
+    : "Standart Mod devrede (Eski sürüm - Tüm ürünler doğrudan gösterilir). Hafif moda geçmek için tıklayın.";
+  btn.style.color = light ? "#10b981" : "#e0e7ff";
+  btn.style.border = light ? "1px solid #10b981" : "1px solid rgba(255,255,255,0.2)";
+}
+window.updateModeBadge = updateModeBadge;
+
 function filterCategory(cat) {
   window.posCatalogLimit = 48;
   selectedCategory = cat || "TÜMÜ";
@@ -335,7 +373,8 @@ function renderCatalog() {
   });
 
   const fragment = document.createDocumentFragment();
-  const limit = (search && search.length > 0) ? filtered.length : (window.posCatalogLimit || 48);
+  const lightActive = isLightMode();
+  const limit = (!lightActive || (search && search.length > 0)) ? filtered.length : (window.posCatalogLimit || 48);
   const itemsToRender = filtered.slice(0, limit);
 
   itemsToRender.forEach(p => {
@@ -360,7 +399,7 @@ function renderCatalog() {
     fragment.appendChild(card);
   });
 
-  if (filtered.length > limit) {
+  if (lightActive && filtered.length > limit) {
     const remaining = filtered.length - limit;
     const moreCard = document.createElement("div");
     moreCard.className = "product-card load-more-card";

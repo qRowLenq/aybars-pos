@@ -674,9 +674,20 @@ function initializeApp() {
     else if (typeof window !== "undefined" && typeof window.setPosReceiptDefaultUnofficial === "function") window.setPosReceiptDefaultUnofficial();
   } catch(e) {}
   
+  // Set mode badge in header
+  try { if (typeof updateModeBadge === "function") updateModeBadge(); } catch(e) {}
+
+  // Standart moddaysa envanter tablosunu da hazırla
+  if (typeof isLightMode === "function" && !isLightMode()) {
+    try { if (typeof renderInventoryTable === "function") renderInventoryTable(); } catch(e) {}
+  }
+
   // Set version in footer
   const vEl = document.getElementById("appVersion");
-  if(vEl) vEl.innerText = "v3.1.0 Light (Ultra Hızlı Kasa & Performans Modu)";
+  if (vEl) {
+    const isLight = (typeof isLightMode === "function" && isLightMode());
+    vEl.innerText = isLight ? "v3.2.0 (Aybars POS — Hafif Mod)" : "v3.2.0 (Aybars — Standart Sürüm)";
+  }
 
   // Arka planda donmayı önleyen gecikmeli yükleme (Datalist ve Toptancı listeleri ana iş parçacığını bloke etmez)
   setTimeout(() => {

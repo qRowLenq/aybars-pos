@@ -4579,6 +4579,28 @@ function getMonthYearHeader(dateStr) {
   return `${TURKISH_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
 
+// ── Turkish Mojibake Auto-Repair ──
+function fixTurkishMojibake(str) {
+  if (!str || typeof str !== "string") return str;
+  if (!str.includes("Ã") && !str.includes("Ä") && !str.includes("Å")) return str;
+  return str
+    .replace(/Ã‡/g, "Ç")
+    .replace(/Ã§/g, "ç")
+    .replace(/Ã–/g, "Ö")
+    .replace(/Ã¶/g, "ö")
+    .replace(/Åž/g, "Ş")
+    .replace(/ÅŸ/g, "ş")
+    .replace(/Ä°/g, "İ")
+    .replace(/Ä±/g, "ı")
+    .replace(/Äž/g, "Ğ")
+    .replace(/ÄŸ/g, "ğ")
+    .replace(/Ãœ/g, "Ü")
+    .replace(/Ã¼/g, "ü")
+    .replace(/KÃ±sÃ±r/g, "Kısır")
+    .replace(/kÃ±sÃ±r/g, "kısır");
+}
+window.fixTurkishMojibake = fixTurkishMojibake;
+
 // ── Load from localStorage or use samples ──
 function loadState() {
   const raw = k => {
@@ -4591,7 +4613,7 @@ function loadState() {
     }
   };
 
-  const CURRENT_CATALOG_VERSION = "2026_09_v22_full_db_import_327";
+  const CURRENT_CATALOG_VERSION = "2026_09_v25_turkish_names_restored";
   const savedVer = localStorage.getItem("ps_catalog_version");
   let prods = raw("ps_products");
 
@@ -4604,26 +4626,44 @@ function loadState() {
   const dbSource = window.catalogDatabase || null;
 
   if (savedVer !== CURRENT_CATALOG_VERSION || !Array.isArray(prods) || prods.length < 50) {
+    const existingBarcodeMap = new Map();
+    const existingStockMap = new Map();
+    if (Array.isArray(prods)) {
+      prods.forEach(p => {
+        if (p && p.id) {
+          if (p.barcode) existingBarcodeMap.set(String(p.id), String(p.barcode).trim());
+          if (p.stock !== undefined && p.stock !== null && !isNaN(Number(p.stock)) && Number(p.stock) !== 0) {
+            existingStockMap.set(String(p.id), Number(p.stock));
+          }
+        }
+      });
+    }
+
     window.products = JSON.parse(JSON.stringify(catalogSource));
     window.products.forEach(p => {
+      p.name = fixTurkishMojibake(p.name);
+      p.category = fixTurkishMojibake(p.category);
       p.stock = (p.stock !== undefined && !isNaN(Number(p.stock))) ? Number(p.stock) : 0;
+      if (existingStockMap.has(String(p.id))) {
+        p.stock = existingStockMap.get(String(p.id));
+      }
       p.vatRate = (p.vatRate !== undefined && !isNaN(Number(p.vatRate))) ? Number(p.vatRate) : 20;
       p.cost = Number(p.cost) || 0;
       p.price = Number(p.price) || 0;
       if (!Array.isArray(p.batches)) p.batches = [];
-      if (!p.barcode) p.barcode = "";
+      p.barcode = existingBarcodeMap.get(String(p.id)) || p.barcode || "";
     });
 
     window.categories = (dbSource && Array.isArray(dbSource.categories) && dbSource.categories.length > 0)
-      ? [...dbSource.categories]
+      ? dbSource.categories.map(c => fixTurkishMojibake(c))
       : [...defaultCategories];
 
     window.suppliers = (dbSource && Array.isArray(dbSource.suppliers) && dbSource.suppliers.length > 0)
-      ? JSON.parse(JSON.stringify(dbSource.suppliers))
+      ? JSON.parse(JSON.stringify(dbSource.suppliers)).map(s => ({ ...s, name: fixTurkishMojibake(s.name) }))
       : (typeof sampleSuppliers !== "undefined" ? JSON.parse(JSON.stringify(sampleSuppliers)) : []);
 
     window.customers = (dbSource && Array.isArray(dbSource.customers))
-      ? JSON.parse(JSON.stringify(dbSource.customers))
+      ? JSON.parse(JSON.stringify(dbSource.customers)).map(c => ({ ...c, name: fixTurkishMojibake(c.name) }))
       : [];
 
     window.orders = (dbSource && Array.isArray(dbSource.orders))
@@ -4639,11 +4679,11 @@ function loadState() {
       : [];
 
     window.salesHistory = (dbSource && Array.isArray(dbSource.salesHistory) && dbSource.salesHistory.length > 0)
-      ? JSON.parse(JSON.stringify(dbSource.salesHistory))
+      ? JSON.parse(JSON.stringify(dbSource.salesHistory)).map(s => ({ ...s, itemsSummary: fixTurkishMojibake(s.itemsSummary), customerName: fixTurkishMojibake(s.customerName) }))
       : (typeof sampleSalesHistory !== "undefined" ? JSON.parse(JSON.stringify(sampleSalesHistory)) : []);
 
     window.expenses = (dbSource && Array.isArray(dbSource.expenses) && dbSource.expenses.length > 0)
-      ? JSON.parse(JSON.stringify(dbSource.expenses))
+      ? JSON.parse(JSON.stringify(dbSource.expenses)).map(e => ({ ...e, title: fixTurkishMojibake(e.title), category: fixTurkishMojibake(e.category) }))
       : (typeof sampleExpenses !== "undefined" ? JSON.parse(JSON.stringify(sampleExpenses)) : []);
 
     window.manualDeficits = (dbSource && Array.isArray(dbSource.manualDeficits)) ? JSON.parse(JSON.stringify(dbSource.manualDeficits)) : [];
@@ -4694,6 +4734,8 @@ function loadState() {
   // Ensure product integrity & default values & migrate old category
   let hasProductCategoryMigrated = false;
   window.products.forEach(p => {
+    p.name = fixTurkishMojibake(p.name);
+    p.category = fixTurkishMojibake(p.category);
     if (p.barcode === undefined || p.barcode === null) p.barcode = "";
     else p.barcode = String(p.barcode).trim();
     if (p.vatRate === undefined || p.vatRate === null) p.vatRate = 20;
