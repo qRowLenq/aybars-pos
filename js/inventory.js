@@ -612,9 +612,9 @@ function renderInventoryTable() {
 
     let barcodeBadge = "";
     if (p.barcode) {
-      barcodeBadge = `<br><span class="badge cursor-pointer" style="font-size:11px; font-family:monospace; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; margin-top:3px; display:inline-flex; align-items:center; gap:4px;" onclick="openBarcodeModal(${p.id})" title="Barkodu Düzenle veya Etiket Yazdır">🏷️ ${p.barcode} ✏️</span>`;
+      barcodeBadge = `<br><span class="badge cursor-pointer" style="font-size:11px; font-family:monospace; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; margin-top:3px; display:inline-flex; align-items:center; gap:4px;" onclick="openBarcodeModal('${p.id}')" title="Barkodu Düzenle veya Etiket Yazdır">🏷️ ${p.barcode} ✏️</span>`;
     } else {
-      barcodeBadge = `<br><button class="btn btn-xs" style="font-size:10.5px; padding:1px 6px; background:#fef3c7; color:#b45309; border:1px dashed #d97706; border-radius:4px; margin-top:3px;" onclick="openBarcodeModal(${p.id})" title="Bu ürüne barkod ata">+ 🏷️ Barkod Ekle</button>`;
+      barcodeBadge = `<br><button class="btn btn-xs" style="font-size:10.5px; padding:1px 6px; background:#fef3c7; color:#b45309; border:1px dashed #d97706; border-radius:4px; margin-top:3px;" onclick="openBarcodeModal('${p.id}')" title="Bu ürüne barkod ata">+ 🏷️ Barkod Ekle</button>`;
     }
 
     const catOptionsHtml = activeCats.map(c => `<option value="${c}" ${(p.category || '').toLowerCase() === c.toLowerCase() ? 'selected' : ''}>${c}</option>`).join('');
@@ -642,7 +642,7 @@ function renderInventoryTable() {
         <td id="inv-margin-${p.id}"><span class="badge ${numCost > 0 && numPrice >= numCost ? 'badge-success' : 'badge-ghost'}">${margin}</span></td>
         <td><input type="number" value="${stockVal}" class="inv-quick-input text-center" style="width:65px;" onchange="updateStockFast(${p.id}, this.value)"></td>
         <td class="flex gap-1 items-center">
-          <button class="btn btn-outline btn-xs" onclick="openBarcodeModal(${p.id})" title="Barkod Tanımla / Etiket Yazdır">🏷️</button>
+          <button class="btn btn-outline btn-xs" onclick="openBarcodeModal('${p.id}')" title="Barkod Tanımla / Etiket Yazdır">🏷️</button>
           <button class="btn btn-primary btn-xs" onclick="openStockEntryModal(${p.id})" title="Alış/Satış Fiyatı ve Stok Ekle">📦 Stok Ekle</button>
           <button class="btn btn-ghost btn-xs" onclick="openEditProductModal(${p.id})" title="Detaylı Düzenle">✏️ Düzenle</button>
           <button class="btn btn-ghost btn-xs" onclick="openProductPurchaseHistory(${p.id})" title="Geçmiş">📜</button>
@@ -893,8 +893,8 @@ function renderQuickPricingTable() {
       const catSelectOpts = activeCats.map(c => `<option value="${c}" ${(p.category || '').toLowerCase() === c.toLowerCase() ? 'selected' : ''}>${c}</option>`).join('');
 
       const barcodeBadge = p.barcode
-        ? `<span class="badge cursor-pointer" style="font-size:10.5px; font-family:monospace; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; margin-top:2px; display:inline-flex; align-items:center; gap:3px;" onclick="openBarcodeModal(${p.id})" title="Barkodu Düzenle veya Yazdır">🏷️ ${p.barcode} ✏️</span>`
-        : `<button class="btn btn-xs" style="font-size:10px; padding:1px 5px; background:#fef3c7; color:#b45309; border:1px dashed #d97706; border-radius:4px; margin-top:2px;" onclick="openBarcodeModal(${p.id})" title="Bu ürüne barkod ata">+ 🏷️ Barkod Ekle</button>`;
+        ? `<span class="badge cursor-pointer" style="font-size:10.5px; font-family:monospace; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; margin-top:2px; display:inline-flex; align-items:center; gap:3px;" onclick="openBarcodeModal('${p.id}')" title="Barkodu Düzenle veya Yazdır">🏷️ ${p.barcode} ✏️</span>`
+        : `<button class="btn btn-xs" style="font-size:10px; padding:1px 5px; background:#fef3c7; color:#b45309; border:1px dashed #d97706; border-radius:4px; margin-top:2px;" onclick="openBarcodeModal('${p.id}')" title="Bu ürüne barkod ata">+ 🏷️ Barkod Ekle</button>`;
 
       return `
         <tr id="qp-row-${p.id}">
@@ -932,7 +932,7 @@ function renderQuickPricingTable() {
           <td style="text-align:center;" id="qp-status-${p.id}">${statusBadge}</td>
           <td style="text-align:center;">
             <div class="flex gap-1 justify-center">
-              <button class="btn btn-outline btn-xs" onclick="openBarcodeModal(${p.id})" title="Barkod Tanımla / Etiket Yazdır">🏷️</button>
+              <button class="btn btn-outline btn-xs" onclick="openBarcodeModal('${p.id}')" title="Barkod Tanımla / Etiket Yazdır">🏷️</button>
               <button class="btn btn-primary btn-xs" onclick="openStockEntryModal(${p.id})" title="Alış/Satış Fiyatı ve Stok Ekle">📦 Stok Ekle</button>
               <button class="btn btn-ghost btn-xs" onclick="openEditProductModal(${p.id})" title="Detaylı Düzenle">✏️</button>
             </div>

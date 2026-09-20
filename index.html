@@ -1957,7 +1957,7 @@
           <button type="button" class="btn btn-ghost btn-xs" style="font-size:11px;" onclick="generateBarcodeForModal()">🎲 Yeni Barkod Üret</button>
         </label>
         <div class="flex gap-2">
-          <input type="text" id="bmBarcode" class="fc font-mono" placeholder="Barkodu yazın veya okutun..." oninput="updateBarcodePreviewLive(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault(); saveBarcodeModal();}" autocomplete="off">
+          <input type="text" id="bmBarcode" class="fc font-mono" placeholder="Barkodu yazın veya okutun..." oninput="updateBarcodePreviewLive(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault(); saveBarcodeFromModal();}" autocomplete="off">
           <button type="button" class="btn btn-ghost btn-sm" onclick="clearBarcodeFromModal()" title="Barkodu Temizle">❌</button>
         </div>
       </div>
@@ -1969,10 +1969,10 @@
       </div>
 
       <div class="modal-actions flex justify-between items-center flex-wrap gap-2">
-        <button class="btn btn-ghost" onclick="closeModal('barcodeModal')">Kapat</button>
+        <button class="btn btn-ghost" type="button" onclick="closeModal('barcodeModal')">Kapat</button>
         <div class="flex gap-2">
-          <button class="btn btn-outline" id="bmBtnPrint" onclick="printBarcodeLabelFromModal()">🖨️ Etiket Yazdır</button>
-          <button class="btn btn-primary" onclick="saveBarcodeFromModal()">💾 Barkodu Kaydet</button>
+          <button class="btn btn-outline" type="button" id="bmBtnPrint" onclick="printBarcodeLabelFromModal()">🖨️ Etiket Yazdır</button>
+          <button class="btn btn-primary" type="button" id="bmBtnSave" onclick="saveBarcodeFromModal()">💾 Barkodu Kaydet</button>
         </div>
       </div>
     </div>
@@ -1981,17 +1981,57 @@
   <!-- Toast Container -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <!-- Scripts -->
-  <script src="js/products_catalog.js?v=20260913_live_sync_297"></script>
-  <script src="js/state.js?v=20260913_live_sync_297"></script>
-  <script src="js/ui.js?v=20260913_live_sync_297"></script>
-  <script src="js/pos.js?v=20260913_live_sync_297"></script>
-  <script src="js/orders.js?v=20260913_live_sync_297"></script>
-  <script src="js/inventory.js?v=20260913_live_sync_297"></script>
-  <script src="js/crm.js?v=20260913_live_sync_297"></script>
-  <script src="js/procurement.js?v=20260913_live_sync_297"></script>
-  <script src="js/expenses.js?v=20260913_live_sync_297"></script>
-  <script src="js/app.js?v=20260913_live_sync_297"></script>
+  <!-- Cache-Proof Barcode Global Bridge -->
+  <script>
+    window.saveBarcodeFromModal = function() {
+      if (typeof saveBarcodeModal === "function") {
+        return saveBarcodeModal();
+      }
+      try {
+        const id = document.getElementById("bmProductId")?.value;
+        const barcode = (document.getElementById("bmBarcode")?.value || "").trim();
+        const pList = window.products || (typeof products !== "undefined" ? products : []);
+        const p = pList.find(prod => prod && (String(prod.id) === String(id) || Number(prod.id) === Number(id)));
+        if (!p) {
+          if (typeof toast === "function") toast("Ürün bulunamadı!", "error");
+          else alert("Ürün bulunamadı!");
+          return;
+        }
+        p.barcode = barcode;
+        if (typeof saveData === "function") saveData();
+        if (typeof closeModal === "function") closeModal("barcodeModal");
+        if (typeof sendToGoogleSheets === "function") sendToGoogleSheets({ action: "inventory_sync", items: pList });
+        if (typeof renderInventoryTable === "function") renderInventoryTable();
+        if (typeof renderCatalog === "function") renderCatalog();
+        if (typeof toast === "function") toast(barcode ? `✅ "${p.name}" barkodu [${barcode}] olarak kaydedildi!` : `ℹ️ Barkod temizlendi.`, "success");
+      } catch(e) {
+        console.error("inline saveBarcodeFromModal error:", e);
+      }
+    };
+    window.generateBarcodeForModal = function() {
+      if (typeof generateBarcodeForBarcodeModal === "function") {
+        return generateBarcodeForBarcodeModal();
+      }
+      const code = (typeof generateUniqueBarcode === "function" ? generateUniqueBarcode() : '869' + Date.now().toString().slice(-10));
+      const el = document.getElementById("bmBarcode");
+      if (el) {
+        el.value = code;
+        if (typeof updateBarcodePreviewLive === "function") updateBarcodePreviewLive(code);
+      }
+    };
+  </script>
+
+  <!-- Scripts with Fresh Cache-Buster Version -->
+  <script src="js/products_catalog.js?v=20260920_barcode_fix_305"></script>
+  <script src="js/state.js?v=20260920_barcode_fix_305"></script>
+  <script src="js/ui.js?v=20260920_barcode_fix_305"></script>
+  <script src="js/pos.js?v=20260920_barcode_fix_305"></script>
+  <script src="js/orders.js?v=20260920_barcode_fix_305"></script>
+  <script src="js/inventory.js?v=20260920_barcode_fix_305"></script>
+  <script src="js/crm.js?v=20260920_barcode_fix_305"></script>
+  <script src="js/procurement.js?v=20260920_barcode_fix_305"></script>
+  <script src="js/expenses.js?v=20260920_barcode_fix_305"></script>
+  <script src="js/app.js?v=20260920_barcode_fix_305"></script>
 </body>
 
 </html>
