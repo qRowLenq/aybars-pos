@@ -245,6 +245,7 @@ function deleteCategory(catName) {
 window.deleteCategory = deleteCategory;
 
 function filterCategory(cat) {
+  window.posCatalogLimit = 48;
   selectedCategory = cat || "TÜMÜ";
   if (typeof window !== "undefined") window.selectedCategory = selectedCategory;
 
@@ -333,7 +334,11 @@ function renderCatalog() {
     return (a.name || "").localeCompare(b.name || "", "tr");
   });
 
-  filtered.forEach(p => {
+  const fragment = document.createDocumentFragment();
+  const limit = (search && search.length > 0) ? filtered.length : (window.posCatalogLimit || 48);
+  const itemsToRender = filtered.slice(0, limit);
+
+  itemsToRender.forEach(p => {
     const card = document.createElement("div");
     card.className = "product-card";
     const curStock = (p.stock !== undefined && p.stock !== null) ? Number(p.stock) : 0;
@@ -352,8 +357,26 @@ function renderCatalog() {
         <span class="p-price">${curPrice.toFixed(2)} ₺</span>
       </div>`;
     card.onclick = () => addToCart(p);
-    grid.appendChild(card);
+    fragment.appendChild(card);
   });
+
+  if (filtered.length > limit) {
+    const remaining = filtered.length - limit;
+    const moreCard = document.createElement("div");
+    moreCard.className = "product-card load-more-card";
+    moreCard.style.cssText = "grid-column: 1 / -1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:16px; background:var(--card-bg, #fff); border:2px dashed var(--primary); border-radius:var(--radius-sm); cursor:pointer; text-align:center; transition: all 0.2s;";
+    moreCard.innerHTML = `
+      <div style="font-size:15px; font-weight:700; color:var(--primary);">➕ Daha Fazla Ürün Göster (+${remaining} ürün)</div>
+      <div style="font-size:11.5px; color:var(--text-muted); margin-top:3px;">Toplam ${filtered.length} üründen ${limit} tanesi listeleniyor. Tıklayarak listenin devamını yükleyin veya arama yapın.</div>
+    `;
+    moreCard.onclick = () => {
+      window.posCatalogLimit = (window.posCatalogLimit || 48) + 60;
+      renderCatalog();
+    };
+    fragment.appendChild(moreCard);
+  }
+
+  grid.appendChild(fragment);
 }
 
 // ── Cart ──
@@ -785,7 +808,10 @@ function renderPosSalesHistory() {
     return;
   }
 
-  todaySales.forEach(s => {
+  const maxDisplay = window.salesHistoryLimit || 20;
+  const displaySales = todaySales.slice(0, maxDisplay);
+
+  const htmlList = displaySales.map(s => {
     let badgeStyle = "background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe;";
     let badgeIcon = "💳";
     const pType = (s.paymentType || "").toLowerCase();
@@ -803,14 +829,26 @@ function renderPosSalesHistory() {
       badgeIcon = "📝";
     }
 
-    container.innerHTML += `
+    return `
       <div class="flex items-center justify-between" style="background:var(--bg); padding:7px 10px; border-radius:var(--radius-sm); border:1px solid var(--border); font-size:12px;">
         <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:8px;">
           <b>${s.time}</b> — <span class="badge" style="font-size:10.5px; padding:2px 6px; ${badgeStyle}">${badgeIcon} ${s.paymentType}</span> <b>${s.customerName || 'Tezgâh'}</b>: ${s.itemsSummary} (<b>${Number(s.total).toFixed(2)} ₺</b>)
         </span>
         <button class="btn btn-danger btn-xs" style="flex-shrink:0;" onclick="refundSale(${s.id})">↩️ İade</button>
       </div>`;
-  });
+  }).join("");
+
+  let moreBtn = "";
+  if (todaySales.length > maxDisplay) {
+    moreBtn = `
+      <div style="text-align:center; padding:6px 0 2px 0;">
+        <button class="btn btn-outline btn-xs" onclick="window.salesHistoryLimit = (window.salesHistoryLimit || 20) + 30; renderPosSalesHistory();">
+          ➕ Önceki Satışları Göster (${todaySales.length - maxDisplay} satış daha)
+        </button>
+      </div>`;
+  }
+
+  container.innerHTML = htmlList + moreBtn;
 }
 
 function refundSale(saleId) {

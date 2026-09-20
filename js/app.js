@@ -665,21 +665,9 @@ function initializeApp() {
   try { loadState(); } catch(e) { console.error("loadState error:", e); }
   try { initCategoryBar(); } catch(e) { console.error("initCategoryBar error:", e); }
   try { populateCategoryDropdowns(); } catch(e) { console.error("populateCategoryDropdowns error:", e); }
-  try { populateSupplierDropdowns(); } catch(e) { console.error("populateSupplierDropdowns error:", e); }
   try { renderCatalog(); } catch(e) { console.error("renderCatalog error:", e); }
   try { renderCart(); } catch(e) { console.error("renderCart error:", e); }
   try { renderPosSalesHistory(); } catch(e) { console.error("renderPosSalesHistory error:", e); }
-  try { renderInventoryTable(); } catch(e) { console.error("renderInventoryTable error:", e); }
-  try {
-    if (typeof renderQuickPricingTable === "function") renderQuickPricingTable();
-    else if (typeof window.renderQuickPricingTable === "function") window.renderQuickPricingTable();
-  } catch(e) { console.error("renderQuickPricingTable error:", e); }
-  try { renderBundlesTable(); } catch(e) { console.error("renderBundlesTable error:", e); }
-  try { renderWasteTable(); } catch(e) { console.error("renderWasteTable error:", e); }
-  try { renderSuppliersTable(); } catch(e) { console.error("renderSuppliersTable error:", e); }
-  try { renderAllPurchasesTable(); } catch(e) { console.error("renderAllPurchasesTable error:", e); }
-  try { renderExpensesTable(); } catch(e) { console.error("renderExpensesTable error:", e); }
-  try { populateAllProductDatalists(); } catch(e) { console.error("populateAllProductDatalists error:", e); }
   try { updateAllBadges(); } catch(e) { console.error("updateAllBadges error:", e); }
   try {
     if (typeof setPosReceiptDefaultUnofficial === "function") setPosReceiptDefaultUnofficial();
@@ -688,7 +676,13 @@ function initializeApp() {
   
   // Set version in footer
   const vEl = document.getElementById("appVersion");
-  if(vEl) vEl.innerText = "v3.0.0 (Enterprise Financial & Tax Architecture)";
+  if(vEl) vEl.innerText = "v3.1.0 Light (Ultra Hızlı Kasa & Performans Modu)";
+
+  // Arka planda donmayı önleyen gecikmeli yükleme (Datalist ve Toptancı listeleri ana iş parçacığını bloke etmez)
+  setTimeout(() => {
+    try { populateSupplierDropdowns(); } catch(e) {}
+    try { populateAllProductDatalists(); } catch(e) {}
+  }, 350);
 
   // E-Tablo takvim başlıklarını arka planda otomatik yenile
   setTimeout(() => {

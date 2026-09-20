@@ -31,22 +31,27 @@ function switchTab(tabId) {
     renderPosSalesHistory();
     if (typeof focusCatalogSearch === "function") focusCatalogSearch();
   }
-  if (tabId === "orders") renderOrdersTab();
+  if (tabId === "orders") {
+    if (typeof renderOrdersTab === "function") renderOrdersTab();
+  }
   if (tabId === "inventory") {
     const activeSub = document.querySelector("#tab-inventory .subtab-view.active");
-    if (!activeSub) {
-      switchInvSubtab("stock");
-    } else {
-      if (typeof renderInventoryTable === "function") renderInventoryTable();
-      if (typeof renderQuickPricingTable === "function") renderQuickPricingTable();
-      else if (typeof window.renderQuickPricingTable === "function") window.renderQuickPricingTable();
-      if (typeof renderBundlesTable === "function") renderBundlesTable();
-      if (typeof renderWasteTable === "function") renderWasteTable();
-    }
+    const subId = activeSub ? activeSub.id.replace("subtab-inv-", "") : "stock";
+    switchInvSubtab(subId);
   }
-  if (tabId === "crm") renderCRM();
-  if (tabId === "procurement") renderSuppliersTable();
-  if (tabId === "expenses") renderExpensesTable();
+  if (tabId === "crm") {
+    const activeSub = document.querySelector("#tab-crm .subtab-view.active");
+    const subId = activeSub ? activeSub.id.replace("subtab-", "") : "customers";
+    switchCrmSubtab(subId);
+  }
+  if (tabId === "procurement") {
+    const activeSub = document.querySelector("#tab-procurement .subtab-view.active");
+    const subId = activeSub ? activeSub.id.replace("subtab-", "") : "suppliers";
+    switchProcSubtab(subId);
+  }
+  if (tabId === "expenses") {
+    if (typeof renderExpensesTable === "function") renderExpensesTable();
+  }
 }
 
 function switchSubtab(container, prefix, subId, renderFn) {
