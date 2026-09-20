@@ -1,3 +1,42 @@
+// ===================================================================
+// 🟢 TEK TIKLA ÇALIŞTIR & TÜM TAKVİMİ DÜZELT (BU EN BAŞTAKİ FONKSİYONDUR):
+// Google Apps Script editöründe yukarıdaki "Çalıştır" (Run) butonuna doğrudan basın!
+// E-Tablonuzdaki 19 Eylül (Cmt) ve 20 Eylül (Paz) başlıkları anında düzelecektir!
+// ===================================================================
+
+function TAKVIMI_VE_TARIHLERI_SIMDI_DUZELT() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheets = ss.getSheets();
+  var updatedCount = 0;
+  for (var i = 0; i < sheets.length; i++) {
+    var sName = sheets[i].getName().toUpperCase();
+    if (sName.indexOf("GELİR") !== -1 || sName.indexOf("GELIR") !== -1) {
+      ensureSalesSheetStructure(sheets[i]);
+      updatedCount++;
+    }
+  }
+  // Eğer isim bulunamadıysa şu an açık olan aktif sayfayı da zorunlu olarak düzelt
+  if (updatedCount === 0 && ss.getActiveSheet()) {
+    ensureSalesSheetStructure(ss.getActiveSheet());
+    updatedCount = 1;
+  }
+  try {
+    ss.toast("✅ Tüm GELİR takvim başlıkları (" + updatedCount + " sekme) başarıyla güncellendi!", "Aybars Petshop", 5);
+  } catch(e) {}
+  Logger.log("Takvim başlıkları güncellendi. Toplam güncellenen sekme: " + updatedCount);
+}
+
+function onOpen() {
+  try {
+    SpreadsheetApp.getUi()
+      .createMenu("🐾 Aybars Yönetim")
+      .addItem("📅 Takvim Başlıklarını & Tarihleri Düzelt", "TAKVIMI_VE_TARIHLERI_SIMDI_DUZELT")
+      .addToUi();
+  } catch (e) {}
+}
+
+var TURKISH_MONTHS = ["OCAK", "ŞUBAT", "MART", "NİSAN", "MAYIS", "HAZİRAN", "TEMMUZ", "AĞUSTOS", "EYLÜL", "EKİM", "KASIM", "ARALIK"];
+
 /**
  * ===================================================================
  * AYBARS PETSHOP YÖNETİM SİSTEMİ — GOOGLE APPS SCRIPT BACKEND
@@ -24,41 +63,6 @@
  *    - Fişli Nakit, Fişsiz Nakit, Kredi Kartı, Fişli Havale, Fişsiz Havale, Platform Geliri ayrımı.
  *    - Gün sonu kapanış saati doğrudan GELİR tablosundaki gün sütununun altına damgalanır.
  */
-
-var TURKISH_MONTHS = ["OCAK", "ŞUBAT", "MART", "NİSAN", "MAYIS", "HAZİRAN", "TEMMUZ", "AĞUSTOS", "EYLÜL", "EKİM", "KASIM", "ARALIK"];
-
-// ===================================================================
-// 🟢 TEK TIKLA ÇALIŞTIR & TÜM TAKVİMİ DÜZELT:
-// Apps Script ekranında yukarıdan bu fonksiyonu seçip "Çalıştır" (Run) butonuna basın.
-// E-Tablonuzdaki tüm GELİR sayfalarının takvim başlıkları (Cmt / 19.09.2026, Paz / 20.09.2026 vb.)
-// saniyeler içinde anında güncellenecektir!
-// ===================================================================
-
-function TAKVIMI_VE_TARIHLERI_SIMDI_DUZELT() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheets = ss.getSheets();
-  var updatedCount = 0;
-  for (var i = 0; i < sheets.length; i++) {
-    var sName = sheets[i].getName().toUpperCase();
-    if (sName.indexOf("GELİR") !== -1 || sName.indexOf("GELIR") !== -1) {
-      ensureSalesSheetStructure(sheets[i]);
-      updatedCount++;
-    }
-  }
-  try {
-    ss.toast("Tüm GELİR takvim başlıkları (" + updatedCount + " sekme) başarıyla güncellendi!", "Aybars Petshop", 5);
-  } catch(e) {}
-  Logger.log("Takvim başlıkları güncellendi. Toplam güncellenen sekme: " + updatedCount);
-}
-
-function onOpen() {
-  try {
-    SpreadsheetApp.getUi()
-      .createMenu("🐾 Aybars Yönetim")
-      .addItem("📅 Takvim Başlıklarını & Tarihleri Düzelt", "TAKVIMI_VE_TARIHLERI_SIMDI_DUZELT")
-      .addToUi();
-  } catch (e) {}
-}
 
 // ===================================================================
 // 1. WEB APP ENDPOINT'LERİ (doGet & doPost)
