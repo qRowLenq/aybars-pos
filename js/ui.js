@@ -29,6 +29,7 @@ function switchTab(tabId) {
     if (typeof populateCategoryDropdowns === "function") populateCategoryDropdowns();
     renderCatalog();
     renderPosSalesHistory();
+    if (typeof focusCatalogSearch === "function") focusCatalogSearch();
   }
   if (tabId === "orders") renderOrdersTab();
   if (tabId === "inventory") {

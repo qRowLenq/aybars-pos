@@ -115,10 +115,10 @@ function moveCategory(index, direction) {
   let catList = getActiveCategories();
   const targetIndex = index + direction;
   if (targetIndex < 0 || targetIndex >= catList.length) return;
-  
+
   const [item] = catList.splice(index, 1);
   catList.splice(targetIndex, 0, item);
-  
+
   window.categories = catList;
   categories = catList;
   saveData();
@@ -132,10 +132,10 @@ window.moveCategory = moveCategory;
 function moveCategoryToTop(index) {
   let catList = getActiveCategories();
   if (index <= 0 || index >= catList.length) return;
-  
+
   const [item] = catList.splice(index, 1);
   catList.unshift(item);
-  
+
   window.categories = catList;
   categories = catList;
   saveData();
@@ -153,11 +153,11 @@ function promptMoveCategory(index) {
   if (!newRankStr) return;
   const targetRank = parseInt(newRankStr, 10);
   if (isNaN(targetRank) || targetRank < 1 || targetRank > catList.length || targetRank === currentRank) return;
-  
+
   const targetIndex = targetRank - 1;
   const [item] = catList.splice(index, 1);
   catList.splice(targetIndex, 0, item);
-  
+
   window.categories = catList;
   categories = catList;
   saveData();
@@ -297,8 +297,8 @@ function renderCatalog() {
 
     let catMatch = (sCat === "tümü" || !selectedCategory || pCat === sCat);
     if (!catMatch) {
-      const normFn = (typeof normalizeCategoryName === "function") 
-        ? normalizeCategoryName 
+      const normFn = (typeof normalizeCategoryName === "function")
+        ? normalizeCategoryName
         : s => (s || "").toLowerCase().replace(/ç/g, "c").replace(/ğ/g, "g").replace(/ı/g, "i").replace(/i̇/g, "i").replace(/ö/g, "o").replace(/ş/g, "s").replace(/ü/g, "u").trim();
       if (normFn(pCat) === normFn(sCat)) {
         catMatch = true;
@@ -344,6 +344,7 @@ function renderCatalog() {
     card.innerHTML = `
       <div class="p-top-row">
         <span class="p-cat-badge ${badgeClass}" title="Kategori: ${catName}">${catName}</span>
+        ${p.barcode ? `<span class="p-barcode-tag" style="font-size:10.5px; opacity:0.85; font-family:monospace; background:rgba(0,0,0,0.06); padding:1px 6px; border-radius:4px; font-weight:600;" title="Barkod: ${p.barcode}">🏷️ ${p.barcode}</span>` : ''}
       </div>
       <div class="p-name" title="${p.name}">${p.name}</div>
       <div class="p-footer">
@@ -411,7 +412,7 @@ function renderCart() {
     vatTotal += itemVat;
 
     const hasDiscount = item.originalPrice !== undefined && item.customPrice < (item.originalPrice - 0.001);
-    const priceText = hasDiscount 
+    const priceText = hasDiscount
       ? `<s style="color:#94a3b8; font-size:11px; margin-right:3px;">${item.originalPrice.toFixed(2)} ₺</s> <b style="color:#16a34a;">${item.customPrice.toFixed(2)} ₺</b>`
       : `${item.customPrice.toFixed(2)} ₺`;
 
@@ -479,35 +480,35 @@ function completeSale(payType, splitDetails = null, splitData = null) {
   const custName = cust ? cust.name : "Tezgâh";
   const itemsSummary = cart.map(i => `${i.qty}x ${i.name} (${i.customPrice.toFixed(2)} ₺)`).join(", ");
 
-// ── FIFO Batch Stock Deduction Engine ──
-function deductProductStockFIFO(prod, qtyNeeded) {
-  if (!prod) return;
-  prod.stock = Math.max(0, (Number(prod.stock) || 0) - qtyNeeded);
+  // ── FIFO Batch Stock Deduction Engine ──
+  function deductProductStockFIFO(prod, qtyNeeded) {
+    if (!prod) return;
+    prod.stock = Math.max(0, (Number(prod.stock) || 0) - qtyNeeded);
 
-  if (Array.isArray(prod.batches) && prod.batches.length > 0) {
-    // Sort batches ascending by expiry (FIFO): earliest expiring first
-    prod.batches.sort((a, b) => {
-      const expA = a.expiry || "9999-99";
-      const expB = b.expiry || "9999-99";
-      return expA.localeCompare(expB);
-    });
+    if (Array.isArray(prod.batches) && prod.batches.length > 0) {
+      // Sort batches ascending by expiry (FIFO): earliest expiring first
+      prod.batches.sort((a, b) => {
+        const expA = a.expiry || "9999-99";
+        const expB = b.expiry || "9999-99";
+        return expA.localeCompare(expB);
+      });
 
-    let remainingNeeded = qtyNeeded;
-    for (let i = 0; i < prod.batches.length; i++) {
-      const b = prod.batches[i];
-      if (b.qty <= 0) continue;
+      let remainingNeeded = qtyNeeded;
+      for (let i = 0; i < prod.batches.length; i++) {
+        const b = prod.batches[i];
+        if (b.qty <= 0) continue;
 
-      if (b.qty >= remainingNeeded) {
-        b.qty -= remainingNeeded;
-        remainingNeeded = 0;
-        break;
-      } else {
-        remainingNeeded -= b.qty;
-        b.qty = 0;
+        if (b.qty >= remainingNeeded) {
+          b.qty -= remainingNeeded;
+          remainingNeeded = 0;
+          break;
+        } else {
+          remainingNeeded -= b.qty;
+          b.qty = 0;
+        }
       }
     }
   }
-}
 
   // Stock deduction (FIFO Lot / Batch-based)
   cart.forEach(item => {
@@ -522,8 +523,8 @@ function deductProductStockFIFO(prod, qtyNeeded) {
     }
   });
 
-  const isReceiptOfficial = document.getElementById("posReceiptOfficial") 
-    ? document.getElementById("posReceiptOfficial").checked 
+  const isReceiptOfficial = document.getElementById("posReceiptOfficial")
+    ? document.getElementById("posReceiptOfficial").checked
     : (document.getElementById("posCashIsOfficial") ? document.getElementById("posCashIsOfficial").checked : false);
 
   const payUpper = (payType || "").toUpperCase();
@@ -618,6 +619,7 @@ function deductProductStockFIFO(prod, qtyNeeded) {
   renderCart(); renderCatalog(); renderPosSalesHistory(); saveData(); updateAllBadges();
   if (typeof renderSktRadarWidget === "function") renderSktRadarWidget();
   toast(`✅ ${total.toFixed(2)} ₺ satış tamamlandı! ${isOfficial ? '(🧾 Fişli)' : '(📝 Fişsiz)'}`);
+  focusCatalogSearch();
 }
 
 function toggleRecentSalesBox() {
@@ -699,9 +701,9 @@ function renderPosSalesHistory() {
   // Gün Sonu Durum Rozeti ve Kapatıldı/Geri Aç Bildirim Kutusu
   const statusBadge = document.getElementById("posDayStatusBadge");
   const closedNoticeBox = document.getElementById("posClosedNoticeBox");
-  
-  const closeRecordForCurrent = (typeof getTodayDailyCloseRecord === "function") 
-    ? getTodayDailyCloseRecord(currentWorkingDay) 
+
+  const closeRecordForCurrent = (typeof getTodayDailyCloseRecord === "function")
+    ? getTodayDailyCloseRecord(currentWorkingDay)
     : (Array.isArray(window.dailyCloseRecords) ? window.dailyCloseRecords.find(r => r.date === currentWorkingDay) : null);
 
   const lastClosedRecord = (Array.isArray(window.dailyCloseRecords) && window.dailyCloseRecords.length > 0)
@@ -832,7 +834,7 @@ function refundSale(saleId) {
 
   const refundVat = sale.vatTotal ? -Math.abs(sale.vatTotal) : 0;
   const refundTotal = -Math.abs(sale.total);
-  
+
   let refundCard = 0;
   let refundCash = 0;
   let refundTransfer = 0;
@@ -953,6 +955,7 @@ function chargeToCredit() {
   setPosReceiptDefaultUnofficial();
   renderCart(); renderCatalog(); renderPosSalesHistory(); saveData(); updateAllBadges();
   toast(`📝 ${total.toFixed(2)} ₺ veresiye defterine işlendi!`);
+  focusCatalogSearch();
 }
 
 // ── Hold Cart ──
@@ -963,6 +966,7 @@ function holdCurrentCart() {
   cart = [];
   saveData(); renderCart(); updateAllBadges();
   toast("⏸️ Sepet askıya alındı!");
+  focusCatalogSearch();
 }
 
 function openHoldCartModal() {
@@ -1188,9 +1192,10 @@ if (typeof window !== "undefined") {
   window.editCartItemPrice = editCartItemPrice;
 }
 
-// Sayfa ilk yüklendiğinde ve form yenilendiğinde varsayılan Fişsiz seçimini garantile
+// Sayfa ilk yüklendiğinde ve form yenilendiğinde varsayılan Fişsiz seçimini garantile ve arama kutusuna odaklan
 function initPosReceiptSelection() {
   setPosReceiptDefaultUnofficial();
+  focusCatalogSearch();
 }
 
 if (typeof document !== "undefined") {
@@ -1201,3 +1206,212 @@ if (typeof document !== "undefined") {
   }
   window.addEventListener("pageshow", initPosReceiptSelection);
 }
+
+// ── Focus & Cart Management ──
+function focusCatalogSearch() {
+  setTimeout(() => {
+    try {
+      const posTab = document.getElementById("tab-pos");
+      const isPosVisible = !posTab || posTab.classList.contains("active") || getComputedStyle(posTab).display !== "none";
+      if (isPosVisible) {
+        // Modal açık değilse odakla
+        const openModal = document.querySelector(".modal-overlay.open, .modal-overlay.active");
+        if (!openModal) {
+          const input = document.getElementById("catalogSearch");
+          if (input) {
+            input.focus();
+            input.select();
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("focusCatalogSearch error:", e);
+    }
+  }, 120);
+}
+window.focusCatalogSearch = focusCatalogSearch;
+
+function clearPosCart() {
+  if (!cart || cart.length === 0) {
+    toast("Sepet zaten boş.", "info");
+    focusCatalogSearch();
+    return;
+  }
+  if (confirm("Sepetteki tüm ürünleri temizlemek (sıfırlamak) istediğinize emin misiniz?")) {
+    cart = [];
+    if (document.getElementById("quickCartDiscountInput")) document.getElementById("quickCartDiscountInput").value = "";
+    if (document.getElementById("cartCustomerSelect")) document.getElementById("cartCustomerSelect").value = "";
+    renderCart();
+    toast("🗑️ Sepet sıfırlandı!");
+    focusCatalogSearch();
+  }
+}
+window.clearPosCart = clearPosCart;
+
+// ── Beep Audio Feedback for Barcode Scanner ──
+function playBarcodeBeep(isSuccess = true) {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    if (isSuccess) {
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(1760, ctx.currentTime); // High chime A6
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.12);
+    } else {
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(260, ctx.currentTime);
+      gain.gain.setValueAtTime(0.25, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.22);
+    }
+  } catch (e) {
+    // Suppressed if browser audio policy restricts until user interaction
+  }
+}
+window.playBarcodeBeep = playBarcodeBeep;
+
+// ── Check if active focus is an edit, form, or note input ──
+function isEditingOrNoteElement(el) {
+  if (!el) return false;
+  const tag = (el.tagName || "").toUpperCase();
+  if (tag === "TEXTAREA") return true;
+  if (el.isContentEditable) return true;
+
+  if (tag === "INPUT") {
+    // Specifically catalogSearch on sales screen is the barcode search box, NOT an edit field
+    if (el.id === "catalogSearch") return false;
+
+    // Any input inside an active modal (e.g. npBarcode, seBarcode, customer note, etc.)
+    const insideModal = el.closest(".modal-overlay.open, .modal-overlay.active, .modal-box");
+    if (insideModal) return true;
+
+    // Any other text/number/email/search/tel input
+    const type = (el.type || "").toLowerCase();
+    if (["text", "search", "number", "email", "password", "tel"].includes(type)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// ── Barcode Resolution & Adding to Cart on Sales Screen ──
+function handleScannedBarcodeOnPos(barcodeString, sourceInput = null) {
+  const code = String(barcodeString || "").trim();
+  if (!code) return;
+
+  const pList = window.products || products || [];
+
+  // 1. Exact barcode match (case-insensitive and trimmed)
+  let matchedProduct = pList.find(p => p && p.barcode && String(p.barcode).trim().toLowerCase() === code.toLowerCase());
+
+  // 2. Exact ID match (in case product ID was barcode-encoded)
+  if (!matchedProduct) {
+    matchedProduct = pList.find(p => p && String(p.id).trim() === code);
+  }
+
+  // 3. Fallback: exact name match
+  if (!matchedProduct) {
+    matchedProduct = pList.find(p => p && p.name && p.name.trim().toLowerCase() === code.toLowerCase());
+  }
+
+  if (matchedProduct) {
+    // Ürün bulundu: Sepete anında 1 adet ekle ve ses çal
+    addToCart(matchedProduct);
+    playBarcodeBeep(true);
+    toast(`✅ ${matchedProduct.name} sepete eklendi! (Barkod: ${code})`, "success");
+
+    // Arama kutusunu temizle ve odakla
+    const cs = document.getElementById("catalogSearch");
+    if (cs) cs.value = "";
+    if (sourceInput && sourceInput !== cs) sourceInput.value = "";
+    renderCatalog();
+    focusCatalogSearch();
+  } else {
+    // Ürün bulunamadı: Belirgin bildirim ver
+    playBarcodeBeep(false);
+    toast(`❌ "${code}" barkodlu ürün bulunamadı!`, "error");
+
+    const cs = document.getElementById("catalogSearch");
+    if (cs && cs === document.activeElement) {
+      cs.select();
+    } else {
+      focusCatalogSearch();
+    }
+  }
+}
+window.handleScannedBarcodeOnPos = handleScannedBarcodeOnPos;
+
+// ── Catalog Search Keydown Handler (Enter Key) ──
+function handlePosBarcodeSearchKeyDown(event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    const val = (event.target.value || "").trim();
+    if (!val) return;
+    handleScannedBarcodeOnPos(val, event.target);
+  }
+}
+window.handlePosBarcodeSearchKeyDown = handlePosBarcodeSearchKeyDown;
+
+// ── Global Hardware Barcode Scanner Listener (< 50ms keystrokes buffer) ──
+(function initGlobalBarcodeScanner() {
+  let buffer = "";
+  let lastKeyTime = 0;
+  let isFastTyping = false;
+  const SPEED_THRESHOLD_MS = 50; // 50 ms altında gelen hızlı karakterler
+
+  window.addEventListener("keydown", function(event) {
+    const now = Date.now();
+    const interval = now - lastKeyTime;
+    lastKeyTime = now;
+
+    // Enter tuşu geldiğinde:
+    if (event.key === "Enter") {
+      if (buffer.length >= 3 && isFastTyping) {
+        const scannedBarcode = buffer.trim();
+        buffer = "";
+        isFastTyping = false;
+
+        const activeEl = document.activeElement;
+        // Eğer aktif odak bir düzenleme veya not input alanı ise araya girme
+        if (isEditingOrNoteElement(activeEl)) {
+          return;
+        }
+
+        // Satış ekranında barkod okundu: Sepete ekle!
+        event.preventDefault();
+        event.stopPropagation();
+        handleScannedBarcodeOnPos(scannedBarcode);
+        return;
+      }
+      // Sıradan tek Enter veya yavaş basım
+      buffer = "";
+      isFastTyping = false;
+      return;
+    }
+
+    // Yalnızca tek karakterli tuşları tampona al (Shift, Alt, Ctrl vs. hariç)
+    if (event.key && event.key.length === 1 && !event.ctrlKey && !event.altKey && !event.metaKey) {
+      if (interval < SPEED_THRESHOLD_MS) {
+        isFastTyping = true;
+        buffer += event.key;
+      } else {
+        // Yeni bir serinin başlangıcı veya normal insan yazımı
+        buffer = event.key;
+        isFastTyping = false;
+      }
+    } else if (event.key !== "Shift") {
+      buffer = "";
+      isFastTyping = false;
+    }
+  }, true); // Capture fazında yakala
+})();

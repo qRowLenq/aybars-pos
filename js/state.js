@@ -4667,6 +4667,8 @@ function loadState() {
   // Ensure product integrity & default values & migrate old category
   let hasProductCategoryMigrated = false;
   window.products.forEach(p => {
+    if (p.barcode === undefined || p.barcode === null) p.barcode = "";
+    else p.barcode = String(p.barcode).trim();
     if (p.vatRate === undefined || p.vatRate === null) p.vatRate = 20;
     else p.vatRate = Number(p.vatRate);
     if (!Array.isArray(p.batches)) p.batches = [];
@@ -4868,16 +4870,16 @@ function findMatchingProduct(query) {
   const qTr = q.toLocaleLowerCase('tr-TR');
   const qStd = q.toLowerCase();
 
-  // 1. Exact match by name (Turkish locale)
-  let found = window.products.find(p => p.name && p.name.trim().toLocaleLowerCase('tr-TR') === qTr);
+  // 1. Exact match by barcode (Highest priority for scanner)
+  let found = window.products.find(p => p.barcode && String(p.barcode).trim() === q);
   if (found) return found;
 
-  // 2. Exact match by name (Standard locale fallback)
+  // 2. Exact match by name (Turkish locale)
+  found = window.products.find(p => p.name && p.name.trim().toLocaleLowerCase('tr-TR') === qTr);
+  if (found) return found;
+
+  // 3. Exact match by name (Standard locale fallback)
   found = window.products.find(p => p.name && p.name.trim().toLowerCase() === qStd);
-  if (found) return found;
-
-  // 3. Exact match by barcode
-  found = window.products.find(p => p.barcode && String(p.barcode).trim() === q);
   if (found) return found;
 
   // 4. Exact match by ID

@@ -82,12 +82,16 @@ function openStockEntryModal(id) {
     const vatInput = document.getElementById("seVatRate");
     if (vatInput) vatInput.value = String(p.vatRate !== undefined ? p.vatRate : 20);
 
+    const barcodeInput = document.getElementById("seBarcode");
+    if (barcodeInput) barcodeInput.value = p.barcode || "";
+
     const titleEl = document.getElementById("stockEntryModalTitle");
     if (titleEl) titleEl.innerText = `📦 Stok & Fiyat Ekle: ${p.name}`;
 
     openModal("stockEntryModal");
     setTimeout(() => {
-      if (costInput && (!p.cost || p.cost <= 0)) costInput.focus();
+      if (barcodeInput && (!p.barcode || p.barcode === "")) barcodeInput.focus();
+      else if (costInput && (!p.cost || p.cost <= 0)) costInput.focus();
       else if (stockInput) stockInput.focus();
     }, 100);
   } catch (err) {
@@ -109,19 +113,26 @@ function saveStockEntry() {
     const priceInput = document.getElementById("sePrice");
     const stockInput = document.getElementById("seStock");
     const vatInput = document.getElementById("seVatRate");
+    const barcodeInput = document.getElementById("seBarcode");
 
     const cost = costInput ? (parseFloat(costInput.value) || 0) : 0;
     const price = priceInput ? (parseFloat(priceInput.value) || 0) : 0;
     const stock = stockInput ? (parseInt(stockInput.value, 10) || 0) : 0;
     const vatRate = vatInput ? (parseInt(vatInput.value, 10) || 20) : 20;
+    const barcode = barcodeInput ? barcodeInput.value.trim() : "";
 
     p.cost = Math.max(0, cost);
     p.price = Math.max(0, price);
     p.stock = Math.max(0, stock);
     p.vatRate = vatRate;
+    p.barcode = barcode;
 
     saveData();
     closeModal("stockEntryModal");
+
+    if (typeof sendToGoogleSheets === "function") {
+      sendToGoogleSheets({ action: "inventory_sync", items: window.products });
+    }
 
     if (typeof renderCatalog === "function") renderCatalog();
     if (typeof renderInventoryTable === "function") renderInventoryTable();
@@ -129,7 +140,7 @@ function saveStockEntry() {
     if (typeof updateQuickPricingStats === "function") updateQuickPricingStats();
     if (typeof updateAllBadges === "function") updateAllBadges();
 
-    toast(`✅ "${p.name}" güncellendi! Stok: ${p.stock}, Alış: ${p.cost}₺, Satış: ${p.price}₺`, "success");
+    toast(`✅ "${p.name}" güncellendi! Stok: ${p.stock}, Fiyat: ${p.price}₺, Barkod: ${p.barcode || 'Yok'}`, "success");
   } catch (err) {
     console.error("saveStockEntry error:", err);
     toast("Kaydedilirken hata oluştu!", "error");
@@ -137,7 +148,7 @@ function saveStockEntry() {
 }
 
 // ── Add/Edit Product Modal ──
-function openAddProductModal(preSelectedSupplier = null) {
+function openAddProductModal(preSelectedSupplier = null, initialBarcode = null) {
   try {
     if (typeof populateCategoryDropdowns === "function") populateCategoryDropdowns();
     if (typeof populateSupplierDropdowns === "function") populateSupplierDropdowns();
@@ -153,6 +164,8 @@ function openAddProductModal(preSelectedSupplier = null) {
     if (qSearch) qSearch.value = "";
     const npName = document.getElementById("npName");
     if (npName) npName.value = "";
+    const npBarcode = document.getElementById("npBarcode");
+    if (npBarcode) npBarcode.value = initialBarcode ? String(initialBarcode).trim() : "";
     const npPrice = document.getElementById("npPrice");
     if (npPrice) npPrice.value = "";
     const npCost = document.getElementById("npCost");
@@ -178,6 +191,17 @@ function openAddProductModal(preSelectedSupplier = null) {
     console.error("openAddProductModal error:", err);
   }
   openModal("addProductModal");
+  setTimeout(() => {
+    const npBarcode = document.getElementById("npBarcode");
+    const npName = document.getElementById("npName");
+    if (initialBarcode && npName) {
+      npName.focus();
+    } else if (npBarcode && !npBarcode.value) {
+      npBarcode.focus();
+    } else if (npName) {
+      npName.focus();
+    }
+  }, 100);
 }
 
 function openEditProductModal(id) {
@@ -200,6 +224,8 @@ function openEditProductModal(id) {
     if (qSearch) qSearch.value = p.name || "";
     const npName = document.getElementById("npName");
     if (npName) npName.value = p.name || "";
+    const npBarcode = document.getElementById("npBarcode");
+    if (npBarcode) npBarcode.value = p.barcode || "";
     const npCat = document.getElementById("npCategory");
     if (npCat) npCat.value = p.category || (categories && categories[0]) || "Genel";
     const npPrice = document.getElementById("npPrice");
@@ -219,6 +245,13 @@ function openEditProductModal(id) {
     console.error("openEditProductModal error:", err);
   }
   openModal("addProductModal");
+  setTimeout(() => {
+    const npBarcode = document.getElementById("npBarcode");
+    if (npBarcode) {
+      npBarcode.focus();
+      npBarcode.select();
+    }
+  }, 100);
 }
 
 function handleAutoFillExistingProduct(val) {
@@ -232,6 +265,8 @@ function handleAutoFillExistingProduct(val) {
     if (qSelect) qSelect.value = p.id;
     const npName = document.getElementById("npName");
     if (npName) npName.value = p.name || "";
+    const npBarcode = document.getElementById("npBarcode");
+    if (npBarcode) npBarcode.value = p.barcode || "";
     const npCat = document.getElementById("npCategory");
     if (npCat) npCat.value = p.category || (categories && categories[0]) || "Genel";
     const npPrice = document.getElementById("npPrice");
@@ -254,6 +289,8 @@ function saveNewProduct() {
   try {
     const nameEl = document.getElementById("npName");
     const name = nameEl ? nameEl.value.trim() : "";
+    const barcodeEl = document.getElementById("npBarcode");
+    const barcode = barcodeEl ? barcodeEl.value.trim() : "";
     const priceEl = document.getElementById("npPrice");
     const price = priceEl ? (Number(priceEl.value) || 0) : 0;
     const catEl = document.getElementById("npCategory");
@@ -278,6 +315,7 @@ function saveNewProduct() {
       let existing = pList.find(p => Number(p.id) === Number(editId) || String(p.id) === String(editId));
       if (existing) {
         existing.name = name;
+        existing.barcode = barcode;
         existing.price = price;
         existing.cost = cost;
         existing.stock = stock;
@@ -289,6 +327,7 @@ function saveNewProduct() {
         const newProd = {
           id: Number(editId) || Date.now(),
           name,
+          barcode,
           category: cat,
           price,
           cost,
@@ -304,6 +343,7 @@ function saveNewProduct() {
       // Yeni ürün modu
       let existingByName = pList.find(p => p && p.name && p.name.toLowerCase() === name.toLowerCase());
       if (existingByName) {
+        existingByName.barcode = barcode || existingByName.barcode || "";
         existingByName.price = price;
         existingByName.cost = cost;
         existingByName.stock = stock;
@@ -315,6 +355,7 @@ function saveNewProduct() {
         const newProd = {
           id: Date.now(),
           name,
+          barcode,
           category: cat,
           price,
           cost,
@@ -333,6 +374,11 @@ function saveNewProduct() {
 
     saveData();
     closeModal("addProductModal");
+
+    if (typeof sendToGoogleSheets === "function") {
+      sendToGoogleSheets({ action: "inventory_sync", items: window.products });
+    }
+
     if (typeof renderCatalog === "function") renderCatalog();
     if (typeof renderInventoryTable === "function") renderInventoryTable();
     if (typeof renderQuickPricingTable === "function") renderQuickPricingTable();
@@ -515,7 +561,7 @@ function renderInventoryTable() {
     const prodCat = (p.category || "").trim();
     const catMatch = (cat === "TÜMÜ" || !cat || normFn(prodCat) === normFn(cat));
     const prodName = (p.name || "").toLowerCase();
-    const nameMatch = prodName.includes(q);
+    const nameMatch = prodName.includes(q) || (p.barcode && String(p.barcode).toLowerCase().includes(q));
     return catMatch && nameMatch;
   });
 
@@ -564,11 +610,18 @@ function renderInventoryTable() {
       }
     }
 
+    let barcodeBadge = "";
+    if (p.barcode) {
+      barcodeBadge = `<br><span class="badge cursor-pointer" style="font-size:11px; font-family:monospace; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; margin-top:3px; display:inline-flex; align-items:center; gap:4px;" onclick="openBarcodeModal(${p.id})" title="Barkodu Düzenle veya Etiket Yazdır">🏷️ ${p.barcode} ✏️</span>`;
+    } else {
+      barcodeBadge = `<br><button class="btn btn-xs" style="font-size:10.5px; padding:1px 6px; background:#fef3c7; color:#b45309; border:1px dashed #d97706; border-radius:4px; margin-top:3px;" onclick="openBarcodeModal(${p.id})" title="Bu ürüne barkod ata">+ 🏷️ Barkod Ekle</button>`;
+    }
+
     const catOptionsHtml = activeCats.map(c => `<option value="${c}" ${(p.category || '').toLowerCase() === c.toLowerCase() ? 'selected' : ''}>${c}</option>`).join('');
 
     tbody.innerHTML += `
       <tr id="inv-row-${p.id}">
-        <td><b>${p.name || '-'}</b>${batchTag}</td>
+        <td><b>${p.name || '-'}</b>${barcodeBadge}${batchTag}</td>
         <td>
           <select class="fc" style="padding:2px 4px; font-size:11.5px; height:26px; width:125px; font-weight:500;" onchange="updateProductCategoryFast(${p.id}, this.value)" title="Kategori Değiştir">
             ${catOptionsHtml}
@@ -589,6 +642,7 @@ function renderInventoryTable() {
         <td id="inv-margin-${p.id}"><span class="badge ${numCost > 0 && numPrice >= numCost ? 'badge-success' : 'badge-ghost'}">${margin}</span></td>
         <td><input type="number" value="${stockVal}" class="inv-quick-input text-center" style="width:65px;" onchange="updateStockFast(${p.id}, this.value)"></td>
         <td class="flex gap-1 items-center">
+          <button class="btn btn-outline btn-xs" onclick="openBarcodeModal(${p.id})" title="Barkod Tanımla / Etiket Yazdır">🏷️</button>
           <button class="btn btn-primary btn-xs" onclick="openStockEntryModal(${p.id})" title="Alış/Satış Fiyatı ve Stok Ekle">📦 Stok Ekle</button>
           <button class="btn btn-ghost btn-xs" onclick="openEditProductModal(${p.id})" title="Detaylı Düzenle">✏️ Düzenle</button>
           <button class="btn btn-ghost btn-xs" onclick="openProductPurchaseHistory(${p.id})" title="Geçmiş">📜</button>
@@ -762,17 +816,18 @@ function renderQuickPricingTable() {
     const normFn = (typeof normalizeCategoryName === "function") ? normalizeCategoryName : s => (s || "").toLowerCase().trim();
     const filtered = pList.filter(p => {
       if (!p || p.isBundle) return false;
-      
+
       // Category match
       if (selCat !== "TÜMÜ" && selCat && normFn(p.category) !== normFn(selCat)) {
         return false;
       }
-      
+
       // Search match
       if (search) {
         const matchName = (p.name || "").toLowerCase().includes(search);
         const matchId = String(p.id).includes(search);
-        if (!matchName && !matchId) return false;
+        const matchBarcode = p.barcode && String(p.barcode).toLowerCase().includes(search);
+        if (!matchName && !matchId && !matchBarcode) return false;
       }
 
       // Filter type match
@@ -814,7 +869,7 @@ function renderQuickPricingTable() {
       const numCost = Number(p.cost) || 0;
       const numPrice = Number(p.price) || 0;
       const stockVal = isNaN(Number(p.stock)) ? 0 : Number(p.stock);
-      
+
       let marginStr = "-";
       let marginClass = "badge-ghost";
       if (numCost > 0 && numPrice > 0) {
@@ -837,11 +892,16 @@ function renderQuickPricingTable() {
       const safeName = String(p.name || "").replace(/"/g, '&quot;');
       const catSelectOpts = activeCats.map(c => `<option value="${c}" ${(p.category || '').toLowerCase() === c.toLowerCase() ? 'selected' : ''}>${c}</option>`).join('');
 
+      const barcodeBadge = p.barcode
+        ? `<span class="badge cursor-pointer" style="font-size:10.5px; font-family:monospace; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; margin-top:2px; display:inline-flex; align-items:center; gap:3px;" onclick="openBarcodeModal(${p.id})" title="Barkodu Düzenle veya Yazdır">🏷️ ${p.barcode} ✏️</span>`
+        : `<button class="btn btn-xs" style="font-size:10px; padding:1px 5px; background:#fef3c7; color:#b45309; border:1px dashed #d97706; border-radius:4px; margin-top:2px;" onclick="openBarcodeModal(${p.id})" title="Bu ürüne barkod ata">+ 🏷️ Barkod Ekle</button>`;
+
       return `
         <tr id="qp-row-${p.id}">
           <td style="text-align:center; color:var(--text-muted); font-size:12px; font-weight:600;">${p.id}</td>
           <td>
             <div style="font-weight:600; font-size:13px; color:var(--text);">${safeName}</div>
+            <div style="margin-top:2px;">${barcodeBadge}</div>
           </td>
           <td>
             <select class="fc" style="padding:2px 4px; font-size:11px; height:26px; width:125px; font-weight:500;" onchange="updateProductCategoryFast(${p.id}, this.value)" title="Kategori Değiştir">
@@ -872,6 +932,7 @@ function renderQuickPricingTable() {
           <td style="text-align:center;" id="qp-status-${p.id}">${statusBadge}</td>
           <td style="text-align:center;">
             <div class="flex gap-1 justify-center">
+              <button class="btn btn-outline btn-xs" onclick="openBarcodeModal(${p.id})" title="Barkod Tanımla / Etiket Yazdır">🏷️</button>
               <button class="btn btn-primary btn-xs" onclick="openStockEntryModal(${p.id})" title="Alış/Satış Fiyatı ve Stok Ekle">📦 Stok Ekle</button>
               <button class="btn btn-ghost btn-xs" onclick="openEditProductModal(${p.id})" title="Detaylı Düzenle">✏️</button>
             </div>
@@ -1146,3 +1207,395 @@ function renderWasteTable() {
     </tr>`;
   });
 }
+
+/* ===================================================================
+   BARCODE MANAGEMENT & PRINTING ENGINE
+   =================================================================== */
+
+// 1. Generate unique 13-digit EAN-compliant Barcode
+function generateUniqueBarcode(prefix = "869") {
+  const pList = window.products || products || [];
+  const existingSet = new Set(pList.filter(p => p && p.barcode).map(p => String(p.barcode).trim()));
+
+  for (let attempt = 0; attempt < 500; attempt++) {
+    // 869 + 9 random digits = 12 digits
+    let code12 = prefix;
+    while (code12.length < 12) {
+      code12 += Math.floor(Math.random() * 10).toString();
+    }
+    // Calculate EAN-13 check digit
+    let sum = 0;
+    for (let i = 0; i < 12; i++) {
+      const digit = parseInt(code12[i], 10);
+      sum += (i % 2 === 0) ? digit : digit * 3;
+    }
+    const checkDigit = (10 - (sum % 10)) % 10;
+    const fullBarcode = code12 + checkDigit.toString();
+
+    if (!existingSet.has(fullBarcode)) {
+      return fullBarcode;
+    }
+  }
+  return "869" + Date.now().toString().slice(-10);
+}
+window.generateUniqueBarcode = generateUniqueBarcode;
+
+function generateBarcodeForAddProductModal() {
+  const code = generateUniqueBarcode();
+  const el = document.getElementById("npBarcode");
+  if (el) {
+    el.value = code;
+    toast(`🎲 Barkod üretildi: ${code}`);
+  }
+}
+window.generateBarcodeForAddProductModal = generateBarcodeForAddProductModal;
+
+function generateBarcodeForStockEntryModal() {
+  const code = generateUniqueBarcode();
+  const el = document.getElementById("seBarcode");
+  if (el) {
+    el.value = code;
+    toast(`🎲 Barkod üretildi: ${code}`);
+  }
+}
+window.generateBarcodeForStockEntryModal = generateBarcodeForStockEntryModal;
+
+function generateBarcodeForBarcodeModal() {
+  const code = generateUniqueBarcode();
+  const el = document.getElementById("bmBarcode");
+  if (el) {
+    el.value = code;
+    updateBarcodePreviewLive(code);
+    toast(`🎲 Barkod üretildi: ${code}`);
+  }
+}
+window.generateBarcodeForBarcodeModal = generateBarcodeForBarcodeModal;
+
+// 2. Open Dedicated Barcode Modal for Any Product
+function openBarcodeModal(productId) {
+  try {
+    const pList = window.products || products || [];
+    const p = pList.find(prod => Number(prod.id) === Number(productId));
+    if (!p) return toast("Ürün bulunamadı!", "error");
+
+    const idInput = document.getElementById("bmProductId");
+    if (idInput) idInput.value = p.id;
+
+    const nameEl = document.getElementById("bmProductName");
+    if (nameEl) nameEl.innerText = p.name || "-";
+
+    const metaEl = document.getElementById("bmProductMeta");
+    if (metaEl) {
+      metaEl.innerText = `Kategori: ${p.category || 'Genel'} | Satış Fiyatı: ${(Number(p.price) || 0).toFixed(2)} ₺ | Stok: ${p.stock || 0} Adet`;
+    }
+
+    const barcodeInput = document.getElementById("bmBarcode");
+    if (barcodeInput) {
+      barcodeInput.value = p.barcode || "";
+    }
+
+    updateBarcodePreviewLive(p.barcode || "");
+    openModal("barcodeModal");
+
+    setTimeout(() => {
+      if (barcodeInput) {
+        barcodeInput.focus();
+        barcodeInput.select();
+      }
+    }, 120);
+  } catch (err) {
+    console.error("openBarcodeModal error:", err);
+  }
+}
+window.openBarcodeModal = openBarcodeModal;
+
+// 3. Save Barcode from Modal
+function saveBarcodeModal() {
+  try {
+    const id = document.getElementById("bmProductId")?.value;
+    if (!id) return toast("Geçersiz ürün!", "error");
+
+    const pList = window.products || products || [];
+    const p = pList.find(prod => Number(prod.id) === Number(id));
+    if (!p) return toast("Ürün bulunamadı!", "error");
+
+    const barcode = (document.getElementById("bmBarcode")?.value || "").trim();
+
+    p.barcode = barcode;
+    saveData();
+    closeModal("barcodeModal");
+
+    if (typeof sendToGoogleSheets === "function") {
+      sendToGoogleSheets({ action: "inventory_sync", items: window.products });
+    }
+
+    if (typeof renderInventoryTable === "function") renderInventoryTable();
+    if (typeof renderQuickPricingTable === "function") renderQuickPricingTable();
+    if (typeof renderCatalog === "function") renderCatalog();
+    if (typeof populateAllProductDatalists === "function") populateAllProductDatalists();
+
+    toast(barcode ? `✅ "${p.name}" için barkod (${barcode}) kaydedildi!` : `ℹ️ "${p.name}" barkodu temizlendi.`);
+  } catch (err) {
+    console.error("saveBarcodeModal error:", err);
+    toast("Barkod kaydedilemedi!", "error");
+  }
+}
+window.saveBarcodeModal = saveBarcodeModal;
+
+function clearBarcodeFromModal() {
+  const input = document.getElementById("bmBarcode");
+  if (input) {
+    input.value = "";
+    updateBarcodePreviewLive("");
+  }
+}
+window.clearBarcodeFromModal = clearBarcodeFromModal;
+
+// 4. Lightweight SVG Barcode Renderer (Code 128 / High-contrast retail barcode pattern)
+function generateBarcodeSvgMarkup(codeStr, width = 280, height = 70) {
+  if (!codeStr || !String(codeStr).trim()) {
+    return `<div style="color:#94a3b8; font-size:12px; font-style:italic;">Barkod girilmediğinde önizleme oluşturulamaz.</div>`;
+  }
+  const cleanCode = String(codeStr).trim();
+  
+  // Standard Code-128 Pattern Table (Patterns 0 to 106)
+  const CODE128_PATTERNS = [
+    "212222","222122","222221","121223","121322","131222","122213","122312","132212","221213",
+    "221312","231212","112232","122132","122231","113222","123122","123221","223211","221132",
+    "221231","213212","223112","312131","311222","321122","321221","312212","322112","322211",
+    "212123","212321","232121","111323","131123","131321","112313","132113","132311","211313",
+    "231113","231311","112133","112331","132131","113123","113321","133121","313121","211331",
+    "231131","213113","213311","213131","311123","311321","331121","312113","312311","332111",
+    "314111","221411","431111","111224","111422","121124","121421","141122","141221","112214",
+    "112412","122114","122411","142112","142211","241211","221114","413111","241112","134111",
+    "111242","121142","121241","114212","124112","124211","411212","421112","421211","212141",
+    "214121","412121","111143","111341","131141","114113","114311","411113","411311","113141",
+    "114131","311141","411131","211412","211214","211232","2331112"
+  ];
+  const START_B = 104;
+  const STOP = 106;
+
+  let codes = [START_B];
+  for (let i = 0; i < cleanCode.length; i++) {
+    const ascii = cleanCode.charCodeAt(i);
+    let val = ascii - 32;
+    if (val < 0 || val > 105) val = 0;
+    codes.push(val);
+  }
+
+  // Calculate checksum
+  let checksum = codes[0];
+  for (let i = 1; i < codes.length; i++) {
+    checksum += codes[i] * i;
+  }
+  codes.push(checksum % 103);
+  codes.push(STOP);
+
+  // Convert codes to bar pattern string
+  let barPattern = "";
+  for (let c of codes) {
+    barPattern += CODE128_PATTERNS[c] || "212222";
+  }
+
+  // Build SVG bars
+  let totalUnits = 0;
+  for (let i = 0; i < barPattern.length; i++) {
+    totalUnits += parseInt(barPattern[i], 10);
+  }
+
+  const quietZone = 12; // units padding on sides
+  const fullUnits = totalUnits + (quietZone * 2);
+  const unitWidth = Math.max(1.4, (width / fullUnits));
+  const svgWidth = fullUnits * unitWidth;
+
+  let currentX = quietZone * unitWidth;
+  let rects = "";
+
+  for (let i = 0; i < barPattern.length; i++) {
+    const len = parseInt(barPattern[i], 10);
+    const barWidth = len * unitWidth;
+    const isBlack = (i % 2 === 0);
+    if (isBlack) {
+      rects += `<rect x="${currentX.toFixed(2)}" y="0" width="${barWidth.toFixed(2)}" height="${height}" fill="#0f172a" />`;
+    }
+    currentX += barWidth;
+  }
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svgWidth.toFixed(2)} ${height}" width="100%" height="${height}" style="display:block; margin:0 auto; background:#ffffff;">
+    <rect width="100%" height="100%" fill="#ffffff" />
+    ${rects}
+  </svg>`;
+}
+window.generateBarcodeSvgMarkup = generateBarcodeSvgMarkup;
+
+function updateBarcodePreviewLive(val) {
+  const wrap = document.getElementById("bmBarcodeSvgWrap");
+  const textEl = document.getElementById("bmBarcodeText");
+  const btnPrint = document.getElementById("bmBtnPrint");
+  const trimmed = String(val || "").trim();
+
+  if (!trimmed) {
+    if (wrap) wrap.innerHTML = `<div style="color:#94a3b8; font-size:12.5px; padding:8px;">Barkod okutun veya yukarıdan "🎲 Rastgele Barkod Üret" butonuna basın.</div>`;
+    if (textEl) textEl.innerText = "";
+    if (btnPrint) btnPrint.disabled = true;
+    return;
+  }
+
+  if (wrap) wrap.innerHTML = generateBarcodeSvgMarkup(trimmed, 300, 65);
+  if (textEl) textEl.innerText = trimmed;
+  if (btnPrint) btnPrint.disabled = false;
+}
+window.updateBarcodePreviewLive = updateBarcodePreviewLive;
+
+// 5. Professional Barcode Label Printing (Thermal / Standard sticker ready)
+function printBarcodeLabelFromModal() {
+  const id = document.getElementById("bmProductId")?.value;
+  const barcode = (document.getElementById("bmBarcode")?.value || "").trim();
+  if (!id) return;
+  printBarcodeLabel(id, barcode);
+}
+window.printBarcodeLabelFromModal = printBarcodeLabelFromModal;
+
+function printBarcodeLabel(productId, customBarcode = null) {
+  const pList = window.products || products || [];
+  const p = pList.find(prod => Number(prod.id) === Number(productId));
+  if (!p) return toast("Ürün bulunamadı!", "error");
+
+  const barcode = customBarcode || p.barcode;
+  if (!barcode) {
+    return toast("Yazdırmak için önce bu ürüne bir barkod tanımlayın!", "warning");
+  }
+
+  const svgMarkup = generateBarcodeSvgMarkup(barcode, 320, 75);
+  const priceFormatted = (Number(p.price) || 0).toFixed(2);
+  const storeName = "AYBARS PET SHOP";
+
+  const printWindow = window.open("", "_blank", "width=480,height=520");
+  if (!printWindow) {
+    return alert("Yazdırma penceresi açılamadı. Lütfen tarayıcınızın açılır pencere (pop-up) engelleyicisini kapatın.");
+  }
+
+  printWindow.document.open();
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Barkod Etiketi - ${p.name}</title>
+      <style>
+        @page {
+          size: auto;
+          margin: 4mm;
+        }
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+          margin: 0;
+          padding: 10px;
+          background: #ffffff;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+        .label-card {
+          width: 58mm;
+          min-height: 38mm;
+          border: 1px dashed #94a3b8;
+          border-radius: 4px;
+          padding: 6px 8px;
+          box-sizing: border-box;
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          background: #fff;
+        }
+        .store-header {
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 1px;
+          color: #0f172a;
+          text-transform: uppercase;
+          border-bottom: 1px solid #e2e8f0;
+          padding-bottom: 2px;
+          margin-bottom: 3px;
+        }
+        .prod-name {
+          font-size: 10px;
+          font-weight: 700;
+          color: #1e293b;
+          line-height: 1.2;
+          max-height: 24px;
+          overflow: hidden;
+          margin-bottom: 3px;
+        }
+        .svg-container {
+          width: 100%;
+          margin: 2px 0;
+        }
+        .barcode-num {
+          font-family: monospace;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 2px;
+          color: #000000;
+          margin-top: 1px;
+        }
+        .price-tag {
+          font-size: 15px;
+          font-weight: 900;
+          color: #0f172a;
+          margin-top: 3px;
+          border-top: 1px solid #e2e8f0;
+          padding-top: 2px;
+        }
+        @media print {
+          body { padding: 0; }
+          .label-card { border: none; }
+          .no-print { display: none !important; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="label-card">
+        <div class="store-header">${storeName}</div>
+        <div class="prod-name">${p.name}</div>
+        <div class="svg-container">${svgMarkup}</div>
+        <div class="barcode-num">${barcode}</div>
+        <div class="price-tag">${priceFormatted} ₺</div>
+      </div>
+      <script>
+        window.onload = function() {
+          setTimeout(function() {
+            window.print();
+          }, 250);
+        };
+      </script>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+window.printBarcodeLabel = printBarcodeLabel;
+
+function openBarcodeModalForCurrentProduct() {
+  const prodId = document.getElementById("npProductId")?.value;
+  if (prodId) {
+    openBarcodeModal(prodId);
+  } else {
+    const name = document.getElementById("npName")?.value || "Yeni Ürün";
+    const barcode = (document.getElementById("npBarcode")?.value || "").trim();
+    if (!barcode) {
+      toast("Lütfen önce bir barkod girin veya 'Barkod Üret'e basın.", "warning");
+      return;
+    }
+    const idEl = document.getElementById("bmProductId");
+    if (idEl) idEl.value = "";
+    const nameEl = document.getElementById("bmProductNameDisplay");
+    if (nameEl) nameEl.innerText = name;
+    const barEl = document.getElementById("bmBarcode");
+    if (barEl) barEl.value = barcode;
+    updateBarcodePreviewLive(barcode);
+    openModal("barcodeModal");
+  }
+}
+window.openBarcodeModalForCurrentProduct = openBarcodeModalForCurrentProduct;
