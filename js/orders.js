@@ -144,29 +144,27 @@ function renderSingleOrdersList() {
     return;
   }
 
-  orders.forEach((o, idx) => {
-    container.innerHTML += `
-      <div class="order-card">
-        <div class="oc-header">
-          <div class="flex items-center gap-2">
-            <b style="font-size:14px;">📦 ${o.customerName}</b>
-            <span class="chip chip-warn">${o.channel || 'Telefon'}</span>
-            <span class="chip chip-ok">${o.paymentMethod || 'Nakit'}</span>
-          </div>
-          <b class="text-primary" style="font-size:15px;">${Number(o.total).toFixed(2)} ₺</b>
+  container.innerHTML = orders.map((o, idx) => `
+    <div class="order-card">
+      <div class="oc-header">
+        <div class="flex items-center gap-2">
+          <b style="font-size:14px;">📦 ${o.customerName}</b>
+          <span class="chip chip-warn">${o.channel || 'Telefon'}</span>
+          <span class="chip chip-ok">${o.paymentMethod || 'Nakit'}</span>
         </div>
-        <div class="text-sm text-muted">📞 ${o.phone || '-'} · 📍 ${o.address || '-'}</div>
-        <div class="text-sm">${o.itemsSummary}</div>
-        ${o.note ? `<div class="chip chip-err" style="padding:6px 10px; border-radius:var(--radius-sm);">📝 ${o.note}</div>` : ''}
-        <div class="oc-footer">
-          <span class="text-xs text-muted">🕐 ${o.time || ''} — ${o.date || ''}</span>
-          <div class="flex gap-1">
-            <button class="btn btn-success btn-sm" onclick="markOrderDelivered(${idx})">✅ Teslim Edildi</button>
-            <button class="btn btn-danger btn-sm" onclick="cancelOrder(${idx})">❌ İptal</button>
-          </div>
+        <b class="text-primary" style="font-size:15px;">${Number(o.total).toFixed(2)} ₺</b>
+      </div>
+      <div class="text-sm text-muted">📞 ${o.phone || '-'} · 📍 ${o.address || '-'}</div>
+      <div class="text-sm">${o.itemsSummary}</div>
+      ${o.note ? `<div class="chip chip-err" style="padding:6px 10px; border-radius:var(--radius-sm);">📝 ${o.note}</div>` : ''}
+      <div class="oc-footer">
+        <span class="text-xs text-muted">🕐 ${o.time || ''} — ${o.date || ''}</span>
+        <div class="flex gap-1">
+          <button class="btn btn-success btn-sm" onclick="markOrderDelivered(${idx})">✅ Teslim Edildi</button>
+          <button class="btn btn-danger btn-sm" onclick="cancelOrder(${idx})">❌ İptal</button>
         </div>
-      </div>`;
-  });
+      </div>
+    </div>`).join('');
 }
 
 function markOrderDelivered(idx) {
@@ -323,12 +321,13 @@ function renderPlatformOrdersGrouped() {
     grouped[key].push(o);
   });
 
-  Object.keys(grouped).forEach(key => {
+  container.innerHTML = Object.keys(grouped).map(key => {
     const items = grouped[key];
     const dayTotal = items.reduce((s, o) => s + o.total, 0);
     const channelName = items[0]?.channel || "Getir";
     const orderDate = items[0]?.date || "";
-    let html = `<div style="background:white; border:1px solid var(--border); border-radius:var(--radius); padding:14px; box-shadow:var(--shadow-sm);">
+    const itemsLines = items.map(o => `<div class="text-sm" style="padding:4px 0; border-top:1px solid var(--border-light);">${o.time} — ${o.customerName}: ${o.itemsSummary} (<b>${Number(o.total).toFixed(2)} ₺</b>)</div>`).join('');
+    return `<div style="background:white; border:1px solid var(--border); border-radius:var(--radius); padding:14px; box-shadow:var(--shadow-sm);">
       <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
         <div>
           <b style="font-size:14.5px;">${key}</b>
@@ -338,11 +337,10 @@ function renderPlatformOrdersGrouped() {
           <button class="btn btn-success btn-sm" onclick="openManualPlatformIncomeModal('${channelName}', ${dayTotal}, '${key}', '${orderDate}')" title="Bankaya yatan net hakediş tutarını girip E-Tabloya ve sisteme gelir olarak kaydedin">💰 Net Gelir Girişi Yap</button>
           <button class="btn btn-ghost btn-sm" onclick="settlePlatformDay('${key}')" title="Gelir girmeden sadece listeden temizler">Listeden Kapat</button>
         </div>
-      </div>`;
-    items.forEach(o => { html += `<div class="text-sm" style="padding:4px 0; border-top:1px solid var(--border-light);">${o.time} — ${o.customerName}: ${o.itemsSummary} (<b>${Number(o.total).toFixed(2)} ₺</b>)</div>`; });
-    html += `</div>`;
-    container.innerHTML += html;
-  });
+      </div>
+      ${itemsLines}
+    </div>`;
+  }).join('');
 }
 
 function settlePlatformDay(key) {
@@ -491,13 +489,11 @@ function renderDeliveredOrdersList() {
     container.innerHTML = `<div class="empty-state">Geçmiş teslim kaydı yok.</div>`;
     return;
   }
-  deliveredOrders.forEach(o => {
-    container.innerHTML += `
-      <div class="flex items-center justify-between" style="background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 14px; font-size:12px;">
-        <div><b>${o.date} ${o.time || ''}</b> — ${o.customerName} (${o.channel || 'Telefon'})<br><span class="text-muted">${o.itemsSummary}</span></div>
-        <b class="text-primary">${Number(o.total).toFixed(2)} ₺</b>
-      </div>`;
-  });
+  container.innerHTML = deliveredOrders.map(o => `
+    <div class="flex items-center justify-between" style="background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 14px; font-size:12px;">
+      <div><b>${o.date} ${o.time || ''}</b> — ${o.customerName} (${o.channel || 'Telefon'})<br><span class="text-muted">${o.itemsSummary}</span></div>
+      <b class="text-primary">${Number(o.total).toFixed(2)} ₺</b>
+    </div>`).join('');
 }
 
 function clearDeliveredOrders() {

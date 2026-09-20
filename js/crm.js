@@ -91,20 +91,18 @@ function renderCRM() {
     return;
   }
 
-  filtered.forEach(c => {
-    tbody.innerHTML += `
-      <tr>
-        <td><b>${c.name}</b></td>
-        <td>${c.phone || '-'} / ${c.address || '-'}</td>
-        <td>${c.pet || '-'}</td>
-        <td><b style="color:${c.balance > 0 ? 'var(--danger)' : 'var(--text)'};">${(c.balance || 0).toFixed(2)} ₺</b></td>
-        <td class="flex gap-1">
-          <button class="btn btn-ghost btn-xs" onclick="openEditCustomerModal(${c.id})" title="Bilgileri Düzenle / Tel Ekle">✏️ Düzenle</button>
-          <button class="btn btn-ghost btn-xs" onclick="openCustomerHistoryModal(${c.id})">📜 Geçmiş</button>
-          <button class="btn btn-danger btn-xs" onclick="deleteCustomer(${c.id})">Sil</button>
-        </td>
-      </tr>`;
-  });
+  tbody.innerHTML = filtered.map(c => `
+    <tr>
+      <td><b>${c.name}</b></td>
+      <td>${c.phone || '-'} / ${c.address || '-'}</td>
+      <td>${c.pet || '-'}</td>
+      <td><b style="color:${c.balance > 0 ? 'var(--danger)' : 'var(--text)'};">${(c.balance || 0).toFixed(2)} ₺</b></td>
+      <td class="flex gap-1">
+        <button class="btn btn-ghost btn-xs" onclick="openEditCustomerModal(${c.id})" title="Bilgileri Düzenle / Tel Ekle">✏️ Düzenle</button>
+        <button class="btn btn-ghost btn-xs" onclick="openCustomerHistoryModal(${c.id})">📜 Geçmiş</button>
+        <button class="btn btn-danger btn-xs" onclick="deleteCustomer(${c.id})">Sil</button>
+      </td>
+    </tr>`).join('');
   updateAllBadges();
 }
 
@@ -121,16 +119,14 @@ function openCustomerHistoryModal(custId) {
   if (history.length === 0) {
     container.innerHTML = `<div class="empty-state">Alışveriş kaydı yok.</div>`;
   } else {
-    history.forEach(h => {
-      container.innerHTML += `
-        <div class="flex items-center justify-between" style="background:var(--bg); border:1px solid var(--border); padding:10px 14px; border-radius:var(--radius-sm);">
-          <div>
-            <div class="font-bold text-sm">${h.date} ${h.time || ''} — ${h.items}</div>
-            <div class="text-xs text-muted">Ödeme: <b>${h.payment}</b></div>
-          </div>
-          <b class="text-primary">${Number(h.total).toFixed(2)} ₺</b>
-        </div>`;
-    });
+    container.innerHTML = history.map(h => `
+      <div class="flex items-center justify-between" style="background:var(--bg); border:1px solid var(--border); padding:10px 14px; border-radius:var(--radius-sm);">
+        <div>
+          <div class="font-bold text-sm">${h.date} ${h.time || ''} — ${h.items}</div>
+          <div class="text-xs text-muted">Ödeme: <b>${h.payment}</b></div>
+        </div>
+        <b class="text-primary">${Number(h.total).toFixed(2)} ₺</b>
+      </div>`).join('');
   }
   openModal("customerHistoryModal");
 }
@@ -146,9 +142,9 @@ function renderCreditBook() {
     tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Açık borcu olan müşteri yok. 👍</td></tr>`;
     return;
   }
-  debtors.forEach(c => {
+  tbody.innerHTML = debtors.map(c => {
     const unpaidItems = (c.purchaseHistory || []).slice(0, 2).map(h => h.items).join(" + ");
-    tbody.innerHTML += `
+    return `
       <tr>
         <td><b>${c.name}</b><br><small class="text-danger">${unpaidItems || 'Açık Borç'}</small></td>
         <td>${c.phone || '-'}</td>
@@ -159,7 +155,7 @@ function renderCreditBook() {
           <button class="btn btn-success btn-sm" onclick="openDebtCollectModal(${c.id})">Tahsil Et</button>
         </td>
       </tr>`;
-  });
+  }).join('');
   updateAllBadges();
 }
 

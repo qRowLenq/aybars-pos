@@ -245,12 +245,16 @@ function deleteCategory(catName) {
 window.deleteCategory = deleteCategory;
 
 function isLightMode() {
-  const stored = localStorage.getItem("ps_performance_mode");
+  const repoKey = (typeof window !== "undefined" && window.location) ? (window.location.pathname.split('/')[1] || 'root') : 'root';
+  const stored = localStorage.getItem("ps_performance_mode_" + repoKey) || localStorage.getItem("ps_performance_mode");
   if (stored === "light") return true;
   if (stored === "standard") return false;
-  // Varsayılan: aybars-pos reposu Hafif mod, aybars reposu Standart (eski) sürüm
-  if (typeof window !== "undefined" && window.location && window.location.href.includes("aybars-pos")) {
-    return true;
+  // Varsayılan: aybars-pos ve bluepetshop depoları Hafif mod, aybars ana deposu Standart sürüm
+  if (typeof window !== "undefined" && window.location) {
+    const h = window.location.href.toLowerCase();
+    if (h.includes("aybars-pos") || h.includes("bluepetshop") || h.includes("localhost") || h.includes("127.0.0.1")) {
+      return true;
+    }
   }
   return false;
 }
@@ -259,6 +263,8 @@ window.isLightMode = isLightMode;
 function togglePosPerformanceMode() {
   const current = isLightMode();
   const newMode = current ? "standard" : "light";
+  const repoKey = (typeof window !== "undefined" && window.location) ? (window.location.pathname.split('/')[1] || 'root') : 'root';
+  localStorage.setItem("ps_performance_mode_" + repoKey, newMode);
   localStorage.setItem("ps_performance_mode", newMode);
   updateModeBadge();
   window.posCatalogLimit = 48;
@@ -463,7 +469,7 @@ function renderCart() {
   let vatTotal = 0;
   let originalTotal = 0;
 
-  cart.forEach(item => {
+  const cartItemsHtml = cart.map(item => {
     if (item.originalPrice === undefined) item.originalPrice = item.price !== undefined ? item.price : item.customPrice;
     originalTotal += (item.qty * item.originalPrice);
 
@@ -478,7 +484,7 @@ function renderCart() {
       ? `<s style="color:#94a3b8; font-size:11px; margin-right:3px;">${item.originalPrice.toFixed(2)} ₺</s> <b style="color:#16a34a;">${item.customPrice.toFixed(2)} ₺</b>`
       : `${item.customPrice.toFixed(2)} ₺`;
 
-    container.innerHTML += `
+    return `
       <div class="cart-item">
         <div class="ci-info">
           <b>${item.name}</b>
@@ -492,7 +498,9 @@ function renderCart() {
         </div>
         <div class="font-bold">${lineTotal.toFixed(2)} ₺</div>
       </div>`;
-  });
+  }).join('');
+
+  container.innerHTML = cartItemsHtml;
 
   const totalEl = document.getElementById("cartTotalDisplay");
   if (totalEl) {
@@ -1053,14 +1061,14 @@ function openHoldCartModal() {
   if (heldCarts.length === 0) {
     list.innerHTML = `<div class="empty-state">Askıda sepet yok.</div>`;
   } else {
-    heldCarts.forEach((hc, idx) => {
+    list.innerHTML = heldCarts.map((hc, idx) => {
       const total = hc.items.reduce((s, i) => s + (i.qty * i.customPrice), 0);
-      list.innerHTML += `
+      return `
         <div class="flex items-center justify-between" style="background:var(--bg); border:1px solid var(--border); padding:10px; border-radius:var(--radius-sm);">
           <div><b>${hc.label}</b> (${hc.time})<br><b>${total.toFixed(2)} ₺</b></div>
           <button class="btn btn-success btn-sm" onclick="restoreHeldCart(${idx})">Geri Yükle</button>
         </div>`;
-    });
+    }).join('');
   }
   openModal("holdCartsModal");
 }

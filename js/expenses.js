@@ -782,7 +782,7 @@ function renderExpensesTable() {
   if (filtered.length === 0) {
     unifiedTbody.innerHTML = `<tr><td colspan="6" class="empty-state">Kayıtlı gider bulunamadı.</td></tr>`;
   } else {
-    filtered.forEach(e => {
+    unifiedTbody.innerHTML = filtered.map(e => {
       const amt = Number(e.amount) || 0;
       const vatRate = e.vatRate !== undefined ? e.vatRate : 20;
       const vatAmt = Number(e.vatAmount || 0);
@@ -823,7 +823,7 @@ function renderExpensesTable() {
       const titleLabel = e.subType || e.supplierName || mainCat || "Gider";
       const descText = e.desc ? e.desc : "";
 
-      unifiedTbody.innerHTML += `
+      return `
         <tr>
           <td>
             <b>${e.date}</b>
@@ -848,7 +848,7 @@ function renderExpensesTable() {
           </td>
         </tr>
       `;
-    });
+    }).join('');
   }
 
   renderDualFinancialOverviewCard();

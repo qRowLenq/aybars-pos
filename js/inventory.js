@@ -487,7 +487,7 @@ function renderSktRadarWidget() {
     return;
   }
 
-  allAlerts.forEach(item => {
+  const cardsHtml = allAlerts.map(item => {
     const isRed = item.days <= 15;
     const borderClass = isRed ? "border-red" : "border-yellow";
     const chipClass = isRed ? "chip-red" : "chip-yellow";
@@ -496,7 +496,7 @@ function renderSktRadarWidget() {
     else if (isRed) countdownText = `🚨 ${item.days} Gün Kaldı`;
     else countdownText = `⚠️ ${item.days} Gün Kaldı`;
 
-    container.innerHTML += `
+    return `
       <div class="skt-batch-card ${borderClass}">
         <div class="skt-batch-info">
           <b>${item.product.name}</b>
@@ -510,7 +510,8 @@ function renderSktRadarWidget() {
         </div>
       </div>
     `;
-  });
+  }).join('');
+  container.innerHTML = cardsHtml;
 }
 
 function quickPromoBatch(productId, lotNumber) {
@@ -585,7 +586,12 @@ function renderInventoryTable() {
 
   const activeCats = (typeof getActiveCategories === "function") ? getActiveCategories() : (window.categories || categories || ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum", "Kozmetik", "Kampanyalar", "elekli paspas"]);
 
-  filtered.forEach(p => {
+  const lightActive = (typeof isLightMode === "function" && isLightMode());
+  const searchQ = (document.getElementById("invSearchInput")?.value || "").trim();
+  const limit = (!lightActive || (searchQ && searchQ.length > 0)) ? filtered.length : (window.invTableLimit || 50);
+  const itemsToRender = filtered.slice(0, limit);
+
+  const rowsHtml = itemsToRender.map(p => {
     const numCost = Number(p.cost) || 0;
     const numPrice = Number(p.price) || 0;
     const margin = numCost > 0 ? (((numPrice - numCost) / numCost) * 100).toFixed(0) + "%" : "-";
@@ -619,7 +625,7 @@ function renderInventoryTable() {
 
     const catOptionsHtml = activeCats.map(c => `<option value="${c}" ${(p.category || '').toLowerCase() === c.toLowerCase() ? 'selected' : ''}>${c}</option>`).join('');
 
-    tbody.innerHTML += `
+    return `
       <tr id="inv-row-${p.id}">
         <td><b>${p.name || '-'}</b>${barcodeBadge}${batchTag}</td>
         <td>
@@ -649,7 +655,22 @@ function renderInventoryTable() {
           <button class="btn btn-danger btn-xs" onclick="deleteProduct(${p.id})" title="Sil">Sil</button>
         </td>
       </tr>`;
-  });
+  }).join('');
+
+  let moreRow = "";
+  if (lightActive && filtered.length > limit) {
+    const remaining = filtered.length - limit;
+    moreRow = `
+      <tr>
+        <td colspan="9" style="text-align:center; padding:12px; background:var(--bg);">
+          <button class="btn btn-outline btn-sm" onclick="window.invTableLimit = (window.invTableLimit || 50) + 60; renderInventoryTable();">
+            ➕ Daha Fazla Ürün Göster (+${remaining} ürün daha)
+          </button>
+        </td>
+      </tr>`;
+  }
+
+  tbody.innerHTML = rowsHtml + moreRow;
 }
 
 function updateProductCategoryFast(id, newCat) {
@@ -1061,20 +1082,18 @@ function openProductPurchaseHistory(prodId) {
   if (productPurchases.length === 0) {
     container.innerHTML = `<div class="empty-state">Bu ürüne ait geçmiş toptancı faturası yok.</div>`;
   } else {
-    productPurchases.forEach(t => {
-      container.innerHTML += `
-        <div class="flex items-center justify-between" style="background:var(--bg); border:1px solid var(--border); padding:10px 14px; border-radius:var(--radius-sm);">
-          <div>
-            <div class="font-bold text-sm">${t.date} ${t.time || ''} — ${t.supplierName}</div>
-            <div class="text-sm">Alım: <b>${t.item}</b></div>
-            <div class="text-xs text-muted">Durum: <b style="color:${t.status.includes('Borç') ? 'var(--danger)' : 'var(--success)'};">${t.status}</b></div>
-          </div>
-          <div class="flex items-center gap-2">
-            <b style="color:var(--success-dark);">${Number(t.amount).toFixed(2)} ₺</b>
-            ${t.invoiceImg ? `<button class="btn btn-ghost btn-xs" onclick="viewInvoiceImage('${t.invoiceImg}')">📸</button>` : ''}
-          </div>
-        </div>`;
-    });
+    container.innerHTML = productPurchases.map(t => `
+      <div class="flex items-center justify-between" style="background:var(--bg); border:1px solid var(--border); padding:10px 14px; border-radius:var(--radius-sm);">
+        <div>
+          <div class="font-bold text-sm">${t.date} ${t.time || ''} — ${t.supplierName}</div>
+          <div class="text-sm">Alım: <b>${t.item}</b></div>
+          <div class="text-xs text-muted">Durum: <b style="color:${t.status.includes('Borç') ? 'var(--danger)' : 'var(--success)'};">${t.status}</b></div>
+        </div>
+        <div class="flex items-center gap-2">
+          <b style="color:var(--success-dark);">${Number(t.amount).toFixed(2)} ₺</b>
+          ${t.invoiceImg ? `<button class="btn btn-ghost btn-xs" onclick="viewInvoiceImage('${t.invoiceImg}')">📸</button>` : ''}
+        </div>
+      </div>`).join('');
   }
   openModal("productPurchaseHistoryModal");
 }
@@ -1107,13 +1126,11 @@ function renderTempBundleItems() {
   const container = document.getElementById("bundleItemsList");
   if (!container) return;
   container.innerHTML = "";
-  tempBundleItems.forEach((item, idx) => {
-    container.innerHTML += `
-      <div class="flex items-center justify-between" style="background:white; border:1px solid var(--border); padding:6px 10px; border-radius:var(--radius-sm); font-size:12px;">
-        <span>📦 ${item.qty}x <b>${item.name}</b></span>
-        <button class="btn btn-danger btn-xs" onclick="removeTempBundleItem(${idx})">Kaldır</button>
-      </div>`;
-  });
+  container.innerHTML = tempBundleItems.map((item, idx) => `
+    <div class="flex items-center justify-between" style="background:white; border:1px solid var(--border); padding:6px 10px; border-radius:var(--radius-sm); font-size:12px;">
+      <span>📦 ${item.qty}x <b>${item.name}</b></span>
+      <button class="btn btn-danger btn-xs" onclick="removeTempBundleItem(${idx})">Kaldır</button>
+    </div>`).join('');
 }
 
 function removeTempBundleItem(idx) { tempBundleItems.splice(idx, 1); renderTempBundleItems(); }
@@ -1138,10 +1155,11 @@ function renderBundlesTable() {
     tbody.innerHTML = `<tr><td colspan="4" class="empty-state">Henüz kampanya paketi yok.</td></tr>`;
     return;
   }
-  bundles.forEach((b, idx) => {
+  const bRowsHtml = bundles.map((b, idx) => {
     const itemsDesc = (b.bundleItems || []).map(i => `• ${i.qty}x ${i.name}`).join("<br>");
-    tbody.innerHTML += `<tr><td><b>${b.name}</b></td><td class="text-sm">${itemsDesc}</td><td><b class="text-primary">${Number(b.price).toFixed(2)} ₺</b></td><td><button class="btn btn-danger btn-xs" onclick="deleteBundle(${idx}, ${b.id})">Sil</button></td></tr>`;
-  });
+    return `<tr><td><b>${b.name}</b></td><td class="text-sm">${itemsDesc}</td><td><b class="text-primary">${Number(b.price).toFixed(2)} ₺</b></td><td><button class="btn btn-danger btn-xs" onclick="deleteBundle(${idx}, ${b.id})">Sil</button></td></tr>`;
+  }).join('');
+  tbody.innerHTML = bRowsHtml;
 }
 
 function deleteBundle(bundleIdx, prodId) {
@@ -1196,16 +1214,15 @@ function renderWasteTable() {
     tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Henüz fire/zayi kaydı yok.</td></tr>`;
     return;
   }
-  wasteRecords.forEach(w => {
-    tbody.innerHTML += `<tr>
+  const wasteRowsHtml = wasteRecords.map(w => `<tr>
       <td>${w.date} ${w.time}</td>
       <td><b>${w.productName}</b></td>
       <td><b class="text-danger">${w.qty} adet</b></td>
       <td>${(w.unitCost || 0).toFixed(2)} ₺</td>
       <td><b class="text-danger">${(w.totalLoss || 0).toFixed(2)} ₺</b></td>
       <td><span class="chip chip-err">${w.reason}</span> ${w.note ? `(${w.note})` : ''}</td>
-    </tr>`;
-  });
+    </tr>`).join('');
+  tbody.innerHTML = wasteRowsHtml;
 }
 
 /* ===================================================================

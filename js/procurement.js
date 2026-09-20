@@ -110,22 +110,20 @@ function renderSuppliersTable() {
     return;
   }
 
-  list.forEach(s => {
-    tbody.innerHTML += `
-      <tr>
-        <td><b>${s.name}</b></td>
-        <td>${s.phone || '-'}</td>
-        <td class="text-sm">${s.notes || '-'}</td>
-        <td><b style="color:${s.balance > 0 ? 'var(--danger)' : 'var(--success)'}; font-size:14px;">${Number(s.balance || 0).toFixed(2)} ₺</b></td>
-        <td class="flex gap-1" style="flex-wrap:wrap;">
-          <button class="btn btn-ghost btn-xs" onclick="openEditSupplierModal(${s.id})" title="Bilgileri Düzenle / Tel Ekle">✏️ Düzenle</button>
-          <button class="btn btn-success btn-xs" style="background:linear-gradient(135deg,#047857,#065f46);" onclick="openAddProductModal('${s.name}')">+ Ürün Ekle</button>
-          <button class="btn btn-ghost btn-xs" onclick="openSupplierHistoryModal(${s.id})">📜 Geçmiş</button>
-          <button class="btn btn-success btn-xs" onclick="openQuickPaySupplier(${s.id})">💸 Ödeme</button>
-          <button class="btn btn-danger btn-xs" onclick="deleteSupplier(${s.id})">Sil</button>
-        </td>
-      </tr>`;
-  });
+  tbody.innerHTML = list.map(s => `
+    <tr>
+      <td><b>${s.name}</b></td>
+      <td>${s.phone || '-'}</td>
+      <td class="text-sm">${s.notes || '-'}</td>
+      <td><b style="color:${s.balance > 0 ? 'var(--danger)' : 'var(--success)'}; font-size:14px;">${Number(s.balance || 0).toFixed(2)} ₺</b></td>
+      <td class="flex gap-1" style="flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-xs" onclick="openEditSupplierModal(${s.id})" title="Bilgileri Düzenle / Tel Ekle">✏️ Düzenle</button>
+        <button class="btn btn-success btn-xs" style="background:linear-gradient(135deg,#047857,#065f46);" onclick="openAddProductModal('${s.name}')">+ Ürün Ekle</button>
+        <button class="btn btn-ghost btn-xs" onclick="openSupplierHistoryModal(${s.id})">📜 Geçmiş</button>
+        <button class="btn btn-success btn-xs" onclick="openQuickPaySupplier(${s.id})">💸 Ödeme</button>
+        <button class="btn btn-danger btn-xs" onclick="deleteSupplier(${s.id})">Sil</button>
+      </td>
+    </tr>`).join('');
   updateAllBadges();
 }
 
@@ -575,19 +573,17 @@ function openSupplierHistoryModal(supId) {
   if (trans.length === 0) {
     container.innerHTML = `<div class="empty-state">Bu toptancıya ait işlem kaydı yok.</div>`;
   } else {
-    trans.forEach(t => {
-      container.innerHTML += `
-        <div class="flex items-center justify-between" style="background:var(--bg); border:1px solid var(--border); padding:10px 14px; border-radius:var(--radius-sm);">
-          <div>
-            <div class="font-bold text-sm">${t.date} ${t.time || ''} — ${t.item}</div>
-            <div class="text-xs text-muted">Durum: <b style="color:${t.status.includes('Borç') ? 'var(--danger)' : 'var(--success)'};">${t.status}</b></div>
-          </div>
-          <div class="flex items-center gap-2">
-            <b style="color:${t.type === 'Ödeme' ? 'var(--success)' : 'var(--text)'};">${t.type === 'Ödeme' ? '-' : '+'}${Number(t.amount).toFixed(2)} ₺</b>
-            ${t.invoiceImg ? `<button class="btn btn-ghost btn-xs" onclick="viewInvoiceImage('${t.invoiceImg}')">📸</button>` : ''}
-          </div>
-        </div>`;
-    });
+    container.innerHTML = trans.map(t => `
+      <div class="flex items-center justify-between" style="background:var(--bg); border:1px solid var(--border); padding:10px 14px; border-radius:var(--radius-sm);">
+        <div>
+          <div class="font-bold text-sm">${t.date} ${t.time || ''} — ${t.item}</div>
+          <div class="text-xs text-muted">Durum: <b style="color:${t.status.includes('Borç') ? 'var(--danger)' : 'var(--success)'};">${t.status}</b></div>
+        </div>
+        <div class="flex items-center gap-2">
+          <b style="color:${t.type === 'Ödeme' ? 'var(--success)' : 'var(--text)'};">${t.type === 'Ödeme' ? '-' : '+'}${Number(t.amount).toFixed(2)} ₺</b>
+          ${t.invoiceImg ? `<button class="btn btn-ghost btn-xs" onclick="viewInvoiceImage('${t.invoiceImg}')">📸</button>` : ''}
+        </div>
+      </div>`).join('');
   }
   openModal("supplierHistoryModal");
 }
@@ -673,16 +669,16 @@ function renderAllPurchasesTable() {
   const filtered = all.filter(p => p.supplierName.toLowerCase().includes(q) || p.item.toLowerCase().includes(q) || p.date.includes(q));
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Kayıtlı alım yok.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Kayıtlı alış faturası/işlemi yok.</td></tr>`;
     return;
   }
-  filtered.forEach(p => {
+  tbody.innerHTML = filtered.map(p => {
     const isInv = p.hasInvoice !== undefined ? p.hasInvoice : (p.isInvoice !== undefined ? p.isInvoice : (p.vatAmount > 0));
     const invBadge = isInv
       ? `<span class="badge" style="font-size:10px; background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; margin-left:4px;">🧾 Faturalı</span>`
       : `<span class="badge" style="font-size:10px; background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; margin-left:4px;">⚠️ Faturasız</span>`;
 
-    tbody.innerHTML += `<tr>
+    return `<tr>
       <td><b>${p.date}</b> ${p.time || ''}</td>
       <td><b class="text-primary">${p.supplierName}</b></td>
       <td>${p.item} ${invBadge}</td>
@@ -690,7 +686,7 @@ function renderAllPurchasesTable() {
       <td><b style="color:var(--success-dark);">${Number(p.amount).toFixed(2)} ₺</b></td>
       <td>${p.invoiceImg ? `<button class="btn btn-ghost btn-xs" onclick="viewInvoiceImage('${p.invoiceImg}')">📸 Fatura</button>` : '<span class="text-xs text-muted">—</span>'}</td>
     </tr>`;
-  });
+  }).join('');
 }
 
 // ── Deficits / Smart Order ──
@@ -702,15 +698,13 @@ function renderDeficitsTable() {
   if (manualDeficits.length === 0) {
     tbody.innerHTML = `<tr><td colspan="4" class="empty-state">Eksik listesinde ürün yok.</td></tr>`;
   } else {
-    manualDeficits.forEach((d, idx) => {
-      tbody.innerHTML += `<tr>
+    tbody.innerHTML = manualDeficits.map((d, idx) => `<tr>
         <td><b>${d.name}</b></td><td>${d.supplier || '-'}</td>
         <td><span class="chip ${d.ordered ? 'chip-ok' : 'chip-warn'}">${d.ordered ? '✅ Sipariş Verildi' : '⏳ Bekliyor'}</span></td>
         <td class="flex gap-1">
           <button class="btn btn-success btn-xs" onclick="toggleDeficitOrdered(${idx})">${d.ordered ? 'Geri Al' : '✅ Verildi'}</button>
           <button class="btn btn-danger btn-xs" onclick="removeDeficit(${idx})">Sil</button>
-        </td></tr>`;
-    });
+        </td></tr>`).join('');
   }
 
   const sugTbody = document.getElementById("suggestionsTableBody");
@@ -720,14 +714,14 @@ function renderDeficitsTable() {
   if (criticals.length === 0) {
     sugTbody.innerHTML = `<tr><td colspan="3" class="empty-state">Kritik stok yok. 👍</td></tr>`;
   } else {
-    criticals.forEach(p => {
+    sugTbody.innerHTML = criticals.map(p => {
       const added = manualDeficits.some(d => d.name.toLowerCase() === p.name.toLowerCase());
-      sugTbody.innerHTML += `<tr>
+      return `<tr>
         <td><b>${p.name}</b></td>
         <td><b class="text-danger">${p.stock} adet</b></td>
         <td>${added ? '<span class="chip chip-ok">Listede</span>' : `<button class="btn btn-success btn-xs" onclick="addProductToDeficits(${p.id})">+ Ekle</button>`}</td>
       </tr>`;
-    });
+    }).join('');
   }
 }
 

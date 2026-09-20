@@ -677,16 +677,11 @@ function initializeApp() {
   // Set mode badge in header
   try { if (typeof updateModeBadge === "function") updateModeBadge(); } catch(e) {}
 
-  // Standart moddaysa envanter tablosunu da hazırla
-  if (typeof isLightMode === "function" && !isLightMode()) {
-    try { if (typeof renderInventoryTable === "function") renderInventoryTable(); } catch(e) {}
-  }
-
   // Set version in footer
   const vEl = document.getElementById("appVersion");
   if (vEl) {
     const isLight = (typeof isLightMode === "function" && isLightMode());
-    vEl.innerText = isLight ? "v3.2.0 (Aybars POS — Hafif Mod)" : "v3.2.0 (Aybars — Standart Sürüm)";
+    vEl.innerText = isLight ? "v3.2.1 (Hafif & Hızlı Mod)" : "v3.2.1 (Standart Sürüm)";
   }
 
   // Arka planda donmayı önleyen gecikmeli yükleme (Datalist ve Toptancı listeleri ana iş parçacığını bloke etmez)
