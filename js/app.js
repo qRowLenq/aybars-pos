@@ -689,7 +689,26 @@ function initializeApp() {
   // Set version in footer
   const vEl = document.getElementById("appVersion");
   if(vEl) vEl.innerText = "v3.0.0 (Enterprise Financial & Tax Architecture)";
+
+  // E-Tablo takvim başlıklarını arka planda otomatik yenile
+  setTimeout(() => {
+    try {
+      if (typeof sendToGoogleSheets === "function") {
+        sendToGoogleSheets({ action: "fix_calendar" });
+      }
+    } catch(e) {}
+  }, 2500);
 }
+
+function refreshGoogleSheetsCalendar() {
+  if (typeof sendToGoogleSheets === "function") {
+    sendToGoogleSheets({ action: "fix_calendar" });
+    if (typeof toast === "function") {
+      toast("📅 Google E-Tablo takvim başlıkları ve tam tarihler güncelleniyor...", "info");
+    }
+  }
+}
+window.refreshGoogleSheetsCalendar = refreshGoogleSheetsCalendar;
 
 // Expose daily close functions globally
 window.openDailyCloseModal = openDailyCloseModal;

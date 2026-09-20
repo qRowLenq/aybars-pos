@@ -115,6 +115,19 @@ function doPost(e) {
         handleInventorySync(ss, data);
         break;
 
+      case "fix_calendar":
+      case "refresh_calendar":
+      case "refresh_structure":
+      case "sync_calendar":
+        var allSheets = ss.getSheets();
+        for (var si = 0; si < allSheets.length; si++) {
+          var sNameU = allSheets[si].getName().toUpperCase();
+          if (sNameU.indexOf("GELİR") !== -1 || sNameU.indexOf("GELIR") !== -1) {
+            ensureSalesSheetStructure(allSheets[si]);
+          }
+        }
+        break;
+
       default:
         break;
     }
@@ -247,51 +260,78 @@ function deleteGunSonuKasaIfExists(ss) {
 // 3. GELİR SAYFASI & HAFTALIK TAKVİM DÜZENİ (GELİR - AY YIL)
 // ===================================================================
 
-function getOrCreateMonthlySalesSheet(ss, monthYearStr) {
-  var sheets = ss.getSheets();
-  var parts = String(monthYearStr || "").split(" ");
-  var mName = (parts[0] || "EYLÜL").toUpperCase();
-  var yName = parts[1] || String(new Date().getFullYear());
+var DAY_NAMES_TR = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"];
 
-  var sheet = null;
-  // 1. Önce hem GELİR hem Ay/Yıl içeren sekmeyi ara
-  for (var i = 0; i < sheets.length; i++) {
-    var sNameUpper = sheets[i].getName().toUpperCase();
-    if ((sNameUpper.indexOf("GELİR") !== -1 || sNameUpper.indexOf("GELIR") !== -1) &&
-        (sNameUpper.indexOf(mName) !== -1 || sNameUpper.indexOf("EYLÜL") !== -1 || sNameUpper.indexOf("EYLUL") !== -1) &&
-        sNameUpper.indexOf(yName) !== -1) {
-      sheet = sheets[i];
+function getMonthAndYearFromSheet(sheet, optTitle) {
+  var sName = "";
+  try {
+    sName = ((sheet ? sheet.getName() : "") + " " + (optTitle || "") + " " + (sheet ? sheet.getRange("A1").getValue() : "")).toUpperCase();
+  } catch (e) {
+    sName = String(optTitle || "").toUpperCase();
+  }
+
+  var yearMatch = sName.match(/\b(20\d\d)\b/);
+  var year = yearMatch ? parseInt(yearMatch[1], 10) : (new Date()).getFullYear();
+
+  var monthMap = {
+    "OCAK": 0, "ŞUBAT": 1, "SUBAT": 1, "MART": 2, "NİSAN": 3, "NISAN": 3,
+    "MAYIS": 4, "HAZİRAN": 5, "HAZIRAN": 5, "TEMMUZ": 6, "AĞUSTOS": 7, "AGUSTOS": 7,
+    "EYLÜL": 8, "EYLUL": 8, "EKİM": 9, "EKIM": 9, "KASIM": 10, "ARALIK": 11
+  };
+
+  var month = (new Date()).getMonth();
+  for (var mKey in monthMap) {
+    if (sName.indexOf(mKey) !== -1) {
+      month = monthMap[mKey];
       break;
     }
   }
 
-  // 2. Bulunamazsa sadece Ay içeren GELİR sekmesini ara
-  if (!sheet) {
-    for (var i = 0; i < sheets.length; i++) {
-      var sNameUpper = sheets[i].getName().toUpperCase();
-      if ((sNameUpper.indexOf("GELİR") !== -1 || sNameUpper.indexOf("GELIR") !== -1) &&
-          (sNameUpper.indexOf(mName) !== -1 || sNameUpper.indexOf("EYLÜL") !== -1 || sNameUpper.indexOf("EYLUL") !== -1)) {
-        sheet = sheets[i];
-        break;
-      }
+  return { month: month, year: year };
+}
+
+function getDayHeadersForWeek(startDay, endDay, month, year, daysInMonth) {
+  var headers = [];
+  for (var d = startDay; d <= endDay; d++) {
+    if (d > daysInMonth) {
+      headers.push("-\n-");
+    } else {
+      var dObj = new Date(year, month, d);
+      var dayName = DAY_NAMES_TR[dObj.getDay()];
+      var dd = (d < 10 ? "0" : "") + d;
+      var mm = (month + 1 < 10 ? "0" : "") + (month + 1);
+      var fullDateStr = dd + "." + mm + "." + year;
+      headers.push(dayName + "\n" + fullDateStr);
     }
   }
+  return headers;
+}
 
-  // 3. Bulunamazsa ismi doğrudan "GELİR" veya "GELIR" olan veya içinde geçen ilk sekmeyi al
-  if (!sheet) {
-    for (var i = 0; i < sheets.length; i++) {
-      var sNameUpper = sheets[i].getName().toUpperCase().trim();
-      if (sNameUpper === "GELİR" || sNameUpper === "GELIR" || sNameUpper.indexOf("GELİR") !== -1 || sNameUpper.indexOf("GELIR") !== -1) {
-        sheet = sheets[i];
-        break;
-      }
-    }
-  }
-
+function getOrCreateMonthlySalesSheet(ss, monthYearStr) {
   var sheetName = "GELİR - " + monthYearStr;
+  var sheet = ss.getSheetByName(sheetName);
+
   if (!sheet) {
-    sheet = ss.getSheetByName(sheetName);
+    var sheets = ss.getSheets();
+    var parts = String(monthYearStr || "").split(" ");
+    var mName = (parts[0] || "").toUpperCase();
+    var yName = parts[1] || "";
+
+    // Sadece hedef Ay ve Yıl'ı içeren sekmeyi ara (Örn: 'GELİR - EKİM 2026')
+    if (mName && yName) {
+      for (var i = 0; i < sheets.length; i++) {
+        var sNameUpper = sheets[i].getName().toUpperCase();
+        if ((sNameUpper.indexOf("GELİR") !== -1 || sNameUpper.indexOf("GELIR") !== -1) &&
+            sNameUpper.indexOf(mName) !== -1 &&
+            sNameUpper.indexOf(yName) !== -1) {
+          sheet = sheets[i];
+          break;
+        }
+      }
+    }
   }
+
+  // Hedef aya ait sekme henüz yoksa, otomatik olarak yeni sekme aç
   if (!sheet) {
     sheet = ss.insertSheet(sheetName);
     sheet.setTabColor("#10b981");
@@ -313,11 +353,16 @@ function buildMonthlySalesSheetTemplate(sheet, monthYearStr) {
     .setVerticalAlignment("middle");
   sheet.setRowHeight(1, 35);
 
+  var myInfo = getMonthAndYearFromSheet(sheet, monthYearStr);
+  var month = myInfo.month;
+  var year = myInfo.year;
+  var daysInMonth = new Date(year, month + 1, 0).getDate();
+
   sheet.getRange("B2:H2").merge().setValue("📅 1. HAFTA (GÜN 01 - 07)").setBackground("#047857").setFontColor("#ffffff").setFontWeight("bold").setHorizontalAlignment("center");
   sheet.getRange("J2:P2").merge().setValue("📅 2. HAFTA (GÜN 08 - 14)").setBackground("#047857").setFontColor("#ffffff").setFontWeight("bold").setHorizontalAlignment("center");
   sheet.getRange("R2:X2").merge().setValue("📅 3. HAFTA (GÜN 15 - 21)").setBackground("#047857").setFontColor("#ffffff").setFontWeight("bold").setHorizontalAlignment("center");
   sheet.getRange("Z2:AF2").merge().setValue("📅 4. HAFTA (GÜN 22 - 28)").setBackground("#047857").setFontColor("#ffffff").setFontWeight("bold").setHorizontalAlignment("center");
-  sheet.getRange("AH2:AN2").merge().setValue("📅 5. HAFTA (GÜN 29 - 31)").setBackground("#047857").setFontColor("#ffffff").setFontWeight("bold").setHorizontalAlignment("center");
+  sheet.getRange("AH2:AN2").merge().setValue("📅 5. HAFTA (GÜN 29 - " + daysInMonth + ")").setBackground("#047857").setFontColor("#ffffff").setFontWeight("bold").setHorizontalAlignment("center");
   sheet.getRange("AP2:AQ2").merge().setValue("🏆 AYLIK GELİR TOPLAMI").setBackground("#0f172a").setFontColor("#38bdf8").setFontWeight("bold").setHorizontalAlignment("center");
   sheet.setRowHeight(2, 24);
 
@@ -329,18 +374,19 @@ function buildMonthlySalesSheetTemplate(sheet, monthYearStr) {
   sheet.getRange("AP3:AQ3").merge().setFormula("=B3+J3+R3+Z3+AH3").setNumberFormat("₺#,##0.00").setBackground("#064e3b").setFontColor("#fef08a").setFontWeight("bold").setFontSize(13).setHorizontalAlignment("center");
   sheet.setRowHeight(3, 28);
 
-  var daysW1 = ["Pzt (01)", "Sal (02)", "Çar (03)", "Per (04)", "Cum (05)", "Cmt (06)", "Paz (07)"];
-  var daysW2 = ["Pzt (08)", "Sal (09)", "Çar (10)", "Per (11)", "Cum (12)", "Cmt (13)", "Paz (14)"];
-  var daysW3 = ["Pzt (15)", "Sal (16)", "Çar (17)", "Per (18)", "Cum (19)", "Cmt (20)", "Paz (21)"];
-  var daysW4 = ["Pzt (22)", "Sal (23)", "Çar (24)", "Per (25)", "Cum (26)", "Cmt (27)", "Paz (28)"];
-  var daysW5 = ["Pzt (29)", "Sal (30)", "Çar (31)", "Per (-)", "Cum (-)", "Cmt (-)", "Paz (-)"];
+  // Gün Başlıkları (Gerçek Takvim Matematiği: Gün Adı ve Altında Tam Tarih: Örn: Cmt \n 19.09.2026, Paz \n 20.09.2026)
+  var daysW1 = getDayHeadersForWeek(1, 7, month, year, daysInMonth);
+  var daysW2 = getDayHeadersForWeek(8, 14, month, year, daysInMonth);
+  var daysW3 = getDayHeadersForWeek(15, 21, month, year, daysInMonth);
+  var daysW4 = getDayHeadersForWeek(22, 28, month, year, daysInMonth);
+  var daysW5 = getDayHeadersForWeek(29, 35, month, year, daysInMonth);
 
-  sheet.getRange(4, 2, 1, 7).setValues([daysW1]).setBackground("#1e293b").setFontColor("#ffffff").setFontWeight("bold").setFontSize(9).setHorizontalAlignment("center");
-  sheet.getRange(4, 10, 1, 7).setValues([daysW2]).setBackground("#1e293b").setFontColor("#ffffff").setFontWeight("bold").setFontSize(9).setHorizontalAlignment("center");
-  sheet.getRange(4, 18, 1, 7).setValues([daysW3]).setBackground("#1e293b").setFontColor("#ffffff").setFontWeight("bold").setFontSize(9).setHorizontalAlignment("center");
-  sheet.getRange(4, 26, 1, 7).setValues([daysW4]).setBackground("#1e293b").setFontColor("#ffffff").setFontWeight("bold").setFontSize(9).setHorizontalAlignment("center");
-  sheet.getRange(4, 34, 1, 7).setValues([daysW5]).setBackground("#1e293b").setFontColor("#ffffff").setFontWeight("bold").setFontSize(9).setHorizontalAlignment("center");
-  sheet.setRowHeight(4, 24);
+  sheet.getRange(4, 2, 1, 7).setValues([daysW1]).setBackground("#1e293b").setFontColor("#ffffff").setFontWeight("bold").setFontSize(8.5).setHorizontalAlignment("center").setVerticalAlignment("middle").setWrap(true);
+  sheet.getRange(4, 10, 1, 7).setValues([daysW2]).setBackground("#1e293b").setFontColor("#ffffff").setFontWeight("bold").setFontSize(8.5).setHorizontalAlignment("center").setVerticalAlignment("middle").setWrap(true);
+  sheet.getRange(4, 18, 1, 7).setValues([daysW3]).setBackground("#1e293b").setFontColor("#ffffff").setFontWeight("bold").setFontSize(8.5).setHorizontalAlignment("center").setVerticalAlignment("middle").setWrap(true);
+  sheet.getRange(4, 26, 1, 7).setValues([daysW4]).setBackground("#1e293b").setFontColor("#ffffff").setFontWeight("bold").setFontSize(8.5).setHorizontalAlignment("center").setVerticalAlignment("middle").setWrap(true);
+  sheet.getRange(4, 34, 1, 7).setValues([daysW5]).setBackground("#1e293b").setFontColor("#ffffff").setFontWeight("bold").setFontSize(8.5).setHorizontalAlignment("center").setVerticalAlignment("middle").setWrap(true);
+  sheet.setRowHeight(4, 34);
 
   sheet.getRange("A2").setValue("Haftalar").setFontSize(8).setHorizontalAlignment("center").setFontColor("#94a3b8");
   sheet.getRange("A3").setValue("HAFTA TOPLAMI").setFontSize(8).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#0f172a").setFontColor("#94a3b8");
@@ -413,6 +459,37 @@ function ensureSalesSheetStructure(sheet) {
   sheet.setRowHeight(rowMap.cashDiff, 20);
   sheet.setRowHeight(rowMap.reconcileStatus, 20);
   sheet.setColumnWidth(1, 160);
+
+  // Gün başlıklarını (Row 4) ve tam tarihleri gerçek takvim matematiğiyle güncelle (Örn: Cmt \n 19.09.2026, Paz \n 20.09.2026)
+  try {
+    var myInfo = getMonthAndYearFromSheet(sheet);
+    var month = myInfo.month;
+    var year = myInfo.year;
+    var daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    var daysW1 = getDayHeadersForWeek(1, 7, month, year, daysInMonth);
+    var daysW2 = getDayHeadersForWeek(8, 14, month, year, daysInMonth);
+    var daysW3 = getDayHeadersForWeek(15, 21, month, year, daysInMonth);
+    var daysW4 = getDayHeadersForWeek(22, 28, month, year, daysInMonth);
+    var daysW5 = getDayHeadersForWeek(29, 35, month, year, daysInMonth);
+
+    sheet.getRange(4, 2, 1, 7).setValues([daysW1]).setBackground("#1e293b").setFontColor("#ffffff").setFontWeight("bold").setFontSize(8.5).setHorizontalAlignment("center").setVerticalAlignment("middle").setWrap(true);
+    sheet.getRange(4, 10, 1, 7).setValues([daysW2]).setBackground("#1e293b").setFontColor("#ffffff").setFontWeight("bold").setFontSize(8.5).setHorizontalAlignment("center").setVerticalAlignment("middle").setWrap(true);
+    sheet.getRange(4, 18, 1, 7).setValues([daysW3]).setBackground("#1e293b").setFontColor("#ffffff").setFontWeight("bold").setFontSize(8.5).setHorizontalAlignment("center").setVerticalAlignment("middle").setWrap(true);
+    sheet.getRange(4, 26, 1, 7).setValues([daysW4]).setBackground("#1e293b").setFontColor("#ffffff").setFontWeight("bold").setFontSize(8.5).setHorizontalAlignment("center").setVerticalAlignment("middle").setWrap(true);
+    sheet.getRange(4, 34, 1, 7).setValues([daysW5]).setBackground("#1e293b").setFontColor("#ffffff").setFontWeight("bold").setFontSize(8.5).setHorizontalAlignment("center").setVerticalAlignment("middle").setWrap(true);
+    sheet.setRowHeight(4, 34);
+
+    // Ayın son gününü aşan kolonları pasife al
+    for (var col = 34; col <= 40; col++) {
+      var dNum = 29 + (col - 34);
+      if (dNum > daysInMonth) {
+        sheet.getRange(4, col).setValue("-\n-").setBackground("#334155").setFontColor("#94a3b8");
+      }
+    }
+  } catch (hdrErr) {
+    Logger.log("ensureSalesSheetStructure header update error: " + hdrErr);
+  }
 
   // Hafta toplamları ve Aylık Gelir Toplamını hatasız formülle bağla
   sheet.getRange("B3:H3").merge().setFormula("=SUM(B5:H5)").setNumberFormat("₺#,##0.00").setBackground("#0f172a").setFontColor("#34d399").setFontWeight("bold").setFontSize(11).setHorizontalAlignment("center");
