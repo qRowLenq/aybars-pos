@@ -4616,7 +4616,7 @@ function loadState() {
     }
   };
 
-  const CURRENT_CATALOG_VERSION = "2026_09_v25_turkish_names_restored";
+  const CURRENT_CATALOG_VERSION = "2026_09_v26_database_update_474_urun";
   const savedVer = localStorage.getItem("ps_catalog_version");
   let prods = raw("ps_products");
 
@@ -4627,6 +4627,7 @@ function loadState() {
       : (typeof sampleProducts !== "undefined" && Array.isArray(sampleProducts) ? sampleProducts : []));
 
   const dbSource = window.catalogDatabase || null;
+  const deletedIds = new Set((raw("ps_deleted_product_ids") || []).map(id => String(id)));
 
   if (savedVer !== CURRENT_CATALOG_VERSION || !Array.isArray(prods) || prods.length < 50) {
     const existingBarcodeMap = new Map();
@@ -4642,7 +4643,7 @@ function loadState() {
       });
     }
 
-    window.products = JSON.parse(JSON.stringify(catalogSource));
+    window.products = JSON.parse(JSON.stringify(catalogSource)).filter(p => p && p.id && !deletedIds.has(String(p.id)));
     window.products.forEach(p => {
       p.name = fixTurkishMojibake(p.name);
       p.category = fixTurkishMojibake(p.category);
@@ -4709,11 +4710,13 @@ function loadState() {
     localStorage.setItem("ps_waste_records", JSON.stringify(window.wasteRecords));
     localStorage.setItem("ps_catalog_version", CURRENT_CATALOG_VERSION);
   } else {
-    window.products = (prods && prods.length > 0) ? prods : JSON.parse(JSON.stringify(catalogSource));
+    window.products = (prods && prods.length > 0)
+      ? prods.filter(p => p && p.id && !deletedIds.has(String(p.id)))
+      : JSON.parse(JSON.stringify(catalogSource)).filter(p => p && p.id && !deletedIds.has(String(p.id)));
     const currentIdSet = new Set(window.products.map(p => String(p.id)));
     let hasNewInjected = false;
     catalogSource.forEach(cp => {
-      if (!currentIdSet.has(String(cp.id))) {
+      if (cp && cp.id && !currentIdSet.has(String(cp.id)) && !deletedIds.has(String(cp.id))) {
         window.products.push(JSON.parse(JSON.stringify(cp)));
         currentIdSet.add(String(cp.id));
         hasNewInjected = true;
@@ -4975,6 +4978,7 @@ function findMatchingProduct(query) {
 
 function resetToDefaultCatalog() {
   if (confirm("Tüm ürün listesini varsayılan orijinal listeye sıfırlamak istiyor musunuz?\\n\\n(DİKKAT: Sonradan girdiğiniz özel fiyat ve stoklar sıfırlanacaktır)")) {
+    localStorage.removeItem("ps_deleted_product_ids");
     window.products = JSON.parse(JSON.stringify(sampleProducts));
     saveData();
     if (typeof renderCatalog === "function") renderCatalog();

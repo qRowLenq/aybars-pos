@@ -187,6 +187,8 @@ function openAddProductModal(preSelectedSupplier = null, initialBarcode = null) 
     if (supSelect && preSelectedSupplier) {
       supSelect.value = preSelectedSupplier;
     }
+    const delBtn = document.getElementById("btnDeleteProductModal");
+    if (delBtn) delBtn.style.display = "none";
   } catch (err) {
     console.error("openAddProductModal error:", err);
   }
@@ -207,8 +209,11 @@ function openAddProductModal(preSelectedSupplier = null, initialBarcode = null) 
 function openEditProductModal(id) {
   try {
     const pList = window.products || products || [];
-    const p = pList.find(prod => Number(prod.id) === Number(id));
+    const p = pList.find(prod => String(prod.id).trim() === String(id).trim() || Number(prod.id) === Number(id));
     if (!p) return toast("Ürün bulunamadı!", "error");
+
+    const delBtn = document.getElementById("btnDeleteProductModal");
+    if (delBtn) delBtn.style.display = "inline-flex";
 
     if (typeof populateCategoryDropdowns === "function") populateCategoryDropdowns();
     if (typeof populateSupplierDropdowns === "function") populateSupplierDropdowns();
@@ -652,7 +657,7 @@ function renderInventoryTable() {
           <button class="btn btn-primary btn-xs" onclick="openStockEntryModal(${p.id})" title="Alış/Satış Fiyatı ve Stok Ekle">📦 Stok Ekle</button>
           <button class="btn btn-ghost btn-xs" onclick="openEditProductModal(${p.id})" title="Detaylı Düzenle">✏️ Düzenle</button>
           <button class="btn btn-ghost btn-xs" onclick="openProductPurchaseHistory(${p.id})" title="Geçmiş">📜</button>
-          <button class="btn btn-danger btn-xs" onclick="deleteProduct(${p.id})" title="Sil">Sil</button>
+          <button class="btn btn-danger btn-xs" onclick="deleteProduct('${p.id}')" title="Sil">Sil</button>
         </td>
       </tr>`;
   }).join('');
@@ -1044,21 +1049,76 @@ window.bulkSetDefaultStock = bulkSetDefaultStock;
 window.bulkApplyMargin = bulkApplyMargin;
 window.saveQuickPricingAll = saveQuickPricingAll;
 
-function deleteProduct(id) {
-  if (confirm("Ürünü silmek istiyor musunuz?")) {
-    let pList = window.products || products || [];
-    pList = pList.filter(p => Number(p.id) !== Number(id));
-    products = pList;
-    window.products = pList;
-    saveData();
-    renderCatalog();
-    renderInventoryTable();
-    if (typeof renderQuickPricingTable === "function") renderQuickPricingTable();
-    populateAllProductDatalists();
-    if (typeof populateCatalogProductSelect === "function") populateCatalogProductSelect();
-    if (typeof updateAllBadges === "function") updateAllBadges();
+function handleDeleteProductFromModal() {
+  const id = document.getElementById("npProductId")?.value;
+  if (id) {
+    deleteProduct(id);
   }
 }
+window.handleDeleteProductFromModal = handleDeleteProductFromModal;
+
+function deleteProduct(id) {
+  if (!id && id !== 0) return;
+  const sId = String(id).trim();
+  const pList = window.products || products || [];
+  const prodToDelete = pList.find(p => String(p.id).trim() === sId || Number(p.id) === Number(sId));
+  const prodName = prodToDelete ? prodToDelete.name : "bu ürünü";
+
+  if (confirm(`"${prodName}" adlı ürünü silmek istediğinize emin misiniz?\n\nBu ürün sistemden tamamen kaldırılacaktır.`)) {
+    // 1. Kalıcı silinenler listesine (tombstone) ekle, böylece yenilenince asla geri gelmez
+    try {
+      let deletedIds = [];
+      try {
+        deletedIds = JSON.parse(localStorage.getItem("ps_deleted_product_ids") || "[]");
+      } catch (e) {
+        deletedIds = [];
+      }
+      if (!Array.isArray(deletedIds)) deletedIds = [];
+      if (!deletedIds.includes(sId)) {
+        deletedIds.push(sId);
+        localStorage.setItem("ps_deleted_product_ids", JSON.stringify(deletedIds));
+      }
+    } catch (e) {
+      console.warn("ps_deleted_product_ids kayıt hatası:", e);
+    }
+
+    // 2. window.products ve products listelerinden temizle
+    const filtered = pList.filter(p => String(p.id).trim() !== sId && Number(p.id) !== Number(sId));
+    products = filtered;
+    window.products = filtered;
+
+    // 3. Hafızadaki katalog önbelleğinden de kaldır
+    if (window.catalogProducts && Array.isArray(window.catalogProducts)) {
+      window.catalogProducts = window.catalogProducts.filter(p => String(p.id).trim() !== sId && Number(p.id) !== Number(sId));
+    }
+    if (window.catalogDatabase && Array.isArray(window.catalogDatabase.products)) {
+      window.catalogDatabase.products = window.catalogDatabase.products.filter(p => String(p.id).trim() !== sId && Number(p.id) !== Number(sId));
+    }
+    if (typeof catalogProducts !== "undefined" && Array.isArray(catalogProducts)) {
+      catalogProducts = catalogProducts.filter(p => String(p.id).trim() !== sId && Number(p.id) !== Number(sId));
+    }
+
+    // 4. Verileri kaydet ve tüm tabloları güncelle
+    saveData();
+    if (typeof renderCatalog === "function") renderCatalog();
+    if (typeof renderInventoryTable === "function") renderInventoryTable();
+    if (typeof renderQuickPricingTable === "function") renderQuickPricingTable();
+    if (typeof populateAllProductDatalists === "function") populateAllProductDatalists();
+    if (typeof populateCatalogProductSelect === "function") populateCatalogProductSelect();
+    if (typeof updateAllBadges === "function") updateAllBadges();
+
+    // 5. Açık düzenleme modalı varsa kapat
+    const npId = document.getElementById("npProductId")?.value;
+    if (npId && String(npId).trim() === sId) {
+      closeModal("addProductModal");
+    }
+
+    if (typeof toast === "function") {
+      toast(`🗑️ "${prodName}" başarıyla silindi.`, "info");
+    }
+  }
+}
+window.deleteProduct = deleteProduct;
 
 // ── Product Purchase History ──
 function openProductPurchaseHistory(prodId) {

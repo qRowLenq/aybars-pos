@@ -386,6 +386,7 @@ function renderCatalog() {
   itemsToRender.forEach(p => {
     const card = document.createElement("div");
     card.className = "product-card";
+    card.setAttribute("data-product-id", String(p.id));
     const curStock = (p.stock !== undefined && p.stock !== null) ? Number(p.stock) : 0;
     const curPrice = (p.price !== undefined && p.price !== null) ? Number(p.price) : 0;
     const catName = p.category || 'Genel';
@@ -1389,33 +1390,106 @@ function isEditingOrNoteElement(el) {
   return false;
 }
 
+// ── Catalog Search Input Handler with instant barcode auto-match ──
+let catalogSearchBarcodeTimeout = null;
+function handleCatalogSearchInput(event) {
+  const input = event.target;
+  const val = (input.value || "").trim();
+
+  // Her harfte kataloğu filtrele
+  renderCatalog();
+
+  if (catalogSearchBarcodeTimeout) {
+    clearTimeout(catalogSearchBarcodeTimeout);
+    catalogSearchBarcodeTimeout = null;
+  }
+
+  // Eğer girilen değer en az 5 karakterse ve tam bir ürün barkoduyla eşleşiyorsa
+  if (val.length >= 5) {
+    const pList = window.products || products || [];
+    const valClean = val.replace(/[\x00-\x1F\x7F]/g, "").trim().toLowerCase();
+    const valNoLeadingZero = valClean.replace(/^0+/, "");
+
+    const matched = pList.find(p => {
+      if (!p || !p.barcode) return false;
+      const b = String(p.barcode).trim().toLowerCase();
+      if (b === valClean) return true;
+      if (valClean.length >= 8 && b.replace(/^0+/, "") === valNoLeadingZero) return true;
+      return false;
+    });
+
+    if (matched) {
+      // Barkod okuyucunun tüm karakterleri bitirmesi için 40ms bekle ve otomatik sepete at
+      catalogSearchBarcodeTimeout = setTimeout(() => {
+        const curVal = (input.value || "").replace(/[\x00-\x1F\x7F]/g, "").trim();
+        handleScannedBarcodeOnPos(curVal, input);
+      }, 40);
+    }
+  }
+}
+window.handleCatalogSearchInput = handleCatalogSearchInput;
+
 // ── Barcode Resolution & Adding to Cart on Sales Screen ──
 function handleScannedBarcodeOnPos(barcodeString, sourceInput = null) {
-  const code = String(barcodeString || "").trim();
+  const rawCode = String(barcodeString || "").trim();
+  if (!rawCode) return;
+  const code = rawCode.replace(/[\x00-\x1F\x7F]/g, "").trim();
   if (!code) return;
 
   const pList = window.products || products || [];
+  const codeLower = code.toLowerCase();
+  const codeNoZero = code.replace(/^0+/, "").toLowerCase();
 
   // 1. Exact barcode match (case-insensitive and trimmed)
-  let matchedProduct = pList.find(p => p && p.barcode && String(p.barcode).trim().toLowerCase() === code.toLowerCase());
+  let matchedProduct = pList.find(p => p && p.barcode && String(p.barcode).trim().toLowerCase() === codeLower);
 
-  // 2. Exact ID match (in case product ID was barcode-encoded)
+  // 2. Barcode match ignoring leading zeros (0869... vs 869...)
+  if (!matchedProduct && code.length >= 7) {
+    matchedProduct = pList.find(p => p && p.barcode && String(p.barcode).trim().replace(/^0+/, "").toLowerCase() === codeNoZero);
+  }
+
+  // 3. Exact ID match (in case product ID was barcode-encoded)
   if (!matchedProduct) {
     matchedProduct = pList.find(p => p && String(p.id).trim() === code);
   }
 
-  // 3. Fallback: exact name match
+  // 4. Exact name match (Turkish & standard)
   if (!matchedProduct) {
-    matchedProduct = pList.find(p => p && p.name && p.name.trim().toLowerCase() === code.toLowerCase());
+    const codeTr = code.toLocaleLowerCase('tr-TR');
+    matchedProduct = pList.find(p => p && p.name && (
+      p.name.trim().toLowerCase() === codeLower ||
+      p.name.trim().toLocaleLowerCase('tr-TR') === codeTr
+    ));
+  }
+
+  // 5. Query contains exact barcode substring (okuyucu arama kutusundaki eski yazının üzerine yazdıysa)
+  if (!matchedProduct && code.length >= 6) {
+    matchedProduct = pList.find(p => p && p.barcode && String(p.barcode).trim().length >= 6 && code.includes(String(p.barcode).trim()));
+  }
+
+  // 6. Resilient global product finder fallback
+  if (!matchedProduct && typeof findMatchingProduct === "function") {
+    matchedProduct = findMatchingProduct(code);
+  }
+
+  // 7. Grid fallback: Eğer arama kutusu tek bir ürünü ekrana filtrelediyse, Enter ile o ürünü sepete at
+  if (!matchedProduct) {
+    const gridCards = document.querySelectorAll("#productGrid .product-card");
+    if (gridCards && gridCards.length === 1) {
+      const singleId = gridCards[0].getAttribute("data-product-id");
+      if (singleId) {
+        matchedProduct = pList.find(p => String(p.id) === String(singleId));
+      }
+    }
   }
 
   if (matchedProduct) {
     // Ürün bulundu: Sepete anında 1 adet ekle ve ses çal
     addToCart(matchedProduct);
     playBarcodeBeep(true);
-    toast(`✅ ${matchedProduct.name} sepete eklendi! (Barkod: ${code})`, "success");
+    toast(`✅ ${matchedProduct.name} sepete eklendi!`, "success");
 
-    // Arama kutusunu temizle ve odakla
+    // Arama kutusunu tamamen temizle ve odakla (sol üste yazıp kalmasını engelle)
     const cs = document.getElementById("catalogSearch");
     if (cs) cs.value = "";
     if (sourceInput && sourceInput !== cs) sourceInput.value = "";
@@ -1424,7 +1498,7 @@ function handleScannedBarcodeOnPos(barcodeString, sourceInput = null) {
   } else {
     // Ürün bulunamadı: Belirgin bildirim ver
     playBarcodeBeep(false);
-    toast(`❌ "${code}" barkodlu ürün bulunamadı!`, "error");
+    toast(`❌ "${code}" barkodlu / isimli ürün bulunamadı!`, "error");
 
     const cs = document.getElementById("catalogSearch");
     if (cs && cs === document.activeElement) {
@@ -1436,10 +1510,15 @@ function handleScannedBarcodeOnPos(barcodeString, sourceInput = null) {
 }
 window.handleScannedBarcodeOnPos = handleScannedBarcodeOnPos;
 
-// ── Catalog Search Keydown Handler (Enter Key) ──
+// ── Catalog Search Keydown Handler (Enter & Tab Keys) ──
 function handlePosBarcodeSearchKeyDown(event) {
-  if (event.key === "Enter") {
+  if (event.key === "Enter" || event.key === "Tab" || event.keyCode === 13 || event.keyCode === 9) {
     event.preventDefault();
+    event.stopPropagation();
+    if (catalogSearchBarcodeTimeout) {
+      clearTimeout(catalogSearchBarcodeTimeout);
+      catalogSearchBarcodeTimeout = null;
+    }
     const val = (event.target.value || "").trim();
     if (!val) return;
     handleScannedBarcodeOnPos(val, event.target);
@@ -1447,21 +1526,23 @@ function handlePosBarcodeSearchKeyDown(event) {
 }
 window.handlePosBarcodeSearchKeyDown = handlePosBarcodeSearchKeyDown;
 
-// ── Global Hardware Barcode Scanner Listener (< 50ms keystrokes buffer) ──
+// ── Global Hardware Barcode Scanner Listener (< 100ms keystrokes buffer) ──
 (function initGlobalBarcodeScanner() {
   let buffer = "";
   let lastKeyTime = 0;
   let isFastTyping = false;
-  const SPEED_THRESHOLD_MS = 50; // 50 ms altında gelen hızlı karakterler
+  let scanTimer = null;
+  const SPEED_THRESHOLD_MS = 100; // Genişletilmiş donanım okuyucu eşiği
 
   window.addEventListener("keydown", function(event) {
     const now = Date.now();
     const interval = now - lastKeyTime;
     lastKeyTime = now;
 
-    // Enter tuşu geldiğinde:
-    if (event.key === "Enter") {
-      if (buffer.length >= 3 && isFastTyping) {
+    // Enter veya Tab tuşu geldiğinde:
+    if (event.key === "Enter" || event.key === "Tab" || event.keyCode === 13 || event.keyCode === 9) {
+      if (scanTimer) clearTimeout(scanTimer);
+      if (buffer.length >= 3 && (isFastTyping || buffer.length >= 6)) {
         const scannedBarcode = buffer.trim();
         buffer = "";
         isFastTyping = false;
@@ -1478,7 +1559,6 @@ window.handlePosBarcodeSearchKeyDown = handlePosBarcodeSearchKeyDown;
         handleScannedBarcodeOnPos(scannedBarcode);
         return;
       }
-      // Sıradan tek Enter veya yavaş basım
       buffer = "";
       isFastTyping = false;
       return;
@@ -1490,9 +1570,25 @@ window.handlePosBarcodeSearchKeyDown = handlePosBarcodeSearchKeyDown;
         isFastTyping = true;
         buffer += event.key;
       } else {
-        // Yeni bir serinin başlangıcı veya normal insan yazımı
+        // Yeni bir serinin başlangıcı
         buffer = event.key;
         isFastTyping = false;
+      }
+
+      // Enter göndermeyen okuyucular için otomatik tamamlama zamanlayıcısı
+      if (scanTimer) clearTimeout(scanTimer);
+      if (buffer.length >= 6) {
+        scanTimer = setTimeout(() => {
+          if (buffer.length >= 6 && isFastTyping) {
+            const scannedBarcode = buffer.trim();
+            buffer = "";
+            isFastTyping = false;
+            const activeEl = document.activeElement;
+            if (!isEditingOrNoteElement(activeEl)) {
+              handleScannedBarcodeOnPos(scannedBarcode);
+            }
+          }
+        }, 90);
       }
     } else if (event.key !== "Shift") {
       buffer = "";

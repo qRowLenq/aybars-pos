@@ -61,7 +61,7 @@
       <div class="catalog-area">
         <div class="catalog-toolbar flex gap-2 items-center">
           <input type="text" id="catalogSearch" class="search-input" placeholder="🔍 Barkod okut veya ürün ara..."
-            oninput="renderCatalog()" onkeydown="handlePosBarcodeSearchKeyDown(event)" autocomplete="off">
+            oninput="handleCatalogSearchInput(event)" onkeydown="handlePosBarcodeSearchKeyDown(event)" autocomplete="off">
           <select id="posCatFilter" class="fc pos-cat-select" onchange="filterCategory(this.value)"
             title="Kategoriye Göre Filtrele"></select>
           <select id="posSortSelect" class="fc pos-sort-select" onchange="renderCatalog()" title="Ürünleri Sırala"
@@ -1156,9 +1156,12 @@
           </select>
         </div>
       </div>
-      <div class="modal-actions">
-        <button class="btn btn-ghost" onclick="closeModal('addProductModal')">Vazgeç</button>
-        <button class="btn btn-primary" onclick="saveNewProduct()">💾 Ürünü Kaydet</button>
+      <div class="modal-actions" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+        <button type="button" class="btn btn-danger btn-sm" id="btnDeleteProductModal" style="display:none;" onclick="handleDeleteProductFromModal()">🗑️ Ürünü Sil</button>
+        <div class="flex gap-2" style="margin-left:auto;">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('addProductModal')">Vazgeç</button>
+          <button type="button" class="btn btn-primary" onclick="saveNewProduct()">💾 Ürünü Kaydet</button>
+        </div>
       </div>
     </div>
   </div>
