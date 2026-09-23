@@ -2,21 +2,37 @@
 
 Modern esnaf ihtiyaçları ile bulut mimarisini harmanlayan, istemci tarafında tam yetenekli (Client-Side Rendered) bir POS ve ERP çözümü.
 
-## 🚀 Canlı Demo
+## 🚀 Canlı Demo & Dağıtım Linkleri
 
-- **Blue Petshop:** [https://qrowlenq.github.io/bluepetshop/](https://qrowlenq.github.io/bluepetshop/)
+| Sistem / Şube | GitHub Deposu | Canlı Demo (GitHub Pages) |
+|---|---|---|
+| **🐾 Aybars** | [budakhuseyin/aybars](https://github.com/budakhuseyin/aybars) | [https://budakhuseyin.github.io/aybars/](https://budakhuseyin.github.io/aybars/) |
+| **🛒 Aybars POS** | [qRowLenq/aybars-pos](https://github.com/qRowLenq/aybars-pos) | [https://qrowlenq.github.io/aybars-pos/](https://qrowlenq.github.io/aybars-pos/) |
+| **💙 Bluepetshop** | [qRowLenq/bluepetshop](https://github.com/qRowLenq/bluepetshop) | [https://qrowlenq.github.io/bluepetshop/](https://qrowlenq.github.io/bluepetshop/) |
+
+---
+
+## ⚙️ Google Script & Bulut Mimarisi
+
+Sistem, çalışma ortamını URL ve alan adına göre dinamik olarak tespit eder ve şubeye özel Google Apps Script uç noktasına otomatik olarak bağlanır:
+- **Aybars & Aybars POS:** `AKfycby4ue2uUwGkZUju68CFkaV6fSUZr1zOb57Q08rsVaeA__a1j214ShzK0H5_a6GOOyl_`
+- **Bluepetshop:** `AKfycbzVo_f31p2ys12zv8aXEOtIrwyRnHCtsN_rrGLReUjL0U5I_lktxDUW4ixM6i50Bvwi`
+
+---
 
 ## ✨ Özellikler
 
 ### 🛒 POS & Satış Motoru
 - Anlık sepet hesaplamaları ve real-time stok düşümü
-- Çoklu ödeme yöntemi: Nakit, Kredi Kartı, Parçalı Tahsilat, Veresiye
+- Otomatik donanım barkod okuyucu desteği (hızlı okuma ve otomatik sepete ekleme)
+- Çoklu ödeme yöntemi: Nakit, Kredi Kartı, Parçalı Tahsilat, Veresiye, Havale / IBAN
 - İade/İptal mekanizması ile transaction güvenliği
 - Askıdaki sepet yönetimi
 - Gidecek sipariş (teslimat) desteği
 
 ### 📦 Stok & Envanter
 - Ürün CRUD işlemleri ve kategori yönetimi
+- Kalıcı ürün silme (tombstone koruması ile silinen ürünlerin geri gelmesini önleme)
 - Ağırlıklı ortalama maliyet (WAC) hesabı
 - Kâr marjı takibi
 - Kritik stok uyarıları (≤ 2 adet)
@@ -74,15 +90,6 @@ Modern esnaf ihtiyaçları ile bulut mimarisini harmanlayan, istemci tarafında 
 
 **Kurulum gerektirmez!** Doğrudan `index.html` dosyasını tarayıcıda açın veya GitHub Pages üzerinden erişin.
 
-### GitHub Pages Aktifleştirme
-
-1. Bu repoyu GitHub'a push edin
-2. **Settings → Pages** sekmesine gidin
-3. **Source** olarak `Deploy from a branch` seçin
-4. **Branch** olarak `main` ve `/ (root)` seçin
-5. **Save** butonuna basın
-6. Site birkaç dakika içinde GitHub Pages adresinizde (`https://qrowlenq.github.io/bluepetshop/`) yayına alınır.
-
 ## 📞 İletişim
 
-Blue Petshop Kasa Sistemi © 2026
+Aybars & Bluepetshop Kasa Sistemi © 2026

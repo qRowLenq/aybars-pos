@@ -47,9 +47,17 @@ var dailyCloseRecords = [];
 window.dailyCloseRecords = dailyCloseRecords;
 
 // Dynamic Google Script URL: Auto-selects between Bluepetshop and Aybars environments
-const GOOGLE_SCRIPT_URL = (typeof window !== "undefined" && window.location && window.location.href.includes("bluepetshop"))
+const isBluepetshopEnv = (typeof window !== "undefined" && window.location && (
+  window.location.href.toLowerCase().includes("bluepetshop") ||
+  (window.location.hostname && window.location.hostname.toLowerCase().includes("bluepetshop"))
+));
+const GOOGLE_SCRIPT_URL = isBluepetshopEnv
   ? "https://script.google.com/macros/s/AKfycbzVo_f31p2ys12zv8aXEOtIrwyRnHCtsN_rrGLReUjL0U5I_lktxDUW4ixM6i50Bvwi/exec"
   : "https://script.google.com/macros/s/AKfycby4ue2uUwGkZUju68CFkaV6fSUZr1zOb57Q08rsVaeA__a1j214ShzK0H5_a6GOOyl_/exec";
+if (typeof window !== "undefined") {
+  window.GOOGLE_SCRIPT_URL = GOOGLE_SCRIPT_URL;
+  window.isBluepetshopEnv = isBluepetshopEnv;
+}
 
 const sampleBundles = [];
 const sampleSuppliers = [
