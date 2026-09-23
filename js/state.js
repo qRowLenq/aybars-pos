@@ -4624,7 +4624,7 @@ function loadState() {
     }
   };
 
-  const CURRENT_CATALOG_VERSION = "2026_09_v26_database_update_474_urun";
+  const CURRENT_CATALOG_VERSION = "2026_09_v27_cleaned_375_urun";
   const savedVer = localStorage.getItem("ps_catalog_version");
   let prods = raw("ps_products");
 
