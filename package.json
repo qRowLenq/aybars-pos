@@ -9,8 +9,8 @@
     "start": "electron .",
     "test": "node --test desktop/test/*.test.cjs",
     "test:ui": "node desktop/test/ui-smoke.cjs",
-    "dist:win": "electron-builder --config desktop/build-config.cjs --win nsis --x64",
-    "dist:win:portable": "electron-builder --win zip --x64"
+    "dist:win": "electron-builder --config desktop/build-config.cjs --win nsis --x64 --publish never",
+    "dist:win:portable": "electron-builder --win zip --x64 --publish never"
   },
   "devDependencies": {
     "electron": "44.7.0",
