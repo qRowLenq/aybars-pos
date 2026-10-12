@@ -17,7 +17,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
     rel="stylesheet">
   <title>Aybars POS · Demo</title>
-  <link rel="stylesheet" href="css/styles.css?v=20261012_stock1">
+  <link rel="stylesheet" href="css/styles.css?v=20261012_stock2">
   <link rel="stylesheet" href="css/demo.css">
   <link rel="stylesheet" href="css/sales-history.css">
   <link rel="stylesheet" href="css/desktop.css">
@@ -284,6 +284,7 @@
     <!-- 3. ENVANTER -->
     <section id="tab-inventory" class="tab-pane subtabs-container">
       <div class="subtabs-header">
+        <button class="subtab-btn" data-sub="alerts" onclick="switchInvSubtab('alerts')">🔔 Stok Uyarıları & İhtiyaçlar</button>
         <button class="subtab-btn active" data-sub="stock" onclick="switchInvSubtab('stock')">📦 Stok & Fiyat
           Listesi</button>
         <button class="subtab-btn" data-sub="quick-pricing"
@@ -294,40 +295,6 @@
       </div>
 
       <div id="subtab-inv-stock" class="subtab-view active">
-        <section class="stock-velocity-panel">
-          <h3>Satış hızına göre stok uyarıları <small id="stockVelocityCount"></small></h3>
-          <p>Son 30 günün net satış ortalamasına göre 7 gün veya daha az yetecek stoklar. Yeni kayıtlarda mevcut gün sayısı kullanılır; iadeler satış miktarından düşülür. Bu bir tahmindir. Satış geçmişi olmayan ürünlerde 2 adet ve altı gösterilir.</p>
-          <div id="stockVelocityList"></div>
-        </section>
-        <!-- 🛰️ SKT RADARI (FIFO EXPIRY RADAR WIDGET) -->
-        <div class="skt-radar-container" id="sktRadarContainer">
-          <div class="skt-radar-header">
-            <div class="skt-radar-title">
-              <span style="font-size:24px;">🛰️</span>
-              <div>
-                <h3>SKT Radarı & FIFO Parti Takibi</h3>
-                <p>Yaklaşan son kullanma tarihlerini anlık izleyin, kritik partilere indirim uygulayın ve stok kaybını
-                  önleyin.</p>
-              </div>
-            </div>
-            <div class="skt-radar-counters">
-              <div class="skt-counter-pill alert-red">
-                <span>🚨 &lt; 15 Gün:</span>
-                <b id="sktRedCount">0 Kalem</b>
-              </div>
-              <div class="skt-counter-pill alert-yellow">
-                <span>⚠️ &lt; 30 Gün:</span>
-                <b id="sktYellowCount">0 Kalem</b>
-              </div>
-              <div class="skt-counter-pill alert-safe">
-                <span>✅ Güvenli Stok:</span>
-                <b id="sktSafeCount">0 Kalem</b>
-              </div>
-            </div>
-          </div>
-          <div id="sktRadarBatchList" class="skt-batch-list"></div>
-        </div>
-
         <div class="flex gap-2 mb-3 items-center flex-wrap">
           <input type="text" id="invSearchInput" class="search-input" placeholder="🔍 Ürün Ara..."
             oninput="renderInventoryTable()">
@@ -363,6 +330,49 @@
           </thead>
           <tbody id="inventoryTableBody"></tbody>
         </table>
+      </div>
+
+      <div id="subtab-inv-alerts" class="subtab-view">
+        <section class="stock-velocity-panel">
+          <h3>Satış hızına göre stok uyarıları <small id="stockVelocityCount"></small></h3>
+          <p>Son 30 günün net satış ortalamasına göre 7 gün veya daha az yetecek stoklar. Yeni kayıtlarda mevcut gün sayısı kullanılır; iadeler satış miktarından düşülür. Bu bir tahmindir. Satış geçmişi olmayan ürünlerde 2 adet ve altı gösterilir.</p>
+          <div id="stockVelocityList"></div>
+        </section>
+        <!-- 🛰️ SKT RADARI (FIFO EXPIRY RADAR WIDGET) -->
+        <div class="skt-radar-container" id="sktRadarContainer">
+          <div class="skt-radar-header">
+            <div class="skt-radar-title">
+              <span style="font-size:24px;">🛰️</span>
+              <div>
+                <h3>SKT Radarı & FIFO Parti Takibi</h3>
+                <p>Yaklaşan son kullanma tarihlerini anlık izleyin, kritik partilere indirim uygulayın ve stok kaybını
+                  önleyin.</p>
+              </div>
+            </div>
+            <div class="skt-radar-counters">
+              <div class="skt-counter-pill alert-red">
+                <span>🚨 &lt; 15 Gün:</span>
+                <b id="sktRedCount">0 Kalem</b>
+              </div>
+              <div class="skt-counter-pill alert-yellow">
+                <span>⚠️ &lt; 30 Gün:</span>
+                <b id="sktYellowCount">0 Kalem</b>
+              </div>
+              <div class="skt-counter-pill alert-safe">
+                <span>✅ Güvenli Stok:</span>
+                <b id="sktSafeCount">0 Kalem</b>
+              </div>
+            </div>
+          </div>
+          <div id="sktRadarBatchList" class="skt-batch-list"></div>
+        </div>
+
+        <section class="stock-needs-panel">
+          <h3>İhtiyaç Listesi <small id="stockNeedsCount"></small></h3>
+          <p>Uyarılardan eklediğin ürünler burada saklanır. Tedarik & Toptancı bölümündeki eksik listesiyle aynı listedir.</p>
+          <button class="btn btn-outline btn-sm" onclick="copyDeficits('all')">Bekleyen ihtiyaçları kopyala</button>
+          <div id="stockNeedsList"></div>
+        </section>
       </div>
 
       <!-- ⚡ HIZLI FİYAT & STOK GİRİŞİ (QUICK BULK PRICING & STOCK MANAGER) -->
@@ -2105,19 +2115,19 @@
   <script src="js/products_catalog.js?v=20260920_perf_turbo_v321"></script>
   <script>seedBlueDemo();</script>
   <script src="js/state.js?v=20260920_perf_turbo_v321"></script>
-  <script src="js/ui.js?v=20260920_perf_turbo_v321"></script>
-  <script src="js/stock-flow.js?v=20261012_stock1"></script>
-  <script src="js/pos.js?v=20261012_stock1"></script>
-  <script src="js/orders.js?v=20261012_stock1"></script>
-  <script src="js/inventory.js?v=20261012_stock1"></script>
+  <script src="js/ui.js?v=20261012_stock2"></script>
+  <script src="js/stock-flow.js?v=20261012_stock2"></script>
+  <script src="js/pos.js?v=20261012_stock2"></script>
+  <script src="js/orders.js?v=20261012_stock2"></script>
+  <script src="js/inventory.js?v=20261012_stock2"></script>
   <script src="js/crm.js?v=20260920_perf_turbo_v321"></script>
-  <script src="js/procurement.js?v=20260920_perf_turbo_v321"></script>
+  <script src="js/procurement.js?v=20261012_stock2"></script>
   <script src="js/expenses.js?v=20261012_expense_help"></script>
   <script src="js/sales-history.js"></script>
   <script src="js/refunds.js"></script>
   <script src="js/app.js?v=20260920_perf_turbo_v321"></script>
   <script src="js/demo-ui.js"></script>
-  <script src="js/desktop-ui.js?v=20261012_stock1"></script>
+  <script src="js/desktop-ui.js?v=20261012_stock2"></script>
 </body>
 
 </html>

@@ -43,3 +43,9 @@ test('Velocity includes refunds and bundles once, excludes old/future sales, and
   const first=c.stockVelocity([{id:1,stock:5}],[{date:'12.10.2026',soldItems:[{id:1,qty:5}]}],'12.10.2026')[0];
   assert.equal(first.days,1);assert.equal(first.remaining,1);
 });
+test('Needs deduplicate by product ID and recognize legacy names without blocking different products',()=>{
+  const c=fixture();c.manualDeficits=[{productId:1,name:'Eski isim'},{name:'MAMA'}];
+  assert.equal(c.isStockNeedListed({id:1,name:'Yeni isim'}),true);
+  assert.equal(c.isStockNeedListed({id:2,name:'mama'}),true);
+  assert.equal(c.isStockNeedListed({id:3,name:'Kum'}),false);
+});

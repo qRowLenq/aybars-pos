@@ -35,6 +35,16 @@ function onOpen() {
   } catch (e) {}
 }
 
+// Read-only diagnostic: run in the existing bound Apps Script editor.
+function AYBARS_BAGLI_TABLOYU_GOSTER() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  if (!ss) throw new Error('Bu script bir E-Tabloya bağlı değil. Tablo üzerinden Uzantılar > Apps Script ile açın.');
+  Logger.log('Tablo adı: ' + ss.getName());
+  Logger.log('Tablo linki: ' + ss.getUrl());
+  Logger.log('Sekmeler: ' + ss.getSheets().map(function(sheet) { return sheet.getName(); }).join(', '));
+  return ss.getUrl();
+}
+
 var TURKISH_MONTHS = ["OCAK", "ŞUBAT", "MART", "NİSAN", "MAYIS", "HAZİRAN", "TEMMUZ", "AĞUSTOS", "EYLÜL", "EKİM", "KASIM", "ARALIK"];
 
 /**

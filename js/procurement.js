@@ -691,6 +691,8 @@ function renderAllPurchasesTable() {
 
 // ── Deficits / Smart Order ──
 function renderDeficitsTable() {
+  renderStockVelocity();
+  renderStockNeeds();
   const tbody = document.getElementById("deficitsTableBody");
   if (!tbody) return;
   tbody.innerHTML = "";
@@ -734,10 +736,10 @@ function handleSelectExistingProductForDeficit(val) {
 }
 
 function addProductToDeficits(prodId) {
-  const p = products.find(prod => prod.id === prodId);
+  const p = products.find(prod => String(prod.id) === String(prodId));
   if (!p) return;
-  if (manualDeficits.some(d => d.name.toLowerCase() === p.name.toLowerCase())) return toast("Zaten listede!", "warning");
-  manualDeficits.push({ id: Date.now(), name: p.name, supplier: p.supplier || "-", ordered: false });
+  if (isStockNeedListed(p)) return toast("Zaten ihtiyaç listesinde!", "warning");
+  manualDeficits.push({ id: Date.now(), productId:p.id, name: p.name, supplier: p.supplier || "-", ordered: false });
   saveData(); renderDeficitsTable();
 }
 

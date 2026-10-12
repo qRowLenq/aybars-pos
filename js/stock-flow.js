@@ -115,12 +115,38 @@ function renderStockVelocity() {
   document.getElementById('stockVelocityCount').textContent = `${rows.length} ürün`;
   container.replaceChildren();
   if (!rows.length) { container.textContent = 'Mevcut satış hızına göre 7 gün içinde tükenmesi beklenen ürün yok.'; return; }
-  for (const row of rows.slice(0,12)) {
+  for (const row of rows) {
     const item = document.createElement('div'); item.className = 'stock-velocity-item';
     const name = document.createElement('strong'); name.textContent = row.product.name;
     const detail = document.createElement('span');
     detail.textContent = `Stok: ${row.stock} · ` + (row.rate > 0 ? `${row.days} günde net ${row.quantity} adet · ${row.rate.toLocaleString('tr-TR',{maximumFractionDigits:2})} adet/gün · yaklaşık ${Math.ceil(row.remaining)} gün yeter${row.days < 7 ? ' (veri az, ilk tahmin)' : ''}` : 'Satış verisi yetersiz; düşük stok uyarısı');
-    item.append(name, detail); container.append(item);
+    const add = document.createElement('button'); add.type = 'button'; add.className = 'btn btn-outline btn-sm';
+    add.disabled = isStockNeedListed(row.product); add.textContent = add.disabled ? 'İhtiyaç listesinde' : '+ İhtiyaca ekle';
+    add.onclick = () => addProductToDeficits(row.product.id);
+    item.append(name, detail, add); container.append(item);
   }
-  if (rows.length > 12) { const note=document.createElement('p'); note.textContent=`En öncelikli 12 ürün gösteriliyor; toplam ${rows.length} ürün uyarısı var.`; container.append(note); }
+}
+
+function isStockNeedListed(product) {
+  return manualDeficits.some(d => String(d.productId) === String(product.id) || (!d.productId && String(d.name).toLocaleLowerCase('tr-TR') === String(product.name).toLocaleLowerCase('tr-TR')));
+}
+function renderStockAlerts() {
+  renderStockVelocity(); renderSktRadarWidget(); renderStockNeeds();
+}
+function renderStockNeeds() {
+  const list=document.getElementById('stockNeedsList');
+  if (!list) return;
+  list.replaceChildren();
+  document.getElementById('stockNeedsCount').textContent = `${manualDeficits.filter(d => !d.ordered).length} bekliyor`;
+  if (!manualDeficits.length) { list.textContent='Henüz ihtiyaç eklenmedi. Yukarıdaki ürünlerden “İhtiyaca ekle” ile başlayabilirsin.'; return; }
+  manualDeficits.forEach((need,index) => {
+    const row=document.createElement('div'); row.className='stock-velocity-item';
+    const name=document.createElement('strong'); name.textContent=need.name;
+    const status=document.createElement('span'); status.textContent=`${need.supplier || 'Tedarikçi belirtilmemiş'} · ${need.ordered ? 'Sipariş verildi' : 'Bekliyor'}`;
+    const toggle=document.createElement('button'); toggle.type='button'; toggle.className='btn btn-outline btn-sm';
+    toggle.textContent=need.ordered ? 'Siparişi geri al' : 'Sipariş verildi'; toggle.onclick=()=>toggleDeficitOrdered(index);
+    const remove=document.createElement('button'); remove.type='button'; remove.className='btn btn-danger btn-sm';
+    remove.textContent='Listeden çıkar'; remove.onclick=()=>removeDeficit(index);
+    row.append(name,status,toggle,remove); list.append(row);
+  });
 }

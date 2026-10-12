@@ -175,6 +175,16 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .stock-velocity-panel small { color: #b66d0a; font-size: 12px; }
 .stock-velocity-item { display: flex; flex-direction: column; gap: 4px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
 .stock-velocity-item span { color: #53657b; }
+.stock-needs-panel { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+.stock-needs-panel > p { color: #53657b; font-size: 12px; margin: 8px 0; }
+.stock-needs-panel small { color: #b66d0a; font-size: 12px; }
+#stockVelocityList { max-height: 360px; overflow-y: auto; }
+.stock-velocity-item { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; column-gap: 12px; }
+.stock-velocity-item strong, .stock-velocity-item span { grid-column: 1; }
+.stock-velocity-item .btn { grid-column: 2; }
+#stockVelocityList .stock-velocity-item .btn { grid-row: 1 / 3; }
+#stockNeedsList { margin-top: 12px; }
+@media(max-width:600px) { .stock-velocity-item { display: flex; align-items: stretch; } }
 
 /* Expense sections must keep their natural height inside the scrolling tab. */
 #tab-expenses > * { flex-shrink: 0; min-width: 0; }

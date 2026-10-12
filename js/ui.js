@@ -75,6 +75,8 @@ function switchInvSubtab(subId) {
   let fn = null;
   if (subId === "stock") {
     fn = typeof renderInventoryTable === "function" ? renderInventoryTable : window.renderInventoryTable;
+  } else if (subId === "alerts") {
+    fn = renderStockAlerts;
   } else if (subId === "quick-pricing") {
     fn = typeof renderQuickPricingTable === "function" ? renderQuickPricingTable : window.renderQuickPricingTable;
   } else if (subId === "bundles") {
