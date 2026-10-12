@@ -164,6 +164,17 @@ body { display: flex; flex-direction: column; overflow: hidden; }
   overflow-y: auto;
 }
 .tab-pane.active { display: flex !important; }
+.stock-checkout-warning { background: #fff7e6; border: 1px solid #edc77f; color: #754b10; padding: 12px; flex-shrink: 0; max-height: 230px; overflow-y: auto; font-size: 12px; }
+.stock-checkout-warning[hidden] { display: none; }
+.cart-area { overflow-y: auto; }
+.cart-area .cart-items { min-height: 70px; }
+.cart-area .cart-header, .cart-area .cart-footer { flex-shrink: 0; }
+.stock-checkout-warning p { margin: 6px 0; }
+.stock-velocity-panel { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; flex-shrink: 0; }
+.stock-velocity-panel > p { font-size: 12px; color: #53657b; line-height: 1.6; margin: 8px 0; }
+.stock-velocity-panel small { color: #b66d0a; font-size: 12px; }
+.stock-velocity-item { display: flex; flex-direction: column; gap: 4px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+.stock-velocity-item span { color: #53657b; }
 
 /* Expense sections must keep their natural height inside the scrolling tab. */
 #tab-expenses > * { flex-shrink: 0; min-width: 0; }

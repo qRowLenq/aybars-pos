@@ -54,6 +54,8 @@ function handleSelectDispatchCustomer(val) {
 }
 
 function saveDispatchOrder() {
+  if (!cart.length) return toast("Sepet boş!", "warning");
+  if (requireStockApproval(() => window.saveDispatchOrder())) { closeModal("dispatchModal"); focusCatalogSearch(); return; }
   const total = cart.reduce((sum, i) => sum + (i.qty * i.customPrice), 0);
   const channel = document.getElementById("dispChannel").value;
   const paymentPref = document.getElementById("dispPaymentType").value;
@@ -107,24 +109,7 @@ function saveDispatchOrder() {
     total
   };
 
-  // Deduct stock (FIFO Lot/Batch deduction)
-  cart.forEach(item => {
-    if (item.isBundle && item.bundleItems) {
-      item.bundleItems.forEach(bItem => {
-        const rp = products.find(p => p.id === bItem.productId);
-        if (rp) {
-          if (typeof deductProductStockFIFO === "function") deductProductStockFIFO(rp, (bItem.qty * item.qty));
-          else rp.stock -= (bItem.qty * item.qty);
-        }
-      });
-    } else {
-      const p = products.find(prod => prod.id === item.id);
-      if (p) {
-        if (typeof deductProductStockFIFO === "function") deductProductStockFIFO(p, item.qty);
-        else p.stock -= item.qty;
-      }
-    }
-  });
+  deductCartStock(cart);
 
   orders.unshift(order);
   cart = [];

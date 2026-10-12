@@ -1,7 +1,7 @@
 (() => {
   if (!window.aybarsDesktop) return;
   // Commit each synchronous business operation and its outbox events together.
-  for(const name of ['saveData','completeSale','saveRefundTransaction','markOrderDelivered',
+  for(const name of ['saveData','completeSale','chargeToCredit','saveDispatchOrder','saveRefundTransaction','markOrderDelivered',
     'saveExpense','saveSupplierIntake','confirmSupplierPayment','confirmDebtCollection',
     'saveManualPlatformIncome','completeDailyClose','reopenTodayDailyClose','reopenDailyCloseById',
     'saveStockEntry','saveNewProduct','saveBarcodeModal','saveQuickPricingAll']) {

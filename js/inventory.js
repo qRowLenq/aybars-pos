@@ -552,6 +552,7 @@ function quickPromoBatch(productId, lotNumber) {
 
 // ── Inventory Table ──
 function renderInventoryTable() {
+  renderStockVelocity();
   renderSktRadarWidget();
 
   const q = (document.getElementById("invSearchInput")?.value || "").trim().toLowerCase();

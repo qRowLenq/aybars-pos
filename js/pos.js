@@ -421,6 +421,7 @@ function editCartItemPrice(id) {
 }
 
 function renderCart() {
+  renderStockWarning();
   const container = document.getElementById("cartItems");
   if (!container) return;
   container.innerHTML = "";
@@ -496,6 +497,12 @@ function scrollToCart() {
 
 // ── Complete Sale ──
 function completeSale(payType, splitDetails = null, splitData = null) {
+  if (requireStockApproval(() => window.completeSale(payType, splitDetails, splitData))) return;
+  if (splitData) {
+    const paid = Object.values(splitData).reduce((n,v) => n + Number(v || 0), 0);
+    const due = cart.reduce((n,i) => n + i.qty * i.customPrice, 0);
+    if (Math.abs(paid-due) > 0.01) { openSplitPaymentModal(); return toast("Sepet değişti. Parçalı ödeme tutarlarını güncelleyin.", "warning"); }
+  }
   if (cart.length === 0) return toast("Sepet boş!", "warning");
   const total = cart.reduce((sum, i) => sum + (i.qty * i.customPrice), 0);
   const vatTotal = cart.reduce((sum, item) => {
@@ -509,48 +516,7 @@ function completeSale(payType, splitDetails = null, splitData = null) {
   const custName = cust ? cust.name : "Tezgâh";
   const itemsSummary = cart.map(i => `${i.qty}x ${i.name} (${i.customPrice.toFixed(2)} ₺)`).join(", ");
 
-  // ── FIFO Batch Stock Deduction Engine ──
-  function deductProductStockFIFO(prod, qtyNeeded) {
-    if (!prod) return;
-    prod.stock = Math.max(0, (Number(prod.stock) || 0) - qtyNeeded);
-
-    if (Array.isArray(prod.batches) && prod.batches.length > 0) {
-      // Sort batches ascending by expiry (FIFO): earliest expiring first
-      prod.batches.sort((a, b) => {
-        const expA = a.expiry || "9999-99";
-        const expB = b.expiry || "9999-99";
-        return expA.localeCompare(expB);
-      });
-
-      let remainingNeeded = qtyNeeded;
-      for (let i = 0; i < prod.batches.length; i++) {
-        const b = prod.batches[i];
-        if (b.qty <= 0) continue;
-
-        if (b.qty >= remainingNeeded) {
-          b.qty -= remainingNeeded;
-          remainingNeeded = 0;
-          break;
-        } else {
-          remainingNeeded -= b.qty;
-          b.qty = 0;
-        }
-      }
-    }
-  }
-
-  // Stock deduction (FIFO Lot / Batch-based)
-  cart.forEach(item => {
-    if (item.isBundle && item.bundleItems) {
-      item.bundleItems.forEach(bItem => {
-        const realProd = products.find(p => p.id === bItem.productId);
-        if (realProd) deductProductStockFIFO(realProd, (bItem.qty * item.qty));
-      });
-    } else {
-      const p = products.find(prod => prod.id === item.id);
-      if (p) deductProductStockFIFO(p, item.qty);
-    }
-  });
+  deductCartStock(cart);
 
   const isReceiptOfficial = document.getElementById("posReceiptOfficial")
     ? document.getElementById("posReceiptOfficial").checked
@@ -839,6 +805,8 @@ function completeSplitSale() {
 
 // ── Veresiye (Charge to Credit) ──
 function chargeToCredit() {
+  if (!cart.length) return toast("Sepet boş!", "warning");
+  if (requireStockApproval(() => window.chargeToCredit())) return;
   const custId = document.getElementById("cartCustomerSelect")?.value;
   if (!custId) return toast("Lütfen veresiye yazılacak müşteriyi seçin!", "warning");
   const cust = customers.find(c => c.id == custId);
@@ -850,11 +818,7 @@ function chargeToCredit() {
   }, 0);
   const itemsSummary = cart.map(i => `${i.qty}x ${i.name}`).join(", ");
 
-  cart.forEach(item => {
-    if (item.isBundle && item.bundleItems) {
-      item.bundleItems.forEach(bItem => { const rp = products.find(p => p.id === bItem.productId); if (rp) rp.stock -= (bItem.qty * item.qty); });
-    } else { const p = products.find(prod => prod.id === item.id); if (p) p.stock -= item.qty; }
-  });
+  deductCartStock(cart);
 
   cust.balance = (cust.balance || 0) + total;
   if (!cust.purchaseHistory) cust.purchaseHistory = [];
