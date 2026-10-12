@@ -535,7 +535,9 @@ function exportData() {
     categories, products, customers, suppliers,
     orders, platformPendingOrders, deliveredOrders,
     salesHistory, expenses, manualDeficits, heldCarts,
-    bundles, wasteRecords, exportDate: new Date().toISOString()
+    bundles, wasteRecords, dailyCloseRecords,
+    activeBusinessDate: localStorage.getItem('ps_active_business_date'),
+    exportDate: new Date().toISOString()
   };
   const jsonStr = JSON.stringify(data, null, 2);
   const blob = new Blob([jsonStr], { type: "application/json" });
@@ -646,6 +648,8 @@ function importData(event) {
       if (data.heldCarts) { heldCarts = data.heldCarts; window.heldCarts = data.heldCarts; }
       if (data.bundles) { bundles = data.bundles; window.bundles = data.bundles; }
       if (data.wasteRecords) { wasteRecords = data.wasteRecords; window.wasteRecords = data.wasteRecords; }
+      if (Array.isArray(data.dailyCloseRecords)) { dailyCloseRecords = data.dailyCloseRecords; window.dailyCloseRecords = data.dailyCloseRecords; }
+      if (data.activeBusinessDate && /^\d{2}\.\d{2}\.\d{4}$/.test(data.activeBusinessDate)) localStorage.setItem('ps_active_business_date', data.activeBusinessDate);
       
       saveData();
       initializeApp();
