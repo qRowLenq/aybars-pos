@@ -537,6 +537,7 @@ function exportData() {
     salesHistory, expenses, manualDeficits, heldCarts,
     bundles, wasteRecords, dailyCloseRecords,
     activeBusinessDate: localStorage.getItem('ps_active_business_date'),
+    financialOverview: typeof calculateDualFinancialOverview === 'function' ? calculateDualFinancialOverview() : null,
     exportDate: new Date().toISOString()
   };
   const jsonStr = JSON.stringify(data, null, 2);
