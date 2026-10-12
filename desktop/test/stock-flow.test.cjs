@@ -49,3 +49,15 @@ test('Needs deduplicate by product ID and recognize legacy names without blockin
   assert.equal(c.isStockNeedListed({id:2,name:'mama'}),true);
   assert.equal(c.isStockNeedListed({id:3,name:'Kum'}),false);
 });
+test('Manual needs accept products outside the catalog, reject duplicates and reuse catalog records',()=>{
+  const c=fixture(); const input={value:'  Taşıma çantası  ',focus:()=>{}};
+  c.document={getElementById:()=>input};c.manualDeficits=[];
+  c.crypto=require('node:crypto');let writes=0;
+  c.saveData=()=>writes++;c.renderDeficitsTable=()=>{};
+  c.addStockManualNeed();
+  assert.equal(c.manualDeficits[0].name,'Taşıma çantası');assert.equal(input.value,'');assert.equal(writes,1);
+  input.value='taşıma çantası';c.addStockManualNeed();assert.equal(c.manualDeficits.length,1);assert.equal(writes,1);
+  input.value='   ';c.addStockManualNeed();assert.equal(c.manualDeficits.length,1);
+  let catalogId;c.products=[{id:7,name:'Mama'}];c.addProductToDeficits=id=>catalogId=id;
+  input.value='mama';c.addStockManualNeed();assert.equal(catalogId,7);
+});

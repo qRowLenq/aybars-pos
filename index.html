@@ -17,7 +17,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
     rel="stylesheet">
   <title>Aybars POS · Demo</title>
-  <link rel="stylesheet" href="css/styles.css?v=20261012_stock2">
+  <link rel="stylesheet" href="css/styles.css?v=20261012_stock3">
   <link rel="stylesheet" href="css/demo.css">
   <link rel="stylesheet" href="css/sales-history.css">
   <link rel="stylesheet" href="css/desktop.css">
@@ -370,6 +370,13 @@
         <section class="stock-needs-panel">
           <h3>İhtiyaç Listesi <small id="stockNeedsCount"></small></h3>
           <p>Uyarılardan eklediğin ürünler burada saklanır. Tedarik & Toptancı bölümündeki eksik listesiyle aynı listedir.</p>
+          <form class="stock-needs-entry" onsubmit="event.preventDefault(); addStockManualNeed();">
+            <label for="stockManualNeed">Aklına gelen ürün veya ihtiyaç</label>
+            <div class="flex gap-2 flex-wrap">
+              <input id="stockManualNeed" class="fc" maxlength="200" placeholder="Örn: taşıma çantası, yeni marka mama…" required>
+              <button type="submit" class="btn btn-primary btn-sm">+ İhtiyaç ekle</button>
+            </div>
+          </form>
           <button class="btn btn-outline btn-sm" onclick="copyDeficits('all')">Bekleyen ihtiyaçları kopyala</button>
           <div id="stockNeedsList"></div>
         </section>
@@ -2115,19 +2122,19 @@
   <script src="js/products_catalog.js?v=20260920_perf_turbo_v321"></script>
   <script>seedBlueDemo();</script>
   <script src="js/state.js?v=20261012_endpoint2"></script>
-  <script src="js/ui.js?v=20261012_stock2"></script>
-  <script src="js/stock-flow.js?v=20261012_stock2"></script>
-  <script src="js/pos.js?v=20261012_stock2"></script>
-  <script src="js/orders.js?v=20261012_stock2"></script>
-  <script src="js/inventory.js?v=20261012_stock2"></script>
+  <script src="js/ui.js?v=20261012_stock3"></script>
+  <script src="js/stock-flow.js?v=20261012_stock3"></script>
+  <script src="js/pos.js?v=20261012_stock3"></script>
+  <script src="js/orders.js?v=20261012_stock3"></script>
+  <script src="js/inventory.js?v=20261012_stock3"></script>
   <script src="js/crm.js?v=20260920_perf_turbo_v321"></script>
-  <script src="js/procurement.js?v=20261012_stock2"></script>
+  <script src="js/procurement.js?v=20261012_stock3"></script>
   <script src="js/expenses.js?v=20261012_expense_help"></script>
   <script src="js/sales-history.js"></script>
   <script src="js/refunds.js"></script>
   <script src="js/app.js?v=20260920_perf_turbo_v321"></script>
   <script src="js/demo-ui.js"></script>
-  <script src="js/desktop-ui.js?v=20261012_stock2"></script>
+  <script src="js/desktop-ui.js?v=20261012_stock3"></script>
 </body>
 
 </html>

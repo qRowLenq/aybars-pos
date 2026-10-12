@@ -133,6 +133,20 @@ function isStockNeedListed(product) {
 function renderStockAlerts() {
   renderStockVelocity(); renderSktRadarWidget(); renderStockNeeds();
 }
+function addStockManualNeed() {
+  const input=document.getElementById('stockManualNeed');
+  const name=input.value.trim();
+  if (!name) return toast('Ürün veya ihtiyaç adı yazın.', 'warning');
+  const product=products.find(p => String(p.name).toLocaleLowerCase('tr-TR') === name.toLocaleLowerCase('tr-TR'));
+  if (product) {
+    addProductToDeficits(product.id);
+  } else {
+    if (manualDeficits.some(d => String(d.name).toLocaleLowerCase('tr-TR') === name.toLocaleLowerCase('tr-TR'))) return toast('Bu ihtiyaç zaten listede.', 'warning');
+    manualDeficits.push({id:crypto.randomUUID(),name,supplier:'-',ordered:false});
+    saveData(); renderDeficitsTable();
+  }
+  input.value=''; input.focus();
+}
 function renderStockNeeds() {
   const list=document.getElementById('stockNeedsList');
   if (!list) return;
