@@ -23,7 +23,7 @@ Modern esnaf ihtiyaçları ile bulut mimarisini harmanlayan, istemci tarafında 
 ## ⚙️ Google Script & Bulut Mimarisi
 
 Sistem, çalışma ortamını URL ve alan adına göre dinamik olarak tespit eder ve şubeye özel Google Apps Script uç noktasına otomatik olarak bağlanır:
-- **Aybars & Aybars POS:** `AKfycby4ue2uUwGkZUju68CFkaV6fSUZr1zOb57Q08rsVaeA__a1j214ShzK0H5_a6GOOyl_`
+- **Aybars POS (güncel bağlantı):** `AKfycbyB_I0qVGt-5OkT4M4bN5t5ufHBzQiG-gl9-SYK7XiSf3kRIj2xWnDLzILm2i-CMm0y`
 - **Bluepetshop:** `AKfycbzVo_f31p2ys12zv8aXEOtIrwyRnHCtsN_rrGLReUjL0U5I_lktxDUW4ixM6i50Bvwi`
 
 ---

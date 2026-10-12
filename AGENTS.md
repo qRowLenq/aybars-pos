@@ -9,5 +9,5 @@ Bu projenin geliştirme ve demo deposu yalnızca `https://github.com/qRowLenq/ay
 
 ## ⚙️ Google Script URL Mimarisi
 - `bluepetshop` deposu ve canlı adresi kendi özel Google Apps Script URL'sini (`AKfycbzVo_f31p2ys12zv8aXEOtIrwyRnHCtsN_rrGLReUjL0U5I_lktxDUW4ixM6i50Bvwi`) kullanır.
-- `aybars` ve `aybars-pos` depoları Aybars Google Apps Script URL'sini (`AKfycby4ue2uUwGkZUju68CFkaV6fSUZr1zOb57Q08rsVaeA__a1j214ShzK0H5_a6GOOyl_`) kullanır.
+- Bu `aybars-pos` deposu aşağıdaki güncel Google Apps Script URL'sini (`AKfycbyB_I0qVGt-5OkT4M4bN5t5ufHBzQiG-gl9-SYK7XiSf3kRIj2xWnDLzILm2i-CMm0y`) kullanır.
 - Bu ayrım `js/state.js` içerisindeki dinamik `GOOGLE_SCRIPT_URL` mantığıyla otomatik olarak yönetilir.

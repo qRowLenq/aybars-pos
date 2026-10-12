@@ -53,7 +53,7 @@ const isBluepetshopEnv = (typeof window !== "undefined" && window.location && (
 ));
 const GOOGLE_SCRIPT_URL = isBluepetshopEnv
   ? "https://script.google.com/macros/s/AKfycbzVo_f31p2ys12zv8aXEOtIrwyRnHCtsN_rrGLReUjL0U5I_lktxDUW4ixM6i50Bvwi/exec"
-  : "https://script.google.com/macros/s/AKfycby4ue2uUwGkZUju68CFkaV6fSUZr1zOb57Q08rsVaeA__a1j214ShzK0H5_a6GOOyl_/exec";
+  : "https://script.google.com/macros/s/AKfycbyB_I0qVGt-5OkT4M4bN5t5ufHBzQiG-gl9-SYK7XiSf3kRIj2xWnDLzILm2i-CMm0y/exec";
 if (typeof window !== "undefined") {
   window.GOOGLE_SCRIPT_URL = GOOGLE_SCRIPT_URL;
   window.isBluepetshopEnv = isBluepetshopEnv;
