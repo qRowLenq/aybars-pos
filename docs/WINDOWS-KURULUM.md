@@ -81,7 +81,8 @@ TLS ve paket checksum kontrolleri korunur. `npm test` veritabanı/kuyruk/Apps Sc
 `npm run test:ui` boş mağaza, satış ve yeniden açılış kalıcılığını sınar.
 Linux arayüz testinde Xvfb gerekir; standart komut `xvfb-run -a npm run test:ui`.
 
-`npm run dist:win` Windows kurulum dosyasını `dist` altında üretir. Özel NSIS betiği
-uygulamayı ve Windows kaldırma programını standart NSIS araçlarıyla üretir; Linux'ta Wine gerekmez.
+`npm run dist:win` Windows kurulum dosyasını `dist` altında üretir. Windows üzerinde
+electron-builder'ın standart NSIS kurulum betiği kullanılır. Linux'ta özel NSIS betiği
+uygulamayı ve kaldırma programını üretir; bu derleme için Wine gerekmez.
 Windows GitHub Actions iş akışı da aynı paketi artifact olarak üretir; müşterinin bilgisayarı
 bu iş akışına veya GitHub erişimine ihtiyaç duymaz. Kurulum dosyaları Git deposuna eklenmez.

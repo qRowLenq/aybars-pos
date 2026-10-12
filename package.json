@@ -9,7 +9,7 @@
     "start": "electron .",
     "test": "node --test desktop/test/*.test.cjs",
     "test:ui": "node desktop/test/ui-smoke.cjs",
-    "dist:win": "electron-builder --win nsis --x64",
+    "dist:win": "electron-builder --config desktop/build-config.cjs --win nsis --x64",
     "dist:win:portable": "electron-builder --win zip --x64"
   },
   "devDependencies": {
@@ -35,7 +35,6 @@
       "signAndEditExecutable": false
     },
     "nsis": {
-      "script": "desktop/installer.nsi",
       "installerLanguages": ["tr_TR"],
       "oneClick": false,
       "perMachine": false,
