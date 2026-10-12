@@ -62,4 +62,9 @@ test('Apps Script rejects another shop, deduplicates retries and holds incomplet
   assert.equal(post(payload).status,'success');assert.equal(post(payload).status,'success');assert.equal(applied,1);
   rows[1][2]='processing';assert.equal(post(payload).code,'uncertain');assert.equal(applied,1);
   rows[1][2]='retry';assert.equal(post(payload).status,'success');assert.equal(applied,2);
+  let snapshots=0;context.handleFullReportSnapshot=()=>snapshots++;
+  const bulk={...payload,action:'full_report_snapshot',eventId:'22222222-2222-4222-8222-222222222222',snapshot:{salesHistory:[],products:[]}};
+  assert.equal(post({...bulk,eventId:undefined}).code,'auth');assert.equal(snapshots,0);
+  assert.equal(post({...bulk,storeId:'wrong'}).code,'auth');assert.equal(snapshots,0);
+  assert.equal(post(bulk).status,'success');assert.equal(post(bulk).status,'success');assert.equal(snapshots,1);
 });

@@ -4935,6 +4935,9 @@ if (typeof window !== "undefined") {
 
 function sendToGoogleSheets(payload) {
   if (window.BLUEPETSHOP_DEMO) return;
+  if (payload && payload.officialSales !== undefined && typeof calculateDualFinancialOverview === 'function') {
+    payload.totalCardSales = calculateDualFinancialOverview().cardSales;
+  }
   if (payload && !payload.supplierDebts && Array.isArray(window.suppliers)) {
     payload.supplierDebts = window.suppliers
       .filter(s => (s.balance || 0) > 0)

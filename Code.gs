@@ -45,6 +45,86 @@ function AYBARS_BAGLI_TABLOYU_GOSTER() {
   return ss.getUrl();
 }
 
+function handleFullReportSnapshot(ss, snapshot) {
+  if (!snapshot || !Array.isArray(snapshot.salesHistory) || !Array.isArray(snapshot.products)) throw new Error('Geçerli tam veri yedeği bulunamadı.');
+  var reports=buildAybarsSnapshotTables(snapshot);
+  Object.keys(reports).forEach(function(name) {
+    var rows=reports[name], sheet=ss.getSheetByName(name) || ss.insertSheet(name);
+    if (rows.length>sheet.getMaxRows()) sheet.insertRowsAfter(sheet.getMaxRows(),rows.length-sheet.getMaxRows());
+    if (rows[0].length>sheet.getMaxColumns()) sheet.insertColumnsAfter(sheet.getMaxColumns(),rows[0].length-sheet.getMaxColumns());
+    var height=Math.max(1,sheet.getLastRow(),rows.length), width=rows[0].length;
+    sheet.getRange(1,1,height,width).clearContent();
+    var safeRows=rows.map(function(row){return row.map(function(v){return typeof v==='string' && /^=/.test(v) ? "'"+v : v;});});
+    sheet.getRange(1,1,rows.length,width).setValues(safeRows).setFontSize(10).setVerticalAlignment('middle');
+    sheet.getRange(1,1,1,width).setBackground('#edf1f5').setFontColor('#172b4d').setFontWeight('bold').setWrap(true);
+    sheet.setFrozenRows(1);sheet.setRowHeight(1,44);
+    sheet.setColumnWidths(1,width,160);
+    if (name==='GÜNLÜK ÖZET' || name==='AYLIK ÖZET') {
+      sheet.setColumnWidths(1,width,130);
+      sheet.getRange(2,2,Math.max(1,rows.length-1),12).setNumberFormat('₺#,##0.00');
+      sheet.getRange(2,11,Math.max(1,rows.length-1),1).setNumberFormat('0');
+    }
+    if (name==='RAPOR PANELİ') {
+      sheet.setColumnWidth(1,260);sheet.setColumnWidth(2,480);
+      sheet.getRange(3,2,11,1).setNumberFormat('₺#,##0.00');
+    }
+  });
+  // Rebuild calendar totals in one bounded block per month; repeated snapshots do not add sales twice.
+  var months={};
+  (snapshot.salesHistory || []).forEach(function(sale){var dt=parseDateHelper(sale.date);var key=getMonthYearTitle(dt);(months[key] || (months[key]=[])).push(sale);});
+  Object.keys(months).forEach(function(key){
+    var sheet=getOrCreateMonthlySalesSheet(ss,key), matrix=Array.from({length:16},function(){return Array(39).fill('');});
+    months[key].forEach(function(sale){
+      var row=buildAybarsSnapshotTables({salesHistory:[sale]})['SATIŞ DETAYLARI'][1];
+      var col=getSalesColumnForDay(parseDateHelper(sale.date).getDate())-2, off=row[14]==='Fişli';
+      function add(r,v){matrix[r-5][col]=Number(matrix[r-5][col] || 0)+Number(v || 0);}
+      add(off?10:11,row[8]);add(7,row[9]);add(off?12:13,row[10]);add(9,row[12]);add(18,row[11]);
+      if (row[6]==='Tahsilat') add(19,row[7]); else if (row[7]<0) add(20,-row[7]);
+    });
+    for (var day=1;day<=31;day++) {
+      var idx=getSalesColumnForDay(day)-2, letter=getColumnLetter(idx+2);
+      matrix[0][idx]='=SUM('+letter+'6:'+letter+'9)+'+letter+'18-'+letter+'19';
+      matrix[1][idx]='='+letter+'10+'+letter+'11';matrix[3][idx]='='+letter+'12+'+letter+'13';
+    }
+    // Close stamps are rebuilt from the same authoritative snapshot.
+    sheet.getRange(5,2,9,39).setValues(matrix.slice(0,9));
+    sheet.getRange(18,2,3,39).setValues(matrix.slice(13,16));
+    sheet.getRange(14,2,4,39).clearContent();
+  });
+  var expenseMonths={};
+  (snapshot.expenses || []).forEach(function(e){var key=getMonthYearTitle(parseDateHelper(e.date));(expenseMonths[key] || (expenseMonths[key]=[])).push(e);});
+  Object.keys(expenseMonths).forEach(function(key){
+    var sheet=getOrCreateMonthlyExpenseSheet(ss,key,[]), major=[], daily=[];
+    expenseMonths[key].forEach(function(e){
+      var row=[e.date,e.subType || e.category || e.mainCategory || '',e.desc || '',Number(e.amount || 0),e.source || e.paymentMethod || '',e.hasInvoice || e.isInvoice?'Faturalı':'Faturasız'];
+      (e.expenseType==='major'?major:daily).push(row);
+    });
+    var height=Math.max(1,sheet.getLastRow()-8,major.length,daily.length);
+    if (height+8>sheet.getMaxRows()) sheet.insertRowsAfter(sheet.getMaxRows(),height+8-sheet.getMaxRows());
+    sheet.getRange(9,1,height,6).clearContent();sheet.getRange(9,8,height,6).clearContent();
+    if (major.length) sheet.getRange(9,1,major.length,6).setValues(major);
+    if (daily.length) sheet.getRange(9,8,daily.length,6).setValues(daily);
+    recalculateExpenseSheetKPIs(sheet);
+  });
+  (snapshot.dailyCloseRecords || []).forEach(function(close){handleDailyClose(ss,close);});
+  if (snapshot.financialOverview) {
+    var f=snapshot.financialOverview;
+    handleSyncTaxReport(ss,{date:getTodayFormatted(),time:getTimeFormatted(),officialSales:f.officialSales,
+      invoicedPurchases:f.invoicedPurchases,expensesTotal:f.totalInvoicedDeductions,taxBase:f.officialTaxBase,
+      collectedVat:f.officialCollectedVat,deductibleVat:f.totalDeductibleVat,payableVat:f.payableVat,
+      estimatedIncomeTax:f.estimatedIncomeTax,netCashProfit:f.realProfit,totalCardSales:reports['AYLIK ÖZET'].slice(1).reduce(function(n,r){return n+Number(r[5] || 0);},0),riskAmount:Math.max(0,reports['AYLIK ÖZET'].slice(1).reduce(function(n,r){return n+Number(r[5] || 0);},0)-Number(f.invoicedPurchases || 0)),riskStatus:f.isHighRisk?'Yüksek Risk':'Güvenli'});
+  }
+}
+
+function AYBARS_JSON_YEDEKTEN_TUM_RAPORLARI_AKTAR() {
+  var ui=SpreadsheetApp.getUi();
+  var response=ui.prompt('Tam rapor aktarımı','Drive’a yüklediğiniz Petshop_Yedek JSON dosyasının kimliğini girin. Bu işlem rapor sekmelerini yedekteki verilerle yeniler.',ui.ButtonSet.OK_CANCEL);
+  if (response.getSelectedButton()!==ui.Button.OK) return;
+  var snapshot=JSON.parse(DriveApp.getFileById(response.getResponseText().trim()).getBlob().getDataAsString('UTF-8'));
+  handleFullReportSnapshot(SpreadsheetApp.getActiveSpreadsheet(),snapshot);
+  SpreadsheetApp.flush();
+}
+
 var TURKISH_MONTHS = ["OCAK", "ŞUBAT", "MART", "NİSAN", "MAYIS", "HAZİRAN", "TEMMUZ", "AĞUSTOS", "EYLÜL", "EKİM", "KASIM", "ARALIK"];
 
 /**
@@ -123,6 +203,7 @@ function doPost(e) {
 
     var action = data.action || data.type || "";
     desktopRequest = Boolean(data.eventId) || action === "pos_probe";
+    if (action === 'full_report_snapshot' && !desktopRequest) return createJsonResponse({status:'error',code:'auth',message:'Tam rapor aktarımı doğrulanmış mağaza bağlantısı gerektirir.'});
     var props = PropertiesService.getScriptProperties();
     var expectedKey = props.getProperty("POS_API_KEY");
     var expectedStore = props.getProperty("POS_STORE_ID");
@@ -140,7 +221,7 @@ function doPost(e) {
         return createJsonResponse({status:"error", code:"invalid", message:"İşlem kimliği geçersiz."});
       }
       var allowed = ["save_sale","sale","sync_sale","refund","refund_sale","sale_refund",
-        "save_expense","expense","sync_expense","sync_tax_report","tax_report","daily_close","close",
+        "save_expense","expense","sync_expense","sync_tax_report","tax_report","daily_close","close","full_report_snapshot",
         "reopen_daily_close","reopen_day","save_platform_income","platform_income","inventory_sync",
         "fix_calendar","refresh_calendar","refresh_structure","sync_calendar"];
       if (allowed.indexOf(action) === -1) return createJsonResponse({status:"error",code:"invalid"});
@@ -208,6 +289,9 @@ function doPost(e) {
 
       case "inventory_sync":
         handleInventorySync(ss, data);
+        break;
+      case "full_report_snapshot":
+        handleFullReportSnapshot(ss, data.snapshot);
         break;
 
       case "fix_calendar":
@@ -449,7 +533,9 @@ function getOrCreateMonthlySalesSheet(ss, monthYearStr) {
 }
 
 function buildMonthlySalesSheetTemplate(sheet, monthYearStr) {
-  sheet.getRange("A1:AQ1").merge()
+  // Keep the title outside frozen column A so native Sheets accepts the merge.
+  sheet.getRange("A1").setValue("AYBARS POS").setFontWeight("bold");
+  sheet.getRange("B1:AQ1").merge()
     .setValue("AYBARS PETSHOP — " + monthYearStr + " GELİR TAKVİMİ (HAFTALIK / GÜNLÜK BLOK DÜZENİ)")
     .setBackground("#064e3b")
     .setFontColor("#ffffff")
@@ -529,12 +615,19 @@ function getSalesRowMap(sheet) {
     closeTime: 14,       // 🏁 Kapanış Saati
     countedCash: 15,     // 💵 Sayılan Kasa Nakit
     cashDiff: 16,        // ⚖️ Kasa Farkı
-    reconcileStatus: 17  // 🏷️ Mutabakat Durumu
+    reconcileStatus: 17, // 🏷️ Mutabakat Durumu
+    credit: 18,
+    collections: 19,
+    refunds: 20
   };
 }
 
 function ensureSalesSheetStructure(sheet) {
   var rowMap = getSalesRowMap(sheet);
+  sheet.getRange(rowMap.credit, 1).setValue('Veresiye Satış (Net)');
+  sheet.getRange(rowMap.collections, 1).setValue('Eski Borç Tahsilatı');
+  sheet.getRange(rowMap.refunds, 1).setValue('İade Tutarı');
+  sheet.getRange(18,1,3,40).setFontSize(10).setNumberFormat('₺#,##0.00');
 
   // A Sütunu Başlıkları (Kullanıcının talep ettiği satır başlıkları ve standart düzen)
   sheet.getRange(rowMap.total, 1).setValue("💰 GÜN TOPLAMI").setFontSize(9).setFontWeight("bold").setHorizontalAlignment("center").setBackground("#065f46").setFontColor("#a7f3d0");
@@ -632,7 +725,7 @@ function ensureSalesSheetStructure(sheet) {
 
       // Row 5: Gün Toplamı = Toplam Nakit (6) + Toplam Kredi Kartı (7) + Toplam Havale (8) + Toplam Online (9)
       sheet.getRange(rowMap.total, colIdx)
-        .setFormula("=SUM(" + colLetter + rowMap.totalCash + ":" + colLetter + rowMap.platform + ")")
+        .setFormula("=SUM(" + colLetter + rowMap.totalCash + ":" + colLetter + rowMap.platform + ")+" + colLetter + rowMap.credit + "-" + colLetter + rowMap.collections)
         .setNumberFormat("₺#,##0.00")
         .setBackground("#065f46")
         .setFontColor("#a7f3d0")
@@ -690,7 +783,7 @@ function ensureSalesSheetStructure(sheet) {
             sheet.getRange(r + 5, col).setFormula("=" + colLet + rowMap.officialTransfer + "+" + colLet + rowMap.unoffTransfer);
           } else if (r + 5 === rowMap.total) {
             var colLet = getColumnLetter(col);
-            sheet.getRange(r + 5, col).setFormula("=SUM(" + colLet + rowMap.totalCash + ":" + colLet + rowMap.platform + ")");
+            sheet.getRange(r + 5, col).setFormula("=SUM(" + colLet + rowMap.totalCash + ":" + colLet + rowMap.platform + ")+" + colLet + rowMap.credit + "-" + colLet + rowMap.collections);
           } else {
             sheet.getRange(r + 5, col).setValue(0);
           }
@@ -720,6 +813,9 @@ function handleSaveSale(ss, data) {
   var targetCol = getSalesColumnForDay(dayNum);
 
   var totalAmt = Number(data.total || 0);
+  var creditAmt = Number(data.creditSales || 0);
+  var isCollection = /tahsilat/i.test(data.channel || '') || data.isCollection === true;
+  if (!creditAmt && /veresiye/i.test(data.paymentType || '') && !isCollection) creditAmt = totalAmt;
   var cardAmt = Number(data.cardSales || 0);
   var cashAmt = Number(data.cashSales || 0);
   var transferAmt = Number(data.transferSales || 0);
@@ -745,6 +841,9 @@ function handleSaveSale(ss, data) {
   }
 
   var rowMap = getSalesRowMap(sheet);
+  if (creditAmt) sheet.getRange(rowMap.credit,targetCol).setValue(safeParseMoney(sheet.getRange(rowMap.credit,targetCol).getValue())+creditAmt);
+  if (isCollection) sheet.getRange(rowMap.collections,targetCol).setValue(safeParseMoney(sheet.getRange(rowMap.collections,targetCol).getValue())+totalAmt);
+  if (totalAmt < 0 && !isCollection) sheet.getRange(rowMap.refunds,targetCol).setValue(safeParseMoney(sheet.getRange(rowMap.refunds,targetCol).getValue())-totalAmt);
 
   // 🧾 Fişli Nakit Ekleme (Doğrudan hücre toplamına eklenir, not veya satır spam'i yapılmaz)
   if (officialCash !== 0) {
@@ -786,7 +885,7 @@ function handleSaveSale(ss, data) {
   var colLetter = getColumnLetter(targetCol);
   sheet.getRange(rowMap.totalCash, targetCol).setFormula("=" + colLetter + rowMap.officialCash + "+" + colLetter + rowMap.unoffCash);
   sheet.getRange(rowMap.totalTransfer, targetCol).setFormula("=" + colLetter + rowMap.officialTransfer + "+" + colLetter + rowMap.unoffTransfer);
-  sheet.getRange(rowMap.total, targetCol).setFormula("=SUM(" + colLetter + rowMap.totalCash + ":" + colLetter + rowMap.platform + ")");
+  sheet.getRange(rowMap.total, targetCol).setFormula("=SUM(" + colLetter + rowMap.totalCash + ":" + colLetter + rowMap.platform + ")+" + colLetter + rowMap.credit + "-" + colLetter + rowMap.collections);
   SpreadsheetApp.flush();
 
   if (data.officialSales !== undefined || data.taxBase !== undefined) {
@@ -810,7 +909,7 @@ function handleSavePlatformIncome(ss, data) {
   sheet.getRange(rowMap.platform, targetCol).setValue(curPlat + netAmt);
 
   var colLetter = getColumnLetter(targetCol);
-  sheet.getRange(rowMap.total, targetCol).setFormula("=SUM(" + colLetter + rowMap.totalCash + ":" + colLetter + rowMap.platform + ")");
+  sheet.getRange(rowMap.total, targetCol).setFormula("=SUM(" + colLetter + rowMap.totalCash + ":" + colLetter + rowMap.platform + ")+" + colLetter + rowMap.credit + "-" + colLetter + rowMap.collections);
 }
 
 // ===================================================================
@@ -1170,7 +1269,7 @@ function handleSyncTaxReport(ss, data) {
   var dateStr = data.date || getTodayFormatted();
   var timeStr = data.time || getTimeFormatted();
   sheet.getRange("B2:L2").merge()
-    .setValue("Son Güncelleme: " + dateStr + " " + timeStr + " | Tekil Yönetici Paneli (Hücreler Yerinde Güncellenir)")
+    .setValue("Son Güncelleme: " + dateStr + " " + timeStr + " | Uygulama varsayımlarıyla tahmini rapor; resmi beyanname değildir")
     .setBackground("#1e293b")
     .setFontColor("#94a3b8")
     .setFontStyle("italic")
@@ -1261,10 +1360,10 @@ function handleSyncTaxReport(ss, data) {
   var isHighRisk = (riskAmt > 0 || (cardSalesAmt > invoicedPurchasesAmt && invoicedPurchasesAmt > 0));
 
   var card3Rows = [
-    ["📊 Kartlı Satış Hacmi", cardSalesAmt, "GİB banka POS kayıtlarına düşen resmi ciro"],
-    ["📦 Faturalı Giriş Hacmi", invoicedPurchasesAmt, "GİB sisteminde kayıtlı faturalı mal alımları"],
+    ["📊 Kartlı Satış Hacmi", cardSalesAmt, "Uygulamada kart olarak kaydedilen satışlar"],
+    ["📦 Faturalı Giriş Hacmi", invoicedPurchasesAmt, "Uygulamada faturalı işaretlenen alımlar"],
     ["⚠️ Riskli Satış Hacmi", riskAmt, riskAmt > 0 ? "⚠️ Kartlı satış faturalı stoğu aşıyor!" : "✅ Kartlı satışlar faturalı alımla güvende"],
-    ["🛡️ GİB Denetim Riski", isHighRisk ? "YÜKSEK RİSK" : "GÜVENLİ", isHighRisk ? "Faturasız alınıp kartla satılan hacim tespit edildi" : "Stok faturalı alımlarla tam uyumlu"]
+    ["Kayıt Karşılaştırması", isHighRisk ? "YÜKSEK RİSK" : "GÜVENLİ", isHighRisk ? "Kayıtlı tutarlar arasında fark var; kayıtlar kontrol edilmeli." : "Stok faturalı alımlarla tam uyumlu"]
   ];
 
   sheet.getRange("J5:L8").setValues(card3Rows)
@@ -1389,7 +1488,7 @@ function handleDailyClose(ss, data) {
     salesSheet.getRange(rowMap.totalCash, targetCol).setFormula("=" + colLetter + rowMap.officialCash + "+" + colLetter + rowMap.unoffCash);
     salesSheet.getRange(rowMap.totalTransfer, targetCol).setFormula("=" + colLetter + rowMap.officialTransfer + "+" + colLetter + rowMap.unoffTransfer);
     salesSheet.getRange(rowMap.total, targetCol)
-      .setFormula("=SUM(" + colLetter + rowMap.totalCash + ":" + colLetter + rowMap.platform + ")")
+      .setFormula("=SUM(" + colLetter + rowMap.totalCash + ":" + colLetter + rowMap.platform + ")+" + colLetter + rowMap.credit + "-" + colLetter + rowMap.collections)
       .setNumberFormat("₺#,##0.00")
       .setHorizontalAlignment("center")
       .setFontWeight("bold")
@@ -1508,7 +1607,7 @@ function handleInventorySync(ss, data) {
       p.category || "",
       Number(p.stock || 0),
       Number(p.criticalThreshold || 5),
-      Number(p.buyPrice || 0),
+      Number(p.buyPrice !== undefined ? p.buyPrice : (p.cost || 0)),
       Number(p.price || 0),
       (p.batches && Array.isArray(p.batches)) ? p.batches.length : 0,
       getTodayFormatted() + " " + getTimeFormatted()
@@ -1621,3 +1720,85 @@ function resetSpreadsheetFinancials() {
   Logger.log("✅ Finansal tablolar (Gelir, Gider) sıfırlandı. Ürünler ve stoklar korundu!");
 }
 
+
+// === FULL SNAPSHOT REPORT BUILDER (shared with js/report-tables.js) ===
+/* Pure report builder shared with the bound Apps Script snapshot importer. */
+function buildAybarsSnapshotTables(data) {
+  function num(v) { return Number.isFinite(Number(v)) ? Number(v) : 0; }
+  function money(v) { return Math.round((v + Number.EPSILON) * 100) / 100; }
+  function date(v) {
+    var s=String(v || '').split('T')[0], m=/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(s);
+    return m ? m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0') : s;
+  }
+  function clean(v) {
+    if (v === null || v === undefined) return '';
+    if (typeof v === 'object') return JSON.stringify(v, function(k,val) { return /invoiceImage|invoiceFile|imageBase64/i.test(k) ? '[Görsel yedek dosyasında]' : val; }).slice(0,45000);
+    return v;
+  }
+  var groups={}, items={}, sales=[], issues=[];
+  (data.salesHistory || []).forEach(function(s) {
+    var day=date(s.date), total=num(s.total), refund=s.isRefund === true || total < 0;
+    var collection=s.isCollection === true || /tahsilat/i.test((s.channel || '')+' '+(s.paymentType || ''));
+    var cash=num(s.splitCash), card=num(s.splitCard), transfer=num(s.splitTransfer), credit=num(s.splitCredit), platform=num(s.platformSales);
+    if (Math.abs(cash+card+transfer+credit+platform) < .001 && Math.abs(total) > .001) {
+      var payment=String(s.paymentType || '').toLocaleLowerCase('tr-TR');
+      if (payment.indexOf('parçalı')>=0) issues.push([s.id,day,'Parçalı ödeme dağılımı eksik']);
+      else if (payment.indexOf('veresiye')>=0) credit=total;
+      else if (payment.indexOf('nakit')>=0) cash=total;
+      else if (/havale|iban|banka|eft/.test(payment)) transfer=total;
+      else if (/platform|getir|yemeksepeti/.test(payment)) platform=total;
+      else if (/kart/.test(payment)) card=total;
+      else issues.push([s.id,day,'Ödeme yöntemi bilinmiyor']);
+    }
+    if (Math.abs(cash+card+transfer+credit+platform-total)>.02) issues.push([s.id,day,'Ödeme dağılımı satış toplamıyla uyuşmuyor']);
+    var g=groups[day] || (groups[day]={gross:0,refunds:0,net:0,cash:0,card:0,transfer:0,credit:0,platform:0,vat:0,count:0,collections:0,expenses:0});
+    if (collection) g.collections+=total;
+    else {
+      g.gross+=Math.max(0,total);g.refunds+=Math.max(0,-total);g.net+=total;
+      g.cash+=cash;g.card+=card;g.transfer+=transfer;g.credit+=credit;g.platform+=platform;g.vat+=num(s.vatTotal);g.count+=refund?0:1;
+      (s.soldItems || []).forEach(function(p) {
+        var key=String(p.id), row=items[key] || (items[key]={id:p.id,name:p.name,qty:0,amount:0,cost:0,missingCost:false});
+        row.qty+=num(p.qty);row.amount+=num(p.qty)*num(p.customPrice === undefined ? p.price : p.customPrice);
+        row.cost+=num(p.qty)*num(p.cost); if (!num(p.cost)) row.missingCost=true;
+      });
+    }
+    sales.push([s.id,day,s.time || '',s.customerName || '',s.channel || '',s.paymentType || '',collection?'Tahsilat':refund?'İade':'Satış',total,cash,card,transfer,credit,platform,num(s.vatTotal),s.isOfficial === true?'Fişli':s.isOfficial === false?'Fişsiz':'Belirsiz',s.originalSaleId || '',s.itemsSummary || '',clean(s.soldItems)]);
+  });
+  (data.expenses || []).forEach(function(e) {
+    var day=date(e.date), g=groups[day] || (groups[day]={gross:0,refunds:0,net:0,cash:0,card:0,transfer:0,credit:0,platform:0,vat:0,count:0,collections:0,expenses:0});
+    g.expenses+=num(e.amount);
+  });
+  var headers=['Tarih','Brüt Satış','İade Tutarı','Net Ciro','Nakit Satış (Net)','Kart Satışı (Net)','Havale (Net)','Veresiye Satış (Net)','Platform (Net)','Satış KDV (Net)','Satış İşlem Sayısı','Borç Tahsilatı','Kayıtlı Gider'];
+  var months={}, daily=Object.keys(groups).sort().map(function(day) {
+    var g=groups[day], month=day.slice(0,7), m=months[month] || (months[month]={gross:0,refunds:0,net:0,cash:0,card:0,transfer:0,credit:0,platform:0,vat:0,count:0,collections:0,expenses:0});
+    Object.keys(g).forEach(function(k) {m[k]+=g[k];});
+    return [day,g.gross,g.refunds,g.net,g.cash,g.card,g.transfer,g.credit,g.platform,g.vat,g.count,g.collections,g.expenses].map(function(v){return typeof v==='number'?money(v):v;});
+  });
+  var monthly=Object.keys(months).sort().map(function(month){var g=months[month];return [month,g.gross,g.refunds,g.net,g.cash,g.card,g.transfer,g.credit,g.platform,g.vat,g.count,g.collections,g.expenses].map(function(v){return typeof v==='number'?money(v):v;});});
+  var reports={
+    'GÜNLÜK ÖZET':[headers].concat(daily),
+    'AYLIK ÖZET':[['Ay'].concat(headers.slice(1))].concat(monthly),
+    'SATIŞ DETAYLARI':[['İşlem ID','Tarih','Saat','Müşteri','Kanal','Ödeme','İşlem Türü','Toplam','Nakit','Kart','Havale','Veresiye','Platform','KDV','Fiş Durumu','Eski Satış ID','Ürün Özeti','Ürün Satırları']].concat(sales),
+    'ÜRÜN SATIŞ ÖZETİ':[['Ürün ID','Ürün Adı','Net Satılan Adet','Net Satış Tutarı','Kayıtlı Maliyet','Tahmini Brüt Kâr','Maliyet Kontrolü']].concat(Object.keys(items).map(function(k){var r=items[k];return [r.id,r.name,r.qty,money(r.amount),money(r.cost),money(r.amount-r.cost),r.missingCost?'Eksik maliyet var':'Kayıtlı maliyet kullanıldı'];})),
+    'VERİ KONTROLÜ':[['İşlem ID','Tarih','Kontrol Notu']].concat(issues)
+  };
+  function table(title, records, fields) { reports[title]=[fields.map(function(f){return f[1];})].concat((records || []).map(function(r){return fields.map(function(f){return clean(r[f[0]]);});})); }
+  table('GİDER DETAYLARI',data.expenses,[['id','ID'],['date','Tarih'],['time','Saat'],['mainCategory','Ana Kategori'],['subType','Gider Adı'],['desc','Açıklama'],['amount','Tutar'],['source','Ödeme Kaynağı'],['hasInvoice','Belge Var'],['vatRate','KDV Oranı'],['vatAmount','KDV Tutarı'],['deductibleVat','İndirilecek KDV'],['taxDeduction','Matrah İndirimi'],['kkeg','KKEG'],['withholdingTax','Stopaj'],['expenseType','Tür']]);
+  table('STOK ENJEKSİYON',(data.products || []).map(function(p){return {barcode:p.barcode,name:p.name,category:p.category,stock:p.stock,threshold:p.criticalThreshold || 2,cost:p.cost,price:p.price,batches:(p.batches || []).length,updated:data.exportDate};}),[['barcode','Barkod'],['name','Ürün Adı'],['category','Kategori'],['stock','Mevcut Stok'],['threshold','Kritik Eşik'],['cost','Alış Fiyatı (TL)'],['price','Satış Fiyatı (TL)'],['batches','Parti / Lot Sayısı'],['updated','Son Güncelleme']]);
+  table('İHTİYAÇ LİSTESİ',data.manualDeficits,[['name','Ürün / İhtiyaç'],['supplier','Tedarikçi'],['qty','İstenen Adet'],['ordered','Sipariş Verildi'],['note','Not'],['date','Eklenme Tarihi']]);
+  table('MÜŞTERİLER',data.customers,[['id','ID'],['name','Müşteri'],['phone','Telefon'],['address','Adres'],['pet','Evcil Hayvan'],['balance','Açık Borç'],['purchaseHistory','İşlem Geçmişi']]);
+  table('TEDARİKÇİLER',data.suppliers,[['id','ID'],['name','Tedarikçi'],['phone','Telefon'],['balance','Açık Borç'],['notes','Not'],['transactions','Alım / Ödeme Geçmişi']]);
+  table('SİPARİŞLER',data.orders,[['id','ID'],['date','Tarih'],['customerName','Müşteri'],['channel','Kanal'],['paymentMethod','Ödeme'],['total','Toplam'],['itemsSummary','Ürün Özeti'],['items','Ürünler'],['address','Adres'],['phone','Telefon'],['note','Not']]);
+  table('PLATFORM BEKLEYEN',data.platformPendingOrders,[['id','ID'],['date','Tarih'],['channel','Kanal'],['total','Toplam'],['itemsSummary','Ürün Özeti']]);
+  table('TESLİM EDİLEN',data.deliveredOrders,[['id','ID'],['date','Tarih'],['customerName','Müşteri'],['channel','Kanal'],['total','Toplam'],['itemsSummary','Ürün Özeti']]);
+  table('FİRE ZAYİ',data.wasteRecords,[['id','ID'],['date','Tarih'],['productName','Ürün'],['qty','Adet'],['unitCost','Birim Maliyet'],['totalLoss','Toplam Kayıp'],['reason','Neden'],['note','Not']]);
+  table('GÜN SONU DETAY',data.dailyCloseRecords,[['id','ID'],['date','Tarih'],['time','Saat'],['totalRevenue','Toplam Ciro'],['cashSales','Nakit'],['cardSales','Kart'],['transferSales','Havale'],['platformSales','Platform'],['cashExpenses','Nakit Gider'],['expectedCash','Beklenen Kasa'],['actualCash','Sayılan Kasa'],['difference','Kasa Farkı'],['closedAt','Kapanış Zamanı']]);
+  var archive=[];
+  Object.keys(data).forEach(function(k){if(Array.isArray(data[k]))data[k].forEach(function(record,i){archive.push([k,i+1,clean(record)]);});});
+  reports['VERİ ARŞİVİ']=[['Kaynak Alan','Kayıt Sırası','Kayıt JSON (fatura görselleri hariç)']].concat(archive);
+  reports['AKTARIM BİLGİSİ']=[['Bilgi','Değer'],['Kaynak',data.reportSource || 'aybars-pos tarayıcı demo yedeği'],['Yedek zamanı',data.exportDate || ''],['Aktarım şekli','Tek seferlik veri kopyası; otomatik bağlantı değil'],['Net ciro','Brüt satış eksi iadeler. Eski borç tahsilatı yeniden satış sayılmaz.'],['Maliyet','Ürün satırlarına kaydedilmiş maliyetler. Eksik maliyetler gerçek kârı hesaplamaya yetmez.'],['Eksik alanlar','Eski kayıtlarda bulunmayan değerler boş bırakılır; tutarlar uydurulmaz.'],['Görseller','Fatura görselleri JSON yedeğinde korunur, hücrelere taşınmaz.']];
+  var reportDay=date(data.reportDate || data.activeBusinessDate || data.exportDate), dayGroup=groups[reportDay] || {}, monthGroup=months[reportDay.slice(0,7)] || {};
+  reports['RAPOR PANELİ']=[['Gösterge','Değer'],['Rapor günü',reportDay],['Günlük net ciro',money(dayGroup.net || 0)],['Aylık net ciro',money(monthGroup.net || 0)],['Ayın kart satışları',money(monthGroup.card || 0)],['Ayın nakit satışları',money(monthGroup.cash || 0)],['Ayın havale satışları',money(monthGroup.transfer || 0)],['Ayın veresiye satışları',money(monthGroup.credit || 0)],['Ayın iadeleri',money(monthGroup.refunds || 0)],['Ayın giderleri',money(monthGroup.expenses || 0)],['Tüm dönem kart satışları',money(monthly.reduce(function(n,r){return n+num(r[5]);},0))],['Müşteri açık borcu',money((data.customers || []).reduce(function(n,c){return n+num(c.balance);},0))],['Tedarikçi açık borcu',money((data.suppliers || []).reduce(function(n,s){return n+num(s.balance);},0))],['Ürün sayısı',(data.products || []).length],['Satış / iade kayıt sayısı',(data.salesHistory || []).length],['Veri kopyasının zamanı',data.exportDate || ''],['Veri kaynağı',(data.reportSource || 'aybars-pos demo yedeği')+'; tam veri kopyası']];
+  return reports;
+}
+if (typeof module !== 'undefined' && module.exports) module.exports={buildAybarsSnapshotTables};

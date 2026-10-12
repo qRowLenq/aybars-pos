@@ -529,17 +529,24 @@ function reopenDailyCloseById(closeId) {
 }
 
 // ── Backup System ──
-function exportData() {
-  saveData();
-  const data = {
+function getFullReportSnapshot() {
+  return {
     categories, products, customers, suppliers,
     orders, platformPendingOrders, deliveredOrders,
     salesHistory, expenses, manualDeficits, heldCarts,
     bundles, wasteRecords, dailyCloseRecords,
     activeBusinessDate: localStorage.getItem('ps_active_business_date'),
+    reportDate: nowDate(),
+    reportSource: window.aybarsDesktop ? 'Windows mağaza verisi' : 'aybars-pos demo yedeği',
     financialOverview: typeof calculateDualFinancialOverview === 'function' ? calculateDualFinancialOverview() : null,
     exportDate: new Date().toISOString()
   };
+}
+
+function exportData() {
+  saveData();
+  const data = getFullReportSnapshot();
+
   const jsonStr = JSON.stringify(data, null, 2);
   const blob = new Blob([jsonStr], { type: "application/json" });
   const url = URL.createObjectURL(blob);

@@ -32,6 +32,7 @@
       <div class="local-settings-actions">
         <button type="submit" class="btn btn-primary">Bağlantıyı doğrula ve kaydet</button>
         <button type="button" id="localSyncNow" class="btn btn-outline">Şimdi aktar</button>
+        <button type="button" id="localFullReports" class="btn btn-outline">Tüm raporları E-Tabloya yenile</button>
         <button type="button" id="localBackup" class="btn btn-outline">Dosya yedeği al</button>
         <button type="button" id="localDataFolder" class="btn btn-outline">Veri klasörünü aç</button>
         <button type="button" id="localClose" class="btn btn-ghost">Kapat</button>
@@ -57,6 +58,18 @@
       finally {save.disabled=false;}
     };
     document.getElementById('localSyncNow').onclick=async()=>{await window.aybarsDesktop.sync();await refresh();};
+    document.getElementById('localFullReports').onclick=async event=>{
+      const button=event.currentTarget;button.disabled=true;
+      try {
+        const status=await window.aybarsDesktop.status();
+        if (!status.configured) { error.textContent='Önce mağaza bağlantısını doğrulayıp kaydedin.';return; }
+        window.desktopStorage.transaction(()=>{saveData();window.desktopStorage.enqueue({action:'full_report_snapshot',snapshot:getFullReportSnapshot()});});
+        const result=await window.aybarsDesktop.sync();
+        error.textContent=result.pending ? 'Tam rapor kuyruğa alındı; aktarım durumunu kontrol edin.' : 'Tüm raporlar güncel verilerle yenilendi.';
+        await refresh();
+      } catch { error.textContent='Rapor aktarımı tamamlanamadı. Güncel Code.gs dağıtımını ve bağlantıyı kontrol edin.'; }
+      finally {button.disabled=false;}
+    };
     document.getElementById('localBackup').onclick=async()=>{try{if(await window.aybarsDesktop.backup())error.textContent='Yedek dosyası kaydedildi.';}catch{error.textContent='Yedek alınamadı; disk alanını kontrol edin.';}};
     document.getElementById('localDataFolder').onclick=()=>window.aybarsDesktop.openData();
     await load();setInterval(()=>refresh().catch(()=>{}),5000);

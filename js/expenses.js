@@ -418,10 +418,10 @@ function calculateDualFinancialOverview() {
   const totalTaxBurden = payableVat + estimatedIncomeTax;
 
   // 4. Vergi Riski / Uyarısı (Kartsız/faturasız giriş yapılıp kartla satılan tutar hacmi)
-  const cardSales = (salesHistory || []).filter(s => {
-    const p = (s.paymentType || "").toUpperCase();
-    return p.includes("KART") || p.includes("KREDİ") || p.includes("BANKA") || p.includes("HAVALE") || p.includes("PLATFORM");
-  }).reduce((sum, s) => sum + (Number(s.total) || 0), 0);
+  const cardSales = (salesHistory || []).reduce((sum, s) => {
+    if (s.splitCard !== undefined) return sum + (Number(s.splitCard) || 0);
+    return sum + (/kart/i.test(s.paymentType || '') && !/parçalı/i.test(s.paymentType || '') ? (Number(s.total) || 0) : 0);
+  }, 0);
 
   const riskAmount = Math.max(0, cardSales - invoicedPurchases);
   const isHighRisk = riskAmount > 0;
