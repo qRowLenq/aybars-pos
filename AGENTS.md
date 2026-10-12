@@ -1,11 +1,11 @@
-# Proje ve Dağıtım Kuralları
+# Codexle Petshop Stok Takip — Proje ve Dağıtım Kuralları
 
 ## 🎯 Hedef Depolar
-Bu projede yapılacak tüm kod değişiklikleri, geliştirmeler ve dağıtımlar aşağıdaki depolara uygulanabilir:
+Bu projenin geliştirme ve demo deposu yalnızca `https://github.com/qRowLenq/aybars-pos.git`, demo adresi ise `https://qrowlenq.github.io/aybars-pos/` adresidir.
 
-1. **Aybars:** `https://github.com/budakhuseyin/aybars.git` (Canlı Demo: `https://budakhuseyin.github.io/aybars/`)
-2. **Aybars POS:** `https://github.com/qRowLenq/aybars-pos.git` (Canlı Demo: `https://qrowlenq.github.io/aybars-pos/`)
-3. **Bluepetshop:** `https://github.com/qRowLenq/bluepetshop.git` (Canlı Demo: `https://qrowlenq.github.io/bluepetshop/`)
+- **Bluepetshop canlı mağaza sistemidir.** Kullanıcı ayrıca açıkça izin verene kadar `qRowLenq/bluepetshop` deposuna, `https://qrowlenq.github.io/bluepetshop/` sitesine ve bu sisteme bağlı gerçek mağaza verilerine hiçbir değişiklik, push veya dağıtım yapılmamalıdır.
+- Diğer depolar bu çalışma kapsamında değildir. Kod değişiklikleri ve dağıtımlar yalnızca `qRowLenq/aybars-pos` deposuna uygulanmalıdır.
+- Web demosunun izole tarayıcı verileri ve kapalı Google E-Tablo gönderimleri korunmalıdır. Kurulu Windows sürümü ayrı olarak yerel SQLite ve mağazaya özel bağlantı kullanır.
 
 ## ⚙️ Google Script URL Mimarisi
 - `bluepetshop` deposu ve canlı adresi kendi özel Google Apps Script URL'sini (`AKfycbzVo_f31p2ys12zv8aXEOtIrwyRnHCtsN_rrGLReUjL0U5I_lktxDUW4ixM6i50Bvwi`) kullanır.

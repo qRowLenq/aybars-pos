@@ -1,6 +1,10 @@
 > **Aybars POS demo güncellemesi (12 Ekim 2026):** Bu dağıtım izole deneme verileri kullanır; işlemler `aybars_pos_demo_v1:` alanında tarayıcıya kaydedilir ve Google E-Tablo gönderimleri kapalıdır. Satış geçmişi ayrı pencereden açılır. Sepetten ürün iadesinde nakit/kart/havale ve eski satışın fişli/fişsiz durumu seçilebilir. Tek sürümde ürünler kademeli yüklenir. `Code.gs` negatif iade tutarlarını korur; gerçek E-Tablo için Apps Script dosyasının ayrıca yüklenmesi gerekir.
 
-# 🐾 Petshop Kasa & Envanter Yönetim Sistemi
+# 🐾 Codexle Petshop Stok Takip
+
+Bu proje `qRowLenq/aybars-pos` deposunda geliştirilen demo ve Windows uygulamasıdır. Web demosu örnek veriler kullanır; işlemler yalnızca tarayıcıda saklanır ve Google E-Tabloya gönderilmez. Windows uygulaması yerel SQLite veritabanı ve isteğe bağlı mağaza bağlantısı kullanır.
+
+`bluepetshop` ayrı, mağazada aktif kullanılan sistemdir. Kullanıcının ayrıca açık izni olmadan bu depoya, sitesine veya gerçek mağaza verilerine değişiklik yapılmaz.
 
 **Windows yerel sürümü:** Müşterinin bilgisayarına kurulan, SQLite üzerinde kayıt tutan ve
 her petshopun kendi Google E-Tablosuna çevrimdışı kuyrukla bağlanan sürüm eklendi.
