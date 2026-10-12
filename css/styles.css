@@ -165,6 +165,21 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 }
 .tab-pane.active { display: flex !important; }
 
+/* Expense sections must keep their natural height inside the scrolling tab. */
+#tab-expenses > * { flex-shrink: 0; min-width: 0; }
+#tab-expenses .df-title-box { min-width: 0; flex: 1 1 280px; }
+#tab-expenses .df-grid { grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); }
+#tab-expenses .df-value { overflow-wrap: anywhere; }
+.expense-field-help { display: block; font-size: 12px; line-height: 1.5; color: #53657b; margin-top: 5px; }
+.expense-form-intro { font-size: 13px; line-height: 1.6; margin: 0 0 16px; color: #53657b; }
+.expense-form-guide { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 16px; }
+.expense-form-guide summary { cursor: pointer; font-size: 13px; font-weight: 700; }
+.expense-form-guide dl { margin: 12px 0 0; font-size: 12px; line-height: 1.6; }
+.expense-form-guide dt { font-weight: 700; margin-top: 8px; }
+.expense-form-guide dd { margin: 0; color: #53657b; }
+#addExpenseModal .modal-box { width: 100%; }
+#addExpenseModal .modal-actions { flex-wrap: wrap; }
+
 /* ─── BUTTONS ─── */
 .btn {
   display: inline-flex;

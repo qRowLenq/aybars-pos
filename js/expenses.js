@@ -101,6 +101,18 @@ function handleExpenseCategoryChange() {
   const vatRateEl = document.getElementById("expVatRate");
   const subTypeEl = document.getElementById("expSubType");
 
+  const help = document.getElementById("expCategoryHelp");
+  const descriptions = {
+    "Genel Dükkân / Sarf": "Temizlik, poşet, kırtasiye ve fiş rulosu gibi dükkân ihtiyaçları.",
+    "Binek Taşıt & Akaryakıt": "Araç yakıtı, bakım ve taşıma harcamaları. Araç türüne göre muhasebe işlemi değişebilir.",
+    "Banka & POS Komisyon Kesintisi": "Bankanın veya POS hizmetinin kestiği komisyon ve işlem ücretleri.",
+    "Sabit Kira / Stopaj": "Dükkân kirası. Kira ve stopaj tutarlarını belgenle ve muhasebecinle kontrol et.",
+    "Demirbaş Alımı": "Bilgisayar, raf veya ekipman gibi uzun süre kullanılan alımlar.",
+    "Personel Maaşı & SGK": "Personel maaşı, SGK ve yemek gibi çalışan harcamaları.",
+    "Diğer": "Diğer türlere uymayan işletme harcamaları; gider adını açıkça yaz."
+  };
+  if (help) help.textContent = descriptions[cat] || descriptions["Diğer"];
+
   if (cat === "Sabit Kira / Stopaj") {
     if (vatRateEl) vatRateEl.value = "0";
     if (subTypeEl && !subTypeEl.value) subTypeEl.value = "Dükkân Kirası";
@@ -181,6 +193,8 @@ function calculateExpenseVatLive() {
 }
 
 function openAddExpenseModal(isMajor = false) {
+  const guide = document.getElementById("expenseFormGuide");
+  if (guide) guide.open = false;
   const isMajEl = document.getElementById("expIsMajor");
   if (isMajEl) isMajEl.value = isMajor ? "true" : "false";
 
@@ -621,6 +635,7 @@ function toggleDetailedTaxReport() {
   if (!panel) return;
   const isHidden = (panel.style.display === "none");
   panel.style.display = isHidden ? "block" : "none";
+  document.getElementById("btnToggleTaxReport")?.setAttribute("aria-expanded", String(isHidden));
   if (icon) icon.innerText = isHidden ? "▴ Kapat" : "▾ Aç";
   if (isHidden) {
     renderDualFinancialOverviewCard();

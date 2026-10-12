@@ -1661,27 +1661,39 @@
   <!-- Add Expense Modal (Advanced Tax Shield & Expense Engine) -->
   <div class="modal-overlay" id="addExpenseModal">
     <div class="modal-box" style="max-width:500px;">
-      <div class="modal-title" id="expModalTitle">💸 Yeni Gider & Vergi Kalkanı Girişi</div>
+      <div class="modal-title" id="expModalTitle">💸 Yeni Gider Kaydı</div>
+      <p class="expense-form-intro">İşletme için yaptığın harcamayı kaydet. Önce gider türünü, ödediğin toplam tutarı ve paranın hangi hesaptan çıktığını seç.</p>
+      <details class="expense-form-guide" id="expenseFormGuide">
+        <summary>Bu alanlar ne işe yarar?</summary>
+        <dl>
+          <dt>Gider türü ve gider adı</dt><dd>Tür, raporda harcamaları gruplar. Gider adı ise “Elektrik faturası” veya “Fiş rulosu” gibi ne aldığını belirtir. Satılacak ürün alımlarını “Yeni Mal / Fatura Girişi” ile kaydet.</dd>
+          <dt>Ödeme yöntemi</dt><dd>Paranın kasadan, banka hesabından, şahsi hesaptan veya kredi kartından çıktığını belirtir. Bu seçim banka işlemi gerçekleştirmez.</dd>
+          <dt>Belge ve KDV</dt><dd>Belgen varsa işaretle; KDV oranını belgedeki bilgiye göre seç. Toplam tutar KDV dahil girilir; KDV tutarını sistem hesaplar. Dekont bulunması tek başına KDV indirimi anlamına gelmez.</dd>
+          <dt>Hesaplama özeti</dt><dd>KDV hariç tutar, KDV ayrıldıktan kalan tutardır. İndirilebilecek KDV ve matrah indirimi, uygulamanın mevcut varsayımlarıyla hesaplanan tahminlerdir; ödenecek vergi veya kesin vergi tasarrufu değildir.</dd>
+        </dl>
+        <p class="expense-field-help">Vergiyle ilgili sonuçları muhasebecinle kontrol et. Bu ekran resmi beyanname hazırlamaz.</p>
+      </details>
       <input type="hidden" id="expIsMajor">
 
       <!-- Ana Kategori / Vergi Kalkanı Kategorisi -->
       <div class="fg">
-        <label>Ana Kategori (Vergi Kalkanı Mantığı)</label>
-        <select id="expMainCategory" class="fc font-bold" onchange="handleExpenseCategoryChange()">
-          <option value="Genel Dükkân / Sarf">🛍️ Genel Dükkân / Sarf (%100 Matrah İndirimi + Tam KDV)</option>
-          <option value="Binek Taşıt & Akaryakıt">🚗 Binek Taşıt & Akaryakıt (%70 Matrah, %30 KKEG Kısıtı)</option>
-          <option value="Banka & POS Komisyon Kesintisi">💳 Banka & POS Komisyon Kesintisi (%100 Finansman)</option>
-          <option value="Sabit Kira / Stopaj">🏢 Sabit Kira / Stopaj (%20 Stopaj Takibi İle)</option>
-          <option value="Demirbaş Alımı">🛠️ Demirbaş Alımı (&gt; 12.000 TL Amortisman Kuralı)</option>
+        <label for="expMainCategory">Gider Türü</label>
+        <select id="expMainCategory" class="fc font-bold" aria-describedby="expCategoryHelp" onchange="handleExpenseCategoryChange()">
+          <option value="Genel Dükkân / Sarf">🛍️ Dükkân ihtiyaçları / Sarf malzemesi</option>
+          <option value="Binek Taşıt & Akaryakıt">🚗 Araç / Akaryakıt</option>
+          <option value="Banka & POS Komisyon Kesintisi">💳 Banka / POS komisyonu</option>
+          <option value="Sabit Kira / Stopaj">🏢 Kira / Stopaj</option>
+          <option value="Demirbaş Alımı">🛠️ Demirbaş / Ekipman</option>
           <option value="Personel Maaşı & SGK">👥 Personel Maaşı & SGK / Yemek</option>
           <option value="Diğer">📌 Diğer İşletme Gideri</option>
         </select>
+        <small id="expCategoryHelp" class="expense-field-help" aria-live="polite">Temizlik, poşet, kırtasiye ve fiş rulosu gibi dükkân ihtiyaçları.</small>
       </div>
 
       <!-- Alt Tür / Gider Kalemi -->
       <div class="form-row form-row-2">
         <div class="fg">
-          <label>Alt Tür (Gider Kalemi)</label>
+          <label for="expSubType">Gider Adı</label>
           <input type="text" id="expSubType" class="fc" placeholder="Örn: Kira, Mazot, Elektrik..."
             list="expSubTypesList">
           <datalist id="expSubTypesList">
@@ -1711,7 +1723,7 @@
       <!-- Tutar & Açıklama -->
       <div class="form-row form-row-2">
         <div class="fg">
-          <label>Tutar (₺ - KDV Dahil)</label>
+          <label for="expAmount">Ödenen Toplam (₺ · KDV Dahil)</label>
           <input type="number" id="expAmount" class="fc font-bold" placeholder="Örn: 1500" step="any"
             oninput="calculateExpenseTaxShieldLive()">
         </div>
@@ -1727,7 +1739,7 @@
         <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600; margin-bottom:0;">
           <input type="checkbox" id="expHasVat" checked onchange="toggleExpenseVatInputs()"
             style="width:16px; height:16px; cursor:pointer;">
-          <span>🧾 Fatura / Fiş / Dekont Mevcut (Resmi Gider)</span>
+          <span>🧾 Harcamaya ait belge var</span>
         </label>
         <div id="expVatInputsContainer" style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--border);">
           <div class="form-row form-row-2">
@@ -1762,11 +1774,11 @@
           <b id="expNetAmtDisplay">0.00 ₺</b>
         </div>
         <div class="tax-shield-row" style="color:var(--primary);">
-          <span>Mahsup Edilebilir KDV Tutarı:</span>
+          <span>Tahmini İndirilebilecek KDV:</span>
           <b id="expDeductibleVatDisplay">0.00 ₺</b>
         </div>
         <div class="tax-shield-row" style="color:#16a34a;">
-          <span>🛡️ Vergi Matrah İndirimi:</span>
+          <span>Tahmini Matrah İndirimi:</span>
           <b id="expTaxDeductionDisplay">0.00 ₺</b>
         </div>
         <div class="tax-shield-row" id="expKkegRow" style="display:none; color:#dc2626;">
@@ -1781,7 +1793,7 @@
 
       <div class="modal-actions">
         <button class="btn btn-ghost" onclick="closeModal('addExpenseModal')">İptal</button>
-        <button class="btn btn-primary" onclick="saveExpense()">Kaydet & Senkronize Et</button>
+        <button class="btn btn-primary" onclick="saveExpense()">Gideri Kaydet</button>
       </div>
     </div>
   </div>
