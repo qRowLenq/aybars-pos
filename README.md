@@ -8,9 +8,7 @@ Modern esnaf ihtiyaçları ile bulut mimarisini harmanlayan, istemci tarafında 
 
 | Sistem / Şube | GitHub Deposu | Canlı Demo (GitHub Pages) |
 |---|---|---|
-| **🐾 Aybars** | [budakhuseyin/aybars](https://github.com/budakhuseyin/aybars) | [https://budakhuseyin.github.io/aybars/](https://budakhuseyin.github.io/aybars/) |
 | **🛒 Aybars POS** | [qRowLenq/aybars-pos](https://github.com/qRowLenq/aybars-pos) | [https://qrowlenq.github.io/aybars-pos/](https://qrowlenq.github.io/aybars-pos/) |
-| **💙 Bluepetshop** | [qRowLenq/bluepetshop](https://github.com/qRowLenq/bluepetshop) | [https://qrowlenq.github.io/bluepetshop/](https://qrowlenq.github.io/bluepetshop/) |
 
 ---
 
