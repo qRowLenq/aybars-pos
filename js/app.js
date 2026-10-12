@@ -678,7 +678,7 @@ function initializeApp() {
   // Set version in footer
   const vEl = document.getElementById("appVersion");
   if (vEl) {
-    vEl.innerText = "Aybars POS Demo · v3.3";
+    vEl.innerText = window.aybarsDesktop ? "Aybars POS · Yerel sürüm 1.0.0" : "Aybars POS Demo · v3.3";
   }
 
   // Arka planda donmayı önleyen gecikmeli yükleme (Datalist ve Toptancı listeleri ana iş parçacığını bloke etmez)

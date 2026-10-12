@@ -25,7 +25,9 @@
     });
     area.prepend(summary); area.prepend(intro);
     const notice = document.createElement('div'); notice.className='demo-notice';
-    notice.innerHTML='<span><b>DEMO SÜRÜMÜ</b> · Örnek stoklarla deneyebilirsin. İşlemler yalnızca bu tarayıcıda saklanır.</span><button class="btn btn-sm" onclick="resetBlueDemo()">Demoyu yeniden başlat ↻</button>';
+    notice.innerHTML=window.aybarsDesktop
+      ? '<span><b id="localStoreName">Petshop</b> · Kayıtlar bu bilgisayarda saklanır.</span><span id="localSyncStatus" role="status">E-Tablo bağlantısı ayarlanmamış</span>'
+      : '<span><b>DEMO SÜRÜMÜ</b> · Örnek stoklarla deneyebilirsin. İşlemler yalnızca bu tarayıcıda saklanır.</span><button class="btn btn-sm" onclick="resetBlueDemo()">Demoyu yeniden başlat ↻</button>';
     document.querySelector('.app-header').after(notice);
     document.addEventListener('keydown', event => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k' && !document.querySelector('dialog[open]')) {

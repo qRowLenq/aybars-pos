@@ -1,1 +1,7 @@
 scratch/
+node_modules/
+dist/
+.cache/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm

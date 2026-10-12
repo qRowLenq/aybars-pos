@@ -1,6 +1,13 @@
 /* This copy is an offline demo. All application keys have their own namespace. */
-window.BLUEPETSHOP_DEMO = true;
+window.BLUEPETSHOP_DEMO = !window.aybarsDesktop;
 (() => {
+  if(window.aybarsDesktop){
+    window.seedBlueDemo=()=>{
+      window.catalogProducts=[];
+      window.catalogDatabase={categories:[],products:[],suppliers:[],customers:[],salesHistory:[],expenses:[]};
+    };
+    return;
+  }
   const prefix = 'aybars_pos_demo_v1:';
   const original = {};
   for (const method of ['getItem', 'setItem', 'removeItem']) {

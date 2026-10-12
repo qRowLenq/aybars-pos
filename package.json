@@ -1,0 +1,48 @@
+{
+  "name": "aybars-pos",
+  "version": "1.0.0",
+  "description": "Windows için yerel petshop kasa ve stok uygulaması",
+  "author": "Aybars POS",
+  "private": true,
+  "main": "desktop/main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test desktop/test/*.test.cjs",
+    "test:ui": "node desktop/test/ui-smoke.cjs",
+    "dist:win": "electron-builder --win nsis --x64",
+    "dist:win:portable": "electron-builder --win zip --x64"
+  },
+  "devDependencies": {
+    "electron": "44.7.0",
+    "electron-builder": "26.15.3",
+    "playwright-core": "1.58.2"
+  },
+  "build": {
+    "appId": "com.aybars.pos",
+    "productName": "Aybars POS",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "desktop/*.cjs",
+      "index.html",
+      "js/**",
+      "css/**",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "script": "desktop/installer.nsi",
+      "installerLanguages": ["tr_TR"],
+      "oneClick": false,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "deleteAppDataOnUninstall": false,
+      "artifactName": "Aybars-POS-Kurulum-${version}.${ext}"
+    }
+  }
+}

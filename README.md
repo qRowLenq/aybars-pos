@@ -2,6 +2,10 @@
 
 # 🐾 Petshop Kasa & Envanter Yönetim Sistemi
 
+**Windows yerel sürümü:** Müşterinin bilgisayarına kurulan, SQLite üzerinde kayıt tutan ve
+her petshopun kendi Google E-Tablosuna çevrimdışı kuyrukla bağlanan sürüm eklendi.
+[Windows kurulum ve mağaza bağlantısı rehberi](docs/WINDOWS-KURULUM.md).
+
 Modern esnaf ihtiyaçları ile bulut mimarisini harmanlayan, istemci tarafında tam yetenekli (Client-Side Rendered) bir POS ve ERP çözümü.
 
 ## 🚀 Canlı Demo & Dağıtım Linkleri

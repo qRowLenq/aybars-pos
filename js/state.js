@@ -4637,7 +4637,7 @@ function loadState() {
   const dbSource = window.catalogDatabase || null;
   const deletedIds = new Set((raw("ps_deleted_product_ids") || []).map(id => String(id)));
 
-  if (savedVer !== CURRENT_CATALOG_VERSION || !Array.isArray(prods) || prods.length < 50) {
+  if (!window.aybarsDesktop && (savedVer !== CURRENT_CATALOG_VERSION || !Array.isArray(prods) || prods.length < 50)) {
     const existingBarcodeMap = new Map();
     const existingStockMap = new Map();
     if (Array.isArray(prods)) {
@@ -4723,7 +4723,7 @@ function loadState() {
       : JSON.parse(JSON.stringify(catalogSource)).filter(p => p && p.id && !deletedIds.has(String(p.id)));
     const currentIdSet = new Set(window.products.map(p => String(p.id)));
     let hasNewInjected = false;
-    catalogSource.forEach(cp => {
+    (window.aybarsDesktop ? [] : catalogSource).forEach(cp => {
       if (cp && cp.id && !currentIdSet.has(String(cp.id)) && !deletedIds.has(String(cp.id))) {
         window.products.push(JSON.parse(JSON.stringify(cp)));
         currentIdSet.add(String(cp.id));
@@ -4776,7 +4776,9 @@ function loadState() {
   products = window.products;
 
   let sups = raw("ps_suppliers");
-  if (!Array.isArray(sups) || sups.length === 0) {
+  if (window.aybarsDesktop) {
+    window.suppliers = Array.isArray(sups) ? sups : [];
+  } else if (!Array.isArray(sups) || sups.length === 0) {
     window.suppliers = JSON.parse(JSON.stringify(sampleSuppliers));
     localStorage.setItem("ps_suppliers", JSON.stringify(window.suppliers));
   } else {
@@ -4811,7 +4813,7 @@ function loadState() {
   window.deliveredOrders = raw("ps_delivered_orders") || [];
 
   let sls = raw("ps_sales_history");
-  window.salesHistory = Array.isArray(sls) ? sls : [...sampleSalesHistory];
+  window.salesHistory = Array.isArray(sls) ? sls : (window.aybarsDesktop ? [] : [...sampleSalesHistory]);
   if (Array.isArray(window.salesHistory)) {
     let hasSalesCatMigrated = false;
     window.salesHistory.forEach(s => {
@@ -4834,7 +4836,7 @@ function loadState() {
   }
 
   let exp = raw("ps_expenses");
-  window.expenses = Array.isArray(exp) ? exp : [...sampleExpenses];
+  window.expenses = Array.isArray(exp) ? exp : (window.aybarsDesktop ? [] : [...sampleExpenses]);
 
   window.manualDeficits = raw("ps_deficits") || [];
   window.heldCarts = raw("ps_held_carts") || [];
@@ -4937,6 +4939,10 @@ function sendToGoogleSheets(payload) {
     payload.supplierDebts = window.suppliers
       .filter(s => (s.balance || 0) > 0)
       .map(s => ({ name: s.name, balance: Number(s.balance || 0) }));
+  }
+  if (window.aybarsDesktop) {
+    window.desktopStorage.enqueue(payload);
+    return;
   }
   fetch(GOOGLE_SCRIPT_URL, {
     method: "POST",

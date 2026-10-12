@@ -90,6 +90,9 @@ function doGet(e) {
 function doPost(e) {
   var lock = LockService.getScriptLock();
   var lockAcquired = false;
+  var receiptSheet = null;
+  var receiptRow = 0;
+  var desktopRequest = false;
   
   try {
     lockAcquired = lock.tryLock(30000);
@@ -108,9 +111,54 @@ function doPost(e) {
       data = e.parameter;
     }
 
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    deleteGunSonuKasaIfExists(ss);
     var action = data.action || data.type || "";
+    desktopRequest = Boolean(data.eventId) || action === "pos_probe";
+    var props = PropertiesService.getScriptProperties();
+    var expectedKey = props.getProperty("POS_API_KEY");
+    var expectedStore = props.getProperty("POS_STORE_ID");
+    if (desktopRequest || expectedKey || expectedStore) {
+      if (!expectedKey || !expectedStore || data.apiKey !== expectedKey || data.storeId !== expectedStore) {
+        return createJsonResponse({status:"error", code:"auth", message:"Mağaza bağlantısı doğrulanamadı."});
+      }
+    }
+    if (action === "pos_probe") {
+      return createJsonResponse({status:"success", protocol:"aybars-desktop-v1", storeId:expectedStore});
+    }
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (desktopRequest) {
+      if (!/^[a-f0-9-]{36}$/.test(String(data.eventId))) {
+        return createJsonResponse({status:"error", code:"invalid", message:"İşlem kimliği geçersiz."});
+      }
+      var allowed = ["save_sale","sale","sync_sale","refund","refund_sale","sale_refund",
+        "save_expense","expense","sync_expense","sync_tax_report","tax_report","daily_close","close",
+        "reopen_daily_close","reopen_day","save_platform_income","platform_income","inventory_sync",
+        "fix_calendar","refresh_calendar","refresh_structure","sync_calendar"];
+      if (allowed.indexOf(action) === -1) return createJsonResponse({status:"error",code:"invalid"});
+      receiptSheet = ss.getSheetByName("_AYBARS_SYNC");
+      if (!receiptSheet) {
+        receiptSheet = ss.insertSheet("_AYBARS_SYNC");
+        receiptSheet.appendRow(["eventId","storeId","status","action","date"]);
+        // An empty new spreadsheet may contain only this sheet; hide after other sheets exist.
+        if (ss.getSheets().length > 1) receiptSheet.hideSheet();
+      }
+      var rows = receiptSheet.getLastRow() > 1
+        ? receiptSheet.getRange(2,1,receiptSheet.getLastRow()-1,3).getValues() : [];
+      for (var ri=0;ri<rows.length;ri++) {
+        if (rows[ri][0] === data.eventId && rows[ri][1] === expectedStore) {
+          receiptRow = ri+2;
+          if (rows[ri][2] === "done") return desktopAck(data);
+          if (rows[ri][2] !== "retry") return createJsonResponse({status:"error",code:"uncertain",
+            message:"Önceki aktarım kontrol edilmeli. İşlem otomatik tekrarlanmadı."});
+          break;
+        }
+      }
+      if (!receiptRow) {
+        receiptSheet.appendRow([data.eventId,expectedStore,"processing",action,new Date().toISOString()]);
+        receiptRow=receiptSheet.getLastRow();
+      } else receiptSheet.getRange(receiptRow,3).setValue("processing");
+      SpreadsheetApp.flush();
+    }
+    deleteGunSonuKasaIfExists(ss);
 
     switch (action) {
       case "save_sale":
@@ -169,15 +217,26 @@ function doPost(e) {
         break;
     }
 
+    if (desktopRequest) {
+      SpreadsheetApp.flush();
+      receiptSheet.getRange(receiptRow,3).setValue("done");
+      SpreadsheetApp.flush();
+      return desktopAck(data);
+    }
     return createJsonResponse({ status: "success", action: action, timestamp: new Date().toISOString() });
 
   } catch (err) {
-    return createJsonResponse({ status: "error", message: err.toString() });
+    return createJsonResponse({status:"error", code:desktopRequest && receiptRow ? "uncertain" : "error",
+      message:desktopRequest ? "Aktarım tamamlanamadı; işlem kaydını kontrol edin." : err.toString()});
   } finally {
     if (lockAcquired) {
       lock.releaseLock();
     }
   }
+}
+
+function desktopAck(data) {
+  return createJsonResponse({status:"success",protocol:"aybars-desktop-v1",eventId:data.eventId,storeId:data.storeId});
 }
 
 function createJsonResponse(dataObj) {
