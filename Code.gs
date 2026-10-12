@@ -662,7 +662,7 @@ function handleSaveSale(ss, data) {
   var officialTransfer = Number(data.officialTransfer !== undefined ? data.officialTransfer : (isOfficial ? transferAmt : 0));
   var unoffTransfer = Number(data.unoffTransfer !== undefined ? data.unoffTransfer : (!isOfficial ? transferAmt : 0));
 
-  if (cardAmt === 0 && cashAmt === 0 && transferAmt === 0 && platformAmt === 0) {
+  if (cardAmt === 0 && cashAmt === 0 && transferAmt === 0 && platformAmt === 0 && !/veresiye/i.test(data.paymentType || "")) {
     var pType = (data.paymentType || "").toLowerCase();
     if (pType.includes("nakit") && !pType.includes("parçalı")) {
       if (isOfficial) officialCash = totalAmt; else unoffCash = totalAmt;
@@ -680,37 +680,37 @@ function handleSaveSale(ss, data) {
   // 🧾 Fişli Nakit Ekleme (Doğrudan hücre toplamına eklenir, not veya satır spam'i yapılmaz)
   if (officialCash !== 0) {
     var curOffCash = safeParseMoney(sheet.getRange(rowMap.officialCash, targetCol).getValue());
-    sheet.getRange(rowMap.officialCash, targetCol).setValue(Math.max(0, curOffCash + officialCash));
+    sheet.getRange(rowMap.officialCash, targetCol).setValue(curOffCash + officialCash);
   }
 
   // 📝 Fişsiz Nakit Ekleme
   if (unoffCash !== 0) {
     var curUnoffCash = safeParseMoney(sheet.getRange(rowMap.unoffCash, targetCol).getValue());
-    sheet.getRange(rowMap.unoffCash, targetCol).setValue(Math.max(0, curUnoffCash + unoffCash));
+    sheet.getRange(rowMap.unoffCash, targetCol).setValue(curUnoffCash + unoffCash);
   }
 
   // 💳 Toplam Kredi Kartı Ekleme
   if (cardAmt !== 0) {
     var curCard = safeParseMoney(sheet.getRange(rowMap.card, targetCol).getValue());
-    sheet.getRange(rowMap.card, targetCol).setValue(Math.max(0, curCard + cardAmt));
+    sheet.getRange(rowMap.card, targetCol).setValue(curCard + cardAmt);
   }
 
   // 🧾 Fişli Havale Ekleme
   if (officialTransfer !== 0) {
     var curOffTrans = safeParseMoney(sheet.getRange(rowMap.officialTransfer, targetCol).getValue());
-    sheet.getRange(rowMap.officialTransfer, targetCol).setValue(Math.max(0, curOffTrans + officialTransfer));
+    sheet.getRange(rowMap.officialTransfer, targetCol).setValue(curOffTrans + officialTransfer);
   }
 
   // 🏦 Fişsiz Havale Ekleme
   if (unoffTransfer !== 0) {
     var curUnoffTrans = safeParseMoney(sheet.getRange(rowMap.unoffTransfer, targetCol).getValue());
-    sheet.getRange(rowMap.unoffTransfer, targetCol).setValue(Math.max(0, curUnoffTrans + unoffTransfer));
+    sheet.getRange(rowMap.unoffTransfer, targetCol).setValue(curUnoffTrans + unoffTransfer);
   }
 
   // 📦 Toplam Online Ekleme
   if (platformAmt !== 0) {
     var curPlat = safeParseMoney(sheet.getRange(rowMap.platform, targetCol).getValue());
-    sheet.getRange(rowMap.platform, targetCol).setValue(Math.max(0, curPlat + platformAmt));
+    sheet.getRange(rowMap.platform, targetCol).setValue(curPlat + platformAmt);
   }
 
   // Formülleri Garantiye Al

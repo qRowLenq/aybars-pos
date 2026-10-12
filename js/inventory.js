@@ -591,9 +591,9 @@ function renderInventoryTable() {
 
   const activeCats = (typeof getActiveCategories === "function") ? getActiveCategories() : (window.categories || categories || ["Kedi", "Köpek", "Kuş / Kemirgen", "Açık Mama", "Kum", "Kozmetik", "Kampanyalar", "elekli paspas"]);
 
-  const lightActive = (typeof isLightMode === "function" && isLightMode());
-  const searchQ = (document.getElementById("invSearchInput")?.value || "").trim();
-  const limit = (!lightActive || (searchQ && searchQ.length > 0)) ? filtered.length : (window.invTableLimit || 50);
+  const filterKey = q + "|" + cat + "|" + sortVal;
+  if(window.invFilterKey !== filterKey){window.invTableLimit=50;window.invFilterKey=filterKey;}
+  const limit = window.invTableLimit || 50;
   const itemsToRender = filtered.slice(0, limit);
 
   const rowsHtml = itemsToRender.map(p => {
@@ -663,7 +663,7 @@ function renderInventoryTable() {
   }).join('');
 
   let moreRow = "";
-  if (lightActive && filtered.length > limit) {
+  if (filtered.length > limit) {
     const remaining = filtered.length - limit;
     moreRow = `
       <tr>

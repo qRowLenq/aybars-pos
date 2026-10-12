@@ -674,14 +674,11 @@ function initializeApp() {
     else if (typeof window !== "undefined" && typeof window.setPosReceiptDefaultUnofficial === "function") window.setPosReceiptDefaultUnofficial();
   } catch(e) {}
   
-  // Set mode badge in header
-  try { if (typeof updateModeBadge === "function") updateModeBadge(); } catch(e) {}
 
   // Set version in footer
   const vEl = document.getElementById("appVersion");
   if (vEl) {
-    const isLight = (typeof isLightMode === "function" && isLightMode());
-    vEl.innerText = isLight ? "v3.2.1 (Hafif & Hızlı Mod)" : "v3.2.1 (Standart Sürüm)";
+    vEl.innerText = "Aybars POS Demo · v3.3";
   }
 
   // Arka planda donmayı önleyen gecikmeli yükleme (Datalist ve Toptancı listeleri ana iş parçacığını bloke etmez)

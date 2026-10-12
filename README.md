@@ -1,3 +1,5 @@
+> **Aybars POS demo güncellemesi (12 Ekim 2026):** Bu dağıtım izole deneme verileri kullanır; işlemler `aybars_pos_demo_v1:` alanında tarayıcıya kaydedilir ve Google E-Tablo gönderimleri kapalıdır. Satış geçmişi ayrı pencereden açılır. Sepetten ürün iadesinde nakit/kart/havale ve eski satışın fişli/fişsiz durumu seçilebilir. Tek sürümde ürünler kademeli yüklenir. `Code.gs` negatif iade tutarlarını korur; gerçek E-Tablo için Apps Script dosyasının ayrıca yüklenmesi gerekir.
+
 # 🐾 Petshop Kasa & Envanter Yönetim Sistemi
 
 Modern esnaf ihtiyaçları ile bulut mimarisini harmanlayan, istemci tarafında tam yetenekli (Client-Side Rendered) bir POS ve ERP çözümü.

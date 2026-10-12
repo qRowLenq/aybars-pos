@@ -244,50 +244,7 @@ function deleteCategory(catName) {
 }
 window.deleteCategory = deleteCategory;
 
-function isLightMode() {
-  const repoKey = (typeof window !== "undefined" && window.location) ? (window.location.pathname.split('/')[1] || 'root') : 'root';
-  const stored = localStorage.getItem("ps_performance_mode_" + repoKey) || localStorage.getItem("ps_performance_mode");
-  if (stored === "light") return true;
-  if (stored === "standard") return false;
-  // Varsayılan: aybars-pos ve bluepetshop depoları Hafif mod, aybars ana deposu Standart sürüm
-  if (typeof window !== "undefined" && window.location) {
-    const h = window.location.href.toLowerCase();
-    if (h.includes("aybars-pos") || h.includes("bluepetshop") || h.includes("localhost") || h.includes("127.0.0.1")) {
-      return true;
-    }
-  }
-  return false;
-}
-window.isLightMode = isLightMode;
-
-function togglePosPerformanceMode() {
-  const current = isLightMode();
-  const newMode = current ? "standard" : "light";
-  const repoKey = (typeof window !== "undefined" && window.location) ? (window.location.pathname.split('/')[1] || 'root') : 'root';
-  localStorage.setItem("ps_performance_mode_" + repoKey, newMode);
-  localStorage.setItem("ps_performance_mode", newMode);
-  updateModeBadge();
-  window.posCatalogLimit = 48;
-  renderCatalog();
-  if (typeof toast === "function") {
-    toast(newMode === "light" ? "⚡ Hafif Mod aktif (Hızlı açılış & 48 ürün)" : "🖥️ Standart Mod aktif (Eski sürüm - 327 ürün doğrudan ekranda)", "info");
-  }
-}
-window.togglePosPerformanceMode = togglePosPerformanceMode;
-
-function updateModeBadge() {
-  const btn = document.getElementById("posModeToggleBtn");
-  if (!btn) return;
-  const light = isLightMode();
-  btn.innerHTML = light ? "⚡ Hafif Mod" : "🖥️ Standart Sürüm";
-  btn.title = light 
-    ? "Hafif Mod devrede (Düşük donanımlı cihazlar için optimize). Standart tam sürüme geçmek için tıklayın."
-    : "Standart Mod devrede (Eski sürüm - Tüm ürünler doğrudan gösterilir). Hafif moda geçmek için tıklayın.";
-  btn.style.color = light ? "#10b981" : "#e0e7ff";
-  btn.style.border = light ? "1px solid #10b981" : "1px solid rgba(255,255,255,0.2)";
-}
-window.updateModeBadge = updateModeBadge;
-
+// One optimized version: render products in batches on every device.
 function filterCategory(cat) {
   window.posCatalogLimit = 48;
   selectedCategory = cat || "TÜMÜ";
@@ -379,8 +336,9 @@ function renderCatalog() {
   });
 
   const fragment = document.createDocumentFragment();
-  const lightActive = isLightMode();
-  const limit = (!lightActive || (search && search.length > 0)) ? filtered.length : (window.posCatalogLimit || 48);
+  const filterKey = search + "|" + selectedCategory + "|" + sortVal;
+  if(window.posFilterKey !== filterKey){window.posCatalogLimit=48;window.posFilterKey=filterKey;}
+  const limit = window.posCatalogLimit || 48;
   const itemsToRender = filtered.slice(0, limit);
 
   itemsToRender.forEach(p => {
@@ -406,7 +364,7 @@ function renderCatalog() {
     fragment.appendChild(card);
   });
 
-  if (lightActive && filtered.length > limit) {
+  if (filtered.length > limit) {
     const remaining = filtered.length - limit;
     const moreCard = document.createElement("div");
     moreCard.className = "product-card load-more-card";
@@ -626,7 +584,7 @@ function completeSale(payType, splitDetails = null, splitData = null) {
 
   const saleRecord = {
     id: Date.now(), date: nowDate(), time: nowTime(),
-    customerName: custName, itemsSummary, soldItems: [...cart],
+    customerId: cust ? cust.id : null, customerName: custName, itemsSummary, soldItems: [...cart],
     total, vatTotal: Number(vatTotal.toFixed(2)),
     paymentType: splitDetails ? `Parçalı (${splitDetails})` : payType,
     splitCash: Number(splitCash.toFixed(2)),
@@ -848,123 +806,12 @@ function renderPosSalesHistory() {
     }
   }
 
-  if (!container) return;
-  container.innerHTML = "";
-
-  if (todaySales.length === 0) {
-    container.innerHTML = `<span class="text-sm text-muted">Bugün henüz satış yok.</span>`;
-    return;
-  }
-
-  const maxDisplay = window.salesHistoryLimit || 20;
-  const displaySales = todaySales.slice(0, maxDisplay);
-
-  const htmlList = displaySales.map(s => {
-    let badgeStyle = "background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe;";
-    let badgeIcon = "💳";
-    const pType = (s.paymentType || "").toLowerCase();
-    if (pType.includes("nakit") && !pType.includes("parçalı")) {
-      badgeStyle = "background:#f0fdf4; color:#166534; border:1px solid #bbf7d0;";
-      badgeIcon = "💵";
-    } else if (pType.includes("havale") || pType.includes("iban") || pType.includes("eft")) {
-      badgeStyle = "background:#f0f9ff; color:#0369a1; border:1px solid #bae6fd;";
-      badgeIcon = "📲";
-    } else if (pType.includes("parçalı")) {
-      badgeStyle = "background:#faf5ff; color:#7e22ce; border:1px solid #e9d5ff;";
-      badgeIcon = "✂️";
-    } else if (pType.includes("veresiye")) {
-      badgeStyle = "background:#fef2f2; color:#b91c1c; border:1px solid #fecaca;";
-      badgeIcon = "📝";
-    }
-
-    return `
-      <div class="flex items-center justify-between" style="background:var(--bg); padding:7px 10px; border-radius:var(--radius-sm); border:1px solid var(--border); font-size:12px;">
-        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:8px;">
-          <b>${s.time}</b> — <span class="badge" style="font-size:10.5px; padding:2px 6px; ${badgeStyle}">${badgeIcon} ${s.paymentType}</span> <b>${s.customerName || 'Tezgâh'}</b>: ${s.itemsSummary} (<b>${Number(s.total).toFixed(2)} ₺</b>)
-        </span>
-        <button class="btn btn-danger btn-xs" style="flex-shrink:0;" onclick="refundSale(${s.id})">↩️ İade</button>
-      </div>`;
-  }).join("");
-
-  let moreBtn = "";
-  if (todaySales.length > maxDisplay) {
-    moreBtn = `
-      <div style="text-align:center; padding:6px 0 2px 0;">
-        <button class="btn btn-outline btn-xs" onclick="window.salesHistoryLimit = (window.salesHistoryLimit || 20) + 30; renderPosSalesHistory();">
-          ➕ Önceki Satışları Göster (${todaySales.length - maxDisplay} satış daha)
-        </button>
-      </div>`;
-  }
-
-  container.innerHTML = htmlList + moreBtn;
+  renderSalesHistoryRows();
 }
 
+// Keep older callers routed to the explicit, per-product return flow.
 function refundSale(saleId) {
-  const sale = salesHistory.find(s => s.id === saleId);
-  if (!sale) return;
-  if (!confirm(`"${sale.itemsSummary}" satışını iade almak istiyor musunuz?`)) return;
-
-  if (sale.soldItems) {
-    sale.soldItems.forEach(item => {
-      if (item.isBundle && item.bundleItems) {
-        item.bundleItems.forEach(bItem => {
-          const realProd = products.find(p => p.id === bItem.productId);
-          if (realProd) realProd.stock += (bItem.qty * item.qty);
-        });
-      } else {
-        const p = products.find(prod => prod.id === item.id);
-        if (p) p.stock += item.qty;
-      }
-    });
-  }
-
-  const refundVat = sale.vatTotal ? -Math.abs(sale.vatTotal) : 0;
-  const refundTotal = -Math.abs(sale.total);
-
-  let refundCard = 0;
-  let refundCash = 0;
-  let refundTransfer = 0;
-
-  if (sale.splitCard || sale.splitCash || sale.splitTransfer) {
-    refundCard = sale.splitCard ? -Math.abs(sale.splitCard) : 0;
-    refundCash = sale.splitCash ? -Math.abs(sale.splitCash) : 0;
-    refundTransfer = sale.splitTransfer ? -Math.abs(sale.splitTransfer) : 0;
-  } else {
-    const pType = (sale.paymentType || "").toLowerCase();
-    if (pType.includes("nakit") && !pType.includes("parçalı")) {
-      refundCash = refundTotal;
-    } else if (pType.includes("havale") || pType.includes("iban") || pType.includes("eft")) {
-      refundTransfer = refundTotal;
-    } else {
-      refundCard = refundTotal;
-    }
-  }
-
-  sendToGoogleSheets({
-    action: "save_sale",
-    date: sale.date || nowDate(),
-    time: nowTime(),
-    customerName: sale.customerName,
-    channel: "Satış İptali / İade",
-    itemsSummary: `İADE: ${sale.itemsSummary}`,
-    paymentType: sale.paymentType,
-    total: refundTotal,
-    cardSales: refundCard,
-    cashSales: refundCash,
-    transferSales: refundTransfer,
-    vatTotal: refundVat,
-    isOfficial: sale.isOfficial !== undefined ? sale.isOfficial : true
-  });
-
-  salesHistory = salesHistory.filter(s => s.id !== saleId);
-  saveData(); renderCatalog(); renderInventoryTable(); renderPosSalesHistory();
-
-  // İade sonrası E-Tablo Mali Raporu anında güncelle
-  if (typeof syncTaxReportToSheets === "function") {
-    setTimeout(syncTaxReportToSheets, 600);
-  }
-
-  toast("↩️ Satış iade alındı, stok geri yüklendi!");
+  openSaleDetails(saleId);
 }
 
 // ── Split Payment ──
@@ -1015,7 +862,7 @@ function chargeToCredit() {
 
   const saleRecord = {
     id: Date.now(), date: nowDate(), time: nowTime(),
-    customerName: cust.name, itemsSummary, soldItems: [...cart],
+    customerId: cust.id, customerName: cust.name, itemsSummary, soldItems: [...cart],
     total, vatTotal: Number(vatTotal.toFixed(2)),
     paymentType: "Veresiye",
     isOfficial: false
@@ -1301,7 +1148,7 @@ function focusCatalogSearch() {
       const isPosVisible = !posTab || posTab.classList.contains("active") || getComputedStyle(posTab).display !== "none";
       if (isPosVisible) {
         // Modal açık değilse odakla
-        const openModal = document.querySelector(".modal-overlay.open, .modal-overlay.active");
+        const openModal = document.querySelector(".modal-overlay.open, .modal-overlay.active, dialog[open]");
         if (!openModal) {
           const input = document.getElementById("catalogSearch");
           if (input) {
@@ -1392,12 +1239,13 @@ function isEditingOrNoteElement(el) {
 
 // ── Catalog Search Input Handler with instant barcode auto-match ──
 let catalogSearchBarcodeTimeout = null;
+let catalogRenderTimeout = null;
 function handleCatalogSearchInput(event) {
   const input = event.target;
   const val = (input.value || "").trim();
 
-  // Her harfte kataloğu filtrele
-  renderCatalog();
+  clearTimeout(catalogRenderTimeout);
+  catalogRenderTimeout = setTimeout(renderCatalog, 120);
 
   if (catalogSearchBarcodeTimeout) {
     clearTimeout(catalogSearchBarcodeTimeout);
@@ -1535,6 +1383,7 @@ window.handlePosBarcodeSearchKeyDown = handlePosBarcodeSearchKeyDown;
   const SPEED_THRESHOLD_MS = 100; // Genişletilmiş donanım okuyucu eşiği
 
   window.addEventListener("keydown", function(event) {
+    if (document.querySelector('dialog[open]')) { buffer = ''; isFastTyping = false; clearTimeout(scanTimer); return; }
     const now = Date.now();
     const interval = now - lastKeyTime;
     lastKeyTime = now;

@@ -16,8 +16,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
     rel="stylesheet">
-  <title>🐾 Petshop Kasa Sistemi</title>
+  <title>Aybars POS · Demo</title>
   <link rel="stylesheet" href="css/styles.css?v=20260908_3">
+  <link rel="stylesheet" href="css/demo.css">
+  <link rel="stylesheet" href="css/sales-history.css">
+  <script src="js/demo-boot.js"></script>
 </head>
 
 <body>
@@ -40,7 +43,7 @@
     </div>
 
     <div class="header-actions">
-      <button id="posModeToggleBtn" class="btn btn-ghost btn-sm" onclick="togglePosPerformanceMode()" style="font-weight:600; font-size:12px;"></button>
+      <button class="btn btn-outline btn-sm" onclick="openSalesHistory()">Satış Geçmişi</button>
       <button class="btn btn-warning btn-sm" onclick="openDailyCloseModal()">🏁 Gün Sonu</button>
       <button class="btn btn-ghost btn-sm" onclick="exportData()">💾 Yedek Al</button>
       <label class="btn btn-ghost btn-sm" style="cursor:pointer; margin:0;"
@@ -85,7 +88,7 @@
             onclick="toggleRecentSalesBox()">
             <div class="flex items-center gap-2">
               <span id="posRecentSalesToggleIcon" style="font-size:12px; transition:transform 0.2s;">▶</span>
-              <b>📜 Son Satışlar & Günlük Gelir (Bugün)</b>
+              <b>📜 Satış Geçmişi & İadeler</b>
               <span id="posDayStatusBadge" class="badge"
                 style="font-size:10.5px; background:#dcfce7; color:#166534; border:1px solid #bbf7d0;">🟢 Gün
                 Açık</span>
@@ -98,6 +101,7 @@
           </div>
 
           <div id="posRecentSalesBody" style="display:none;">
+            <p class="history-note" id="historyDailyLabel"></p>
             <!-- Gün Sonu Kapatıldı Bildirimi (Kapatıldığında Görünür ve Geri Aç Butonu Sunar) -->
             <div id="posClosedNoticeBox" style="display:none; margin-bottom:10px;"></div>
 
@@ -127,8 +131,26 @@
             </div>
 
             <!-- Kaydırılabilir ve sınırlandırılmış satış listesi (iade butonuyla birlikte ekranı kaplamaz) -->
-            <div id="posRecentSalesList" class="flex-col gap-2"
-              style="max-height:220px; overflow-y:auto; padding-right:4px;"></div>
+            <div class="history-filters">
+              <label>Başlangıç<input type="date" id="historyStart" onchange="refreshHistoryFilters(true)"></label>
+              <label>Bitiş<input type="date" id="historyEnd" onchange="refreshHistoryFilters(true)"></label>
+              <label class="history-search-label">Ürün, barkod, müşteri veya kayıt no<input type="search" id="historySearch" placeholder="Geçmiş satışlarda ara…" oninput="refreshHistoryFilters()"></label>
+            </div>
+            <div class="history-presets">
+              <button class="btn btn-outline btn-sm" data-history-period="today" onclick="setHistoryPeriod('today')">Bugün</button>
+              <button class="btn btn-outline btn-sm" data-history-period="yesterday" onclick="setHistoryPeriod('yesterday')">Dün</button>
+              <button class="btn btn-outline btn-sm" data-history-period="week" onclick="setHistoryPeriod('week')">Son 7 gün</button>
+              <button class="btn btn-outline btn-sm" data-history-period="all" onclick="setHistoryPeriod('all')">Tüm geçmiş</button>
+            </div>
+            <div class="history-scroll-help">
+              <span id="historyResultCount" role="status" aria-live="polite"></span>
+              <span>Uzun satışları sağa kaydırarak görebilirsin.
+                <button class="btn btn-outline btn-xs" aria-label="Satış tablosunu sola kaydır" onclick="document.getElementById('posRecentSalesList').scrollBy({left:-400,behavior:'smooth'})">←</button>
+                <button class="btn btn-outline btn-xs" aria-label="Satış tablosunu sağa kaydır" onclick="document.getElementById('posRecentSalesList').scrollBy({left:400,behavior:'smooth'})">→</button>
+              </span>
+            </div>
+            <div id="posRecentSalesList" class="history-scroll" tabindex="0" role="region" aria-label="Satış geçmişi; uzun satırlar için sağa kaydır"></div>
+            <button id="historyLoadMore" class="btn btn-outline btn-sm history-more" hidden onclick="window.salesHistoryLimit = (window.salesHistoryLimit || 20) + 30; renderSalesHistoryRows();">Daha fazla göster</button>
           </div>
         </div>
       </div>
@@ -203,6 +225,7 @@
                 🏷️ İndirim Yap
               </button>
             </div>
+            <button id="cartRefundButton" class="btn btn-outline btn-wide" onclick="openCartRefund()" style="color:#b91c1c;border:1px solid #fca5a5;background:#fff1f2">↩ Ürün İadesi</button>
             <button class="btn btn-warning btn-wide" onclick="openDispatchModal()">🛵 Gidecek Siparişe Ekle</button>
           </div>
         </div>
@@ -2026,7 +2049,41 @@
   </script>
 
   <!-- Scripts with Fresh Cache-Buster Version -->
+  <dialog id="salesHistoryDialog" class="history-dialog history-browser" aria-labelledby="salesHistoryTitle">
+    <div class="history-dialog-header"><h2 id="salesHistoryTitle">Satış Geçmişi & İadeler</h2><button class="btn btn-outline btn-sm" onclick="document.getElementById('salesHistoryDialog').close()">Kapat ✕</button></div>
+    <div id="salesHistoryMount"></div>
+  </dialog>
+  <dialog id="cartRefundDialog" class="history-dialog" aria-labelledby="cartRefundTitle">
+    <div class="history-dialog-header"><h2 id="cartRefundTitle">Sepetten ürün iadesi</h2><button class="btn btn-outline btn-sm" onclick="document.getElementById('cartRefundDialog').close()">Vazgeç ✕</button></div>
+    <p class="history-note">Eski satış kaydı gerekmez. İade birim fiyatlarını kontrol et; değiştirmek için bu pencereyi kapatıp sepetteki “İndirim / Fiyat” düğmesini kullan.</p>
+    <p id="cartRefundDay" class="history-note"></p>
+    <div id="cartRefundItems" class="history-detail-scroll" tabindex="0" role="region" aria-label="İade edilecek ürünler"></div>
+    <form class="history-refund-controls" onsubmit="completeCartRefund(event)">
+      <label>Geri ödeme<select id="cartRefundMethod" onchange="updateCartRefundMethod()"><option>Nakit</option><option>Kredi Kartı</option><option>Havale / IBAN</option><option value="Veresiye">Veresiye borcundan düş</option></select></label>
+      <label>Eski satışın fiş durumu<select id="cartRefundReceipt" required><option value="">Seçiniz</option><option value="official">Fişli</option><option value="unofficial">Fişsiz</option></select></label>
+      <strong id="cartRefundTotal"></strong><button id="completeCartRefundButton" type="submit" class="btn btn-danger">İadeyi kaydet</button>
+      <p class="history-note">Nakit ve havalede seçtiğin fişli/fişsiz toplamdan düşülür. Kart iadeleri kart toplamını azaltır. Ürünler stoğa geri eklenir.</p>
+    </form>
+    <p id="cartRefundError" class="history-dialog-error" role="alert"></p>
+  </dialog>
+  <dialog id="saleDetailsDialog" class="history-dialog" aria-labelledby="saleDetailsTitle">
+    <div class="history-dialog-header"><h2 id="saleDetailsTitle">Satış detayı</h2><button class="btn btn-outline btn-sm" onclick="document.getElementById('saleDetailsDialog').close()" aria-label="Satış detayını kapat">Kapat ✕</button></div>
+    <p class="history-note" id="saleDetailsMeta"></p>
+    <p class="history-note" id="saleDetailNotice"></p>
+    <div id="saleDetailsItems" class="history-detail-scroll" tabindex="0" role="region" aria-label="Satılan ürünler; gerekirse sağa kaydır"></div>
+    <form id="saleRefundControls" class="history-refund-controls" hidden onsubmit="completeSelectedRefund(event)">
+      <p id="refundProductName" style="flex-basis:100%;font-weight:700"></p>
+      <label>İade adedi<input id="refundQuantity" type="number" min="0.001" step="any" required oninput="updateRefundPreview()" style="width:90px;padding:9px;border:1px solid var(--border);border-radius:8px"></label>
+      <label>Geri ödeme<select id="refundMethod"><option>Nakit</option><option>Kredi Kartı</option><option>Havale / IBAN</option><option value="Veresiye">Veresiye borcundan düş</option></select></label>
+      <label>Eski satışın fiş durumu<select id="refundReceipt" required><option value="">Seçiniz</option><option value="official">Fişli</option><option value="unofficial">Fişsiz</option></select></label>
+      <strong id="refundSelectionTotal">0,00 ₺</strong>
+      <button id="completeRefundButton" type="submit" class="btn btn-danger">İadeyi tamamla</button>
+      <small class="history-note" style="flex-basis:100%">Nakit, kart veya havale seçimi ilgili gün toplamını azaltır. Tahsil edilmemiş veresiye için “Veresiye borcundan düş” seçeneğini kullan.</small>
+    </form>
+    <p id="refundError" class="history-dialog-error" role="alert"></p>
+  </dialog>
   <script src="js/products_catalog.js?v=20260920_perf_turbo_v321"></script>
+  <script>seedBlueDemo();</script>
   <script src="js/state.js?v=20260920_perf_turbo_v321"></script>
   <script src="js/ui.js?v=20260920_perf_turbo_v321"></script>
   <script src="js/pos.js?v=20260920_perf_turbo_v321"></script>
@@ -2035,7 +2092,10 @@
   <script src="js/crm.js?v=20260920_perf_turbo_v321"></script>
   <script src="js/procurement.js?v=20260920_perf_turbo_v321"></script>
   <script src="js/expenses.js?v=20260920_perf_turbo_v321"></script>
+  <script src="js/sales-history.js"></script>
+  <script src="js/refunds.js"></script>
   <script src="js/app.js?v=20260920_perf_turbo_v321"></script>
+  <script src="js/demo-ui.js"></script>
 </body>
 
 </html>
