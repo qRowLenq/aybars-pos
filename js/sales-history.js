@@ -77,9 +77,9 @@ function renderSalesHistoryRows() {
   const rows = list.slice(0,limit).map(s => {
     const returned = (s.soldItems || []).some(item => Number(item.returnedQty) > 0);
     const status = s.isRefund || Number(s.total)<0 ? 'İade kaydı' : s.refunded ? 'Tamamı iade' : returned ? 'Kısmi iade' : 'Satış';
-    return `<tr><td>${historyEscape(s.date)}<small>${historyEscape(s.time)}</small></td><td>${historyEscape(s.customerName || 'Tezgâh')}</td><td class="history-products">${historyEscape(s.itemsSummary || 'Ürün özeti yok')}</td><td>${historyEscape(s.paymentType)}</td><td class="history-amount">${historyMoney(s.total)}</td><td>${status}</td><td class="history-actions"><button type="button" class="btn btn-outline btn-sm" data-history-sale="${historyEscape(s.id)}">Detay / İade</button></td></tr>`;
+    return `<tr><td>${historyEscape(s.paymentType)}</td><td class="history-amount">${historyMoney(s.total)}</td><td class="history-products">${historyEscape(s.itemsSummary || 'Ürün özeti yok')}</td><td>${status}</td><td class="history-actions"><button type="button" class="btn btn-outline btn-sm" data-history-sale="${historyEscape(s.id)}">Detay / İade</button></td><td>${historyEscape(s.date)}<small>${historyEscape(s.time)}</small></td><td>${historyEscape(s.customerName || 'Tezgâh')}</td></tr>`;
   }).join('');
-  container.innerHTML = list.length ? `<table class="history-table"><thead><tr><th>Tarih / Saat</th><th>Müşteri</th><th>Satın alınan ürünler</th><th>Ödeme</th><th>Tutar</th><th>Durum</th><th class="history-actions">İşlem</th></tr></thead><tbody>${rows}</tbody></table>` : '<p class="history-empty">Bu tarih aralığında aramana uygun satış bulunamadı.</p>';
+  container.innerHTML = list.length ? `<table class="history-table"><thead><tr><th>Ödeme</th><th>Tutar</th><th>Satın alınan ürünler</th><th>Durum</th><th class="history-actions">İşlem</th><th>Tarih / Saat</th><th>Müşteri</th></tr></thead><tbody>${rows}</tbody></table>` : '<p class="history-empty">Bu tarih aralığında aramana uygun satış bulunamadı.</p>';
   const more = document.getElementById('historyLoadMore');
   more.hidden = list.length <= limit;
   more.textContent = `Daha fazla göster (${Math.max(0,list.length-limit)} kayıt)`;
