@@ -2,7 +2,7 @@ name: Windows kurulum paketi
 on:
   push:
     branches: [main]
-    paths: ['desktop/**', 'js/**', 'css/**', 'index.html', 'package*.json', '.github/workflows/windows.yml']
+    paths: ['desktop/**', 'js/**', 'css/**', 'assets/product-photos/**', 'index.html', 'package*.json', '.github/workflows/windows.yml']
   workflow_dispatch:
 permissions:
   contents: read

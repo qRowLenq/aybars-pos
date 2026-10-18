@@ -28,6 +28,7 @@
       "index.html",
       "js/**",
       "css/**",
+      "assets/product-photos/**",
       "package.json"
     ],
     "win": {

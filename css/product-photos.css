@@ -1,0 +1,29 @@
+/* Keep the existing desktop product grid and checkout layout. */
+.product-card .p-photo-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 0 0 120px;
+  height: 120px;
+  margin: 3px 0 8px;
+  overflow: hidden;
+  background: #fff;
+  border-radius: 7px;
+  pointer-events: none;
+}
+.product-card .p-photo {
+  display: block;
+  flex: 0 0 120px;
+  width: 120px;
+  height: 120px;
+  background-size: 1200px 1200px;
+  background-repeat: no-repeat;
+}
+.product-card .p-photo-unavailable {
+  flex-direction: column;
+  gap: 7px;
+  color: #9aa8bb;
+  background: #f8fafc;
+  font-size: 10px;
+  font-weight: 500;
+}

@@ -360,6 +360,7 @@ function renderCatalog() {
         <span class="p-stock ${curStock <= 2 ? 'critical' : ''}">Stok: ${curStock}</span>
         <span class="p-price">${curPrice.toFixed(2)} ₺</span>
       </div>`;
+    if (typeof appendProductPhoto === 'function') appendProductPhoto(card, p);
     card.onclick = () => addToCart(p);
     fragment.appendChild(card);
   });
