@@ -31,8 +31,26 @@ function onOpen() {
     SpreadsheetApp.getUi()
       .createMenu("🐾 Aybars Yönetim")
       .addItem("📅 Takvim Başlıklarını & Tarihleri Düzelt", "TAKVIMI_VE_TARIHLERI_SIMDI_DUZELT")
+      .addItem("Bu ayın gelir ve gider sekmelerini aç", "AYBARS_BU_AYI_AC")
       .addToUi();
   } catch (e) {}
+  try { AYBARS_BU_AYI_AC(); } catch (error) { Logger.log("Ay sekmeleri: " + error); }
+}
+
+function AYBARS_BU_AYI_AC() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(5000)) return;
+  try {
+    var parts = Utilities.formatDate(new Date(), ss.getSpreadsheetTimeZone(), "yyyy-MM").split("-");
+    var title = TURKISH_MONTHS[Number(parts[1]) - 1] + " " + parts[0];
+    var income = ss.getSheetByName("GELİR - " + title);
+    if (!income || isUnfinishedSalesSheet(income)) getOrCreateMonthlySalesSheet(ss, title);
+    if (!ss.getSheetByName("GİDER - " + title)) getOrCreateMonthlyExpenseSheet(ss, title, []);
+    SpreadsheetApp.flush();
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 // Read-only diagnostic: run in the existing bound Apps Script editor.
@@ -497,6 +515,11 @@ function getDayHeadersForWeek(startDay, endDay, month, year, daysInMonth) {
   return headers;
 }
 
+function isUnfinishedSalesSheet(sheet) {
+  return sheet.getLastRow() <= 1 && sheet.getLastColumn() <= 1 &&
+    (sheet.getLastRow() === 0 || sheet.getRange("A1").getValue() === "AYBARS POS");
+}
+
 function getOrCreateMonthlySalesSheet(ss, monthYearStr) {
   var sheetName = "GELİR - " + monthYearStr;
   var sheet = ss.getSheetByName(sheetName);
@@ -524,6 +547,8 @@ function getOrCreateMonthlySalesSheet(ss, monthYearStr) {
   // Hedef aya ait sekme henüz yoksa, otomatik olarak yeni sekme aç
   if (!sheet) {
     sheet = ss.insertSheet(sheetName);
+  }
+  if (isUnfinishedSalesSheet(sheet)) {
     sheet.setTabColor("#10b981");
     buildMonthlySalesSheetTemplate(sheet, monthYearStr);
   }
@@ -532,7 +557,14 @@ function getOrCreateMonthlySalesSheet(ss, monthYearStr) {
   return sheet;
 }
 
+function ensureMonthlySalesGrid(sheet) {
+  var width = sheet.getMaxColumns(), height = sheet.getMaxRows();
+  if (width < 43) sheet.insertColumnsAfter(width, 43 - width);
+  if (height < 20) sheet.insertRowsAfter(height, 20 - height);
+}
+
 function buildMonthlySalesSheetTemplate(sheet, monthYearStr) {
+  ensureMonthlySalesGrid(sheet);
   // Keep the title outside frozen column A so native Sheets accepts the merge.
   sheet.getRange("A1").setValue("AYBARS POS").setFontWeight("bold");
   sheet.getRange("B1:AQ1").merge()
@@ -623,6 +655,7 @@ function getSalesRowMap(sheet) {
 }
 
 function ensureSalesSheetStructure(sheet) {
+  ensureMonthlySalesGrid(sheet);
   var rowMap = getSalesRowMap(sheet);
   sheet.getRange(rowMap.credit, 1).setValue('Veresiye Satış (Net)');
   sheet.getRange(rowMap.collections, 1).setValue('Eski Borç Tahsilatı');
