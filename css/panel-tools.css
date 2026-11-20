@@ -1,0 +1,8 @@
+.panel-tools-bar{display:flex;flex-wrap:wrap;align-items:center;gap:.55rem;margin:.65rem 0}.panel-tools-bar[hidden]{display:none}
+.panel-tool-dialog{width:min(760px,94vw);max-height:90vh;overflow:auto;color:#172b4d;background:white;border:1px solid #dce4ed;border-radius:12px;padding:1.25rem}
+.panel-tool-dialog::backdrop{background:#172b4d88}.panel-tool-dialog label{display:grid;gap:.3rem;margin:.5rem 0}.panel-tool-dialog input,.panel-tool-dialog select{padding:.55rem;border:1px solid #bdcad7;border-radius:5px;max-width:100%;font:inherit}
+.panel-tool-dialog fieldset{border:1px solid #dce4ed;border-radius:8px;margin:.75rem 0;padding:.75rem}.panel-tool-dialog legend{font-weight:700}.panel-tool-dialog strong{color:#065f46}
+.panel-preview-scroll{max-height:35vh;overflow:auto}.panel-preview-scroll th{position:sticky;top:0}
+#subtab-inv-stock .data-table th,.panel-tool-dialog .data-table th{background:#edf1f5;color:#172b4d;border-bottom:2px solid #ccd9e6}
+#subtab-inv-stock .data-table tbody tr:nth-child(even),.panel-tool-dialog tr:nth-child(even){background:#f7f9fc}
+#subtab-inv-stock .data-table :is(th,td):nth-child(n+4):nth-child(-n+8){text-align:right;font-variant-numeric:tabular-nums}

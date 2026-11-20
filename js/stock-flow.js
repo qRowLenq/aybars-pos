@@ -18,23 +18,11 @@ function stockShortages(items, list) {
   }).filter(line => line.missing || line.qty > line.stock);
 }
 
-function deductProductStockFIFO(product, quantity) {
-  product.stock = (Number(product.stock) || 0) - quantity;
-  // Preserve negative stock after explicit approval so shortages remain visible.
-  let remaining = quantity;
-  for (const batch of [...(product.batches || [])].sort((a,b) => (a.expiry || '9999').localeCompare(b.expiry || '9999'))) {
-    const take = Math.min(Math.max(0, Number(batch.qty) || 0), remaining);
-    batch.qty = (Number(batch.qty) || 0) - take;
-    remaining -= take;
-    if (remaining <= 0) break;
-  }
-}
-
-function deductCartStock(items) {
-  for (const [id, qty] of stockRequirements(items)) {
-    const product = products.find(p => String(p.id) === id);
-    if (product) deductProductStockFIFO(product, qty);
-  }
+function deductProductStockFIFO(product,quantity){return BlueStock.take(product,quantity,{allowNegative:true,allowExpired:true});}
+function deductCartStock(items){
+  const moves=new Map();
+  for(const [id,qty] of stockRequirements(items)){const p=products.find(p=>String(p.id)===id);if(p)moves.set(id,deductProductStockFIFO(p,qty));}
+  return moves;
 }
 
 let pendingStockCheckout = null, stockApproval = null;
@@ -110,7 +98,8 @@ function stockVelocity(list, history, today) {
 function renderStockVelocity() {
   const container = document.getElementById('stockVelocityList');
   if (!container) return;
-  const rows = stockVelocity(products, salesHistory, nowDate()).filter(r => r.stock <= 0 || (r.remaining !== null ? r.remaining <= 7 : r.stock <= 2))
+  const incoming=(manualDeficits||[]).filter(d=>d.ordered && d.productId && Number(d.orderQty)>0).map(d=>({status:'ordered',items:[{productId:d.productId,qty:d.orderQty,received:d.receivedQty}]}));
+  const rows = stockVelocity(products, salesHistory, nowDate()).map(r=>BlueStock.reorder(r,incoming)).filter(r=>r.suggested>0)
     .sort((a,b) => (a.stock <= 0 ? -1 : a.remaining ?? Infinity) - (b.stock <= 0 ? -1 : b.remaining ?? Infinity));
   document.getElementById('stockVelocityCount').textContent = `${rows.length} ürün`;
   container.replaceChildren();
@@ -120,6 +109,7 @@ function renderStockVelocity() {
     const name = document.createElement('strong'); name.textContent = row.product.name;
     const detail = document.createElement('span');
     detail.textContent = `Stok: ${row.stock} · ` + (row.rate > 0 ? `${row.days} günde net ${row.quantity} adet · ${row.rate.toLocaleString('tr-TR',{maximumFractionDigits:2})} adet/gün · yaklaşık ${Math.ceil(row.remaining)} gün yeter${row.days < 7 ? ' (veri az, ilk tahmin)' : ''}` : 'Satış verisi yetersiz; düşük stok uyarısı');
+    detail.textContent += " · Tedarik "+row.lead+" gün · Güvenlik "+row.safety+" · Yolda "+row.incoming+" · Öneri "+row.suggested+" adet";
     const add = document.createElement('button'); add.type = 'button'; add.className = 'btn btn-outline btn-sm';
     add.disabled = isStockNeedListed(row.product); add.textContent = add.disabled ? 'İhtiyaç listesinde' : '+ İhtiyaca ekle';
     add.onclick = () => addProductToDeficits(row.product.id);

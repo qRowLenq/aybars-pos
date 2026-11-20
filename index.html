@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="css/product-photos.css?v=20261018_photos1">
   <script src="js/desktop-boot.js"></script>
   <script src="js/demo-boot.js"></script>
+<link rel="stylesheet" href="css/panel-tools.css?v=20261120">
 </head>
 
 <body>
@@ -87,6 +88,7 @@
         </div>
         <div id="productGrid" class="product-grid"></div>
 
+        <div id="panelFavorites" class="panel-tools-bar" hidden></div>
         <div class="recent-sales-box mt-2" id="posRecentSalesContainer">
           <div class="rs-header flex justify-between items-center mb-2 flex-wrap gap-2" style="cursor:pointer;"
             onclick="toggleRecentSalesBox()">
@@ -172,7 +174,8 @@
         <div style="padding:10px 14px 0 14px;">
           <select id="cartCustomerSelect" class="cart-customer-select"></select>
         </div>
-        <div id="stockCheckoutWarning" class="stock-checkout-warning" role="status" aria-live="polite" hidden></div>
+        <div class="panel-tools-bar"><button class="btn btn-outline btn-xs" onclick="newPanelCart()">Yeni sepet · F4</button> <button class="btn btn-outline btn-xs" onclick="openPanelSimulation()">POS Simülasyonu</button><small>F2 Barkod · F6 Bekleyen sepetler</small></div>
+          <div id="stockCheckoutWarning" class="stock-checkout-warning" role="status" aria-live="polite" hidden></div>
         <div id="cartItems" class="cart-items"></div>
 
         <div class="cart-footer">
@@ -230,7 +233,7 @@
                 🏷️ İndirim Yap
               </button>
             </div>
-            <button id="cartRefundButton" class="btn btn-outline btn-wide" onclick="openCartRefund()" style="color:#b91c1c;border:1px solid #fca5a5;background:#fff1f2">↩ Ürün İadesi</button>
+            <button class="btn btn-outline btn-wide" onclick="setHistoryPeriod('all'); if(document.getElementById('posRecentSalesBody').style.display==='none') toggleRecentSalesBox(); document.getElementById('posRecentSalesContainer').scrollIntoView()">Satış geçmişinden iade</button>
             <button class="btn btn-warning btn-wide" onclick="openDispatchModal()">🛵 Gidecek Siparişe Ekle</button>
           </div>
         </div>
@@ -311,6 +314,9 @@
             <option value="cost-desc">📥 Maliyet (Azalan)</option>
             <option value="id-desc">🕒 Son Eklenenler</option>
           </select>
+          <select id="invStockFilter" class="fc" aria-label="Stok durumu" onchange="renderInventoryTable()"><option value="">Tüm stoklar</option><option value="low">Kritik stok</option><option value="empty">Tükenenler</option><option value="available">Stokta olanlar</option></select>
+          <button class="btn btn-outline" onclick="openProductSplit()">Ürün Bölme</button>
+          <button class="btn btn-outline" onclick="panelId('panelImportDialog').showModal()">Excel / CSV</button>
           <button class="btn btn-primary" onclick="openAddProductModal()">+ Yeni Ürün Ekle</button>
           <button class="btn btn-warning"
             onclick="switchInvSubtab('quick-pricing'); if (window.renderQuickPricingTable) window.renderQuickPricingTable();">⚡
@@ -2113,6 +2119,7 @@
     <form id="saleRefundControls" class="history-refund-controls" hidden onsubmit="completeSelectedRefund(event)">
       <p id="refundProductName" style="flex-basis:100%;font-weight:700"></p>
       <label>İade adedi<input id="refundQuantity" type="number" min="0.001" step="any" required oninput="updateRefundPreview()" style="width:90px;padding:9px;border:1px solid var(--border);border-radius:8px"></label>
+      <label>Ürün durumu<select id="refundCondition" required><option value="">Seçiniz</option><option value="sellable">Yeniden satılabilir</option><option value="damaged">Hasarlı → Fire / Zayi</option></select></label>
       <label>Geri ödeme<select id="refundMethod"><option>Nakit</option><option>Kredi Kartı</option><option>Havale / IBAN</option><option value="Veresiye">Veresiye borcundan düş</option></select></label>
       <label>Eski satışın fiş durumu<select id="refundReceipt" required><option value="">Seçiniz</option><option value="official">Fişli</option><option value="unofficial">Fişsiz</option></select></label>
       <strong id="refundSelectionTotal">0,00 ₺</strong>
@@ -2121,22 +2128,37 @@
     </form>
     <p id="refundError" class="history-dialog-error" role="alert"></p>
   </dialog>
-  <script src="js/products_catalog.js?v=20260920_perf_turbo_v321"></script>
+  <dialog id="productSplitDialog" class="panel-tool-dialog"><h2>Ürün Bölme</h2><button id="splitExamples" type="button" class="btn btn-outline" hidden onclick="loadSplitExamples()">Örnek çuval ve paket kartlarını hazırla</button><form id="productSplitForm" onsubmit="saveProductSplit(event)">
+<fieldset><legend>Bölünecek ürün</legend><label>Ad veya barkodla ara<input id="searchSource" oninput="fillSplitPicker('Source')"></label><label>Stok kartı<select id="splitSource" required onchange="renderSplitPreview()"></select></label><label>Kaç tane açıldı?<input id="splitOpened" type="number" value="1" min="1" step="1" required oninput="renderSplitPreview()"></label><strong id="previewSource"></strong></fieldset>
+<fieldset><legend>Oluşan ürün</legend><label>Ad veya barkodla ara<input id="searchTarget" oninput="fillSplitPicker('Target')"></label><label>Stok kartı<select id="splitTarget" required onchange="renderSplitPreview()"></select></label><label>Kaç tane çıktı?<input id="splitProduced" type="number" min="1" step="1" required oninput="renderSplitPreview()"></label><strong id="previewTarget"></strong></fieldset>
+<label>İşlemi yapan kişi<input id="splitActor" required maxlength="80"></label><p id="splitMessage" role="status"></p><button id="productSplitSave" class="btn btn-primary">Bölmeyi kaydet</button> <button type="button" class="btn btn-outline" onclick="this.closest('dialog').close()">Kapat</button></form><details><summary>Stok hareket geçmişi</summary><ul id="splitHistory"></ul></details></dialog>
+<dialog id="panelImportDialog" class="panel-tool-dialog"><h2>Excel / CSV</h2><p>İndirilen dosya, o andaki stok kopyasıdır. Güncel liste için yeniden indirin. Excel’de barkod sütununu metin olarak tutun.</p><div class="panel-tools-bar">
+<button class="btn btn-outline" onclick="panelDownload('xlsx',true)">Excel şablonu</button><button class="btn btn-outline" onclick="panelDownload('csv',true)">CSV şablonu</button><button class="btn btn-outline" onclick="panelDownload('xlsx')">Excel indir</button><button class="btn btn-outline" onclick="panelDownload('csv')">CSV indir</button></div>
+<label>İşlem<select id="importMode" onchange="resetPanelImport()"><option value="add">Yeni ürün ekle</option><option value="update">Ürün bilgilerini güncelle</option><option value="stock">Stok düzelt · hedef adet</option></select></label><label>Dosya<input type="file" id="importFile" accept=".csv,.xlsx" onchange="readPanelImport()"></label><div id="importFields" class="panel-tools-bar"></div><button class="btn btn-outline" onclick="previewPanelImport()">Önizle</button> <button id="importConfirm" class="btn btn-primary" disabled onclick="applyPanelImport()">Geçerli satırları onayla</button> <button class="btn btn-outline" onclick="this.closest('dialog').close()">Kapat</button><p id="importMessage" role="status"></p><div class="panel-preview-scroll"><table class="data-table"><thead><tr><th>Satır</th><th>Barkod</th><th>Ürün</th><th>Stok</th><th>Durum</th></tr></thead><tbody id="importPreview"></tbody></table></div></dialog>
+<dialog id="panelSimDialog" class="panel-tool-dialog"><h2>POS Simülasyonu</h2><p>Sepetin kopyasıyla çalışır. Gerçek tahsilat yapmaz; kasa ve stok kayıtlarını değiştirmez.</p><p id="simItems"></p><label>Simülasyonda alınan nakit (₺) <input id="simCash" type="number" min="0" step="0.01" placeholder="0,00"></label><p id="simStatus" role="status"></p><p id="simResult" role="status"></p><button id="simSend" class="btn btn-primary" onclick="panelSimAction('send')">POS’a gönder</button> <button class="btn btn-outline" onclick="this.closest('dialog').close()">Kapat</button><div id="simActions" class="panel-tools-bar"><button class="btn btn-outline" data-sim="approved">Onay</button><button class="btn btn-outline" data-sim="rejected">Ret</button><button class="btn btn-outline" data-sim="cancelled">İptal</button><button class="btn btn-outline" data-sim="disconnect">Bağlantıyı kes</button><button class="btn btn-outline" data-sim="query">Sonucu sorgula</button><button class="btn btn-outline" data-sim="repeat">Yanıtı tekrar gönder</button></div></dialog>
+<script src="js/products_catalog.js?v=20260920_perf_turbo_v321"></script>
   <script>seedBlueDemo();</script>
   <script src="js/state.js?v=20261012_report3"></script>
   <script src="js/ui.js?v=20261012_stock3"></script>
-  <script src="js/stock-flow.js?v=20261012_stock3"></script>
+  <script src="js/stock-flow.js?v=20261120_beta1"></script>
   <script src="js/product-photo-data.js?v=20261018_photos1"></script>
   <script src="js/product-photos.js?v=20261018_photos1"></script>
-  <script src="js/pos.js?v=20261018_photos1"></script>
+  <script src="js/pos.js?v=20261120_beta1"></script>
   <script src="js/orders.js?v=20261012_stock3"></script>
-  <script src="js/inventory.js?v=20261012_stock3"></script>
+  <script src="js/inventory.js?v=20261120_beta1"></script>
   <script src="js/crm.js?v=20260920_perf_turbo_v321"></script>
-  <script src="js/procurement.js?v=20261012_stock3"></script>
+  <script src="js/procurement.js?v=20261120_beta1"></script>
   <script src="js/expenses.js?v=20261012_card_report1"></script>
-  <script src="js/sales-history.js"></script>
-  <script src="js/refunds.js"></script>
-  <script src="js/app.js?v=20261012_report3"></script>
+  <script src="js/sales-history.js?v=20261120_beta1"></script>
+  <script src="js/refunds.js?v=20261120_beta1"></script>
+  <script src="js/stock-domain.js?v=20261120"></script>
+  <script src="js/terminal-simulator.js?v=20261120"></script>
+  <script src="js/simulation-engine.js?v=20261120"></script>
+  <script src="js/import-export.js?v=20261120"></script>
+  <script src="js/store-summary.js?v=20261120"></script>
+  <script src="js/excel.js?v=20261120"></script>
+  <script src="js/panel-tools.js?v=20261120"></script>
+  <script src="js/app.js?v=20261120_beta1"></script>
   <script src="js/demo-ui.js"></script>
   <script src="js/desktop-ui.js?v=20261012_full_report1"></script>
 </body>

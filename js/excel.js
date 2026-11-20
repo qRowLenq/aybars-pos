@@ -1,0 +1,57 @@
+// Minimal OOXML writer: real .xlsx, with explicit text cells (including barcodes).
+// No formulas are emitted, so user-entered names cannot execute Excel formulas.
+const xlsxXML = value => String(value ?? '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g,'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
+function xlsxZip(files) {
+ const encoder=new TextEncoder(),chunks=[],directory=[];let offset=0;
+ const crc = bytes => {let n=0xffffffff;for(const b of bytes){n^=b;for(let i=0;i<8;i++)n=(n>>>1)^((n&1)?0xedb88320:0);}return (n^0xffffffff)>>>0;};
+ for(const [name,text] of Object.entries(files)){
+  const path=encoder.encode(name),data=encoder.encode(text),sum=crc(data);
+  const header=new Uint8Array(30+path.length),v=new DataView(header.buffer);
+  v.setUint32(0,0x04034b50,true);v.setUint16(4,20,true);v.setUint16(10,0,true);v.setUint16(12,33,true);
+  v.setUint32(14,sum,true);v.setUint32(18,data.length,true);v.setUint32(22,data.length,true);v.setUint16(26,path.length,true);header.set(path,30);
+  const central=new Uint8Array(46+path.length),c=new DataView(central.buffer);
+  c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(14,33,true);c.setUint32(16,sum,true);
+  c.setUint32(20,data.length,true);c.setUint32(24,data.length,true);c.setUint16(28,path.length,true);c.setUint32(42,offset,true);central.set(path,46);
+  chunks.push(header,data);directory.push(central);offset+=header.length+data.length;
+ }
+ const size=directory.reduce((n,c)=>n+c.length,0),end=new Uint8Array(22),e=new DataView(end.buffer);
+ e.setUint32(0,0x06054b50,true);e.setUint16(8,directory.length,true);e.setUint16(10,directory.length,true);e.setUint32(12,size,true);e.setUint32(16,offset,true);
+ const output=new Uint8Array(offset+size+22);let i=0;for(const chunk of [...chunks,...directory,end]){output.set(chunk,i);i+=chunk.length;}return output;
+}
+function storeExcel(account, now=new Date()) {
+ const state=account.state||{},parse=key=>{try{const v=JSON.parse(state[key]||'[]');return Array.isArray(v)?v:[];}catch{return [];}};
+ const labels={id:'Kayıt no',name:'Ad',barcode:'Barkod',category:'Kategori',price:'Satış fiyatı (TL)',cost:'Maliyet (TL)',stock:'Stok',vatRate:'KDV (%)',supplier:'Tedarikçi',date:'Tarih',time:'Saat',total:'Tutar (TL)',paymentType:'Ödeme',customerName:'Müşteri',itemsSummary:'Ürün özeti',phone:'Telefon',address:'Adres',balance:'Bakiye (TL)',amount:'Tutar (TL)',description:'Açıklama',isRefund:'İade kaydı',refunded:'Tamamı iade',soldItems:'Ürün ayrıntıları',qty:'Miktar',returnedQty:'İade miktarı',customPrice:'Uygulanan fiyat (TL)',saleId:'Satış no'};
+ const tables=[];
+ const add=(name,rows,defaults=[])=>{const keys=[...new Set([...defaults,...rows.flatMap(r=>Object.keys(r&&typeof r==='object'?r:{value:r}))])];tables.push({name,keys,rows:[keys.map(k=>labels[k]||k),...rows.map(r=>keys.map(k=>{const v=r&&typeof r==='object'?r[k]:k==='value'?r:'';if(v==null)return '';if(['id','barcode','phone','saleId'].includes(k))return String(v);return typeof v==='object'?JSON.stringify(v):typeof v==='boolean'?(v?'Evet':'Hayır'):v;}))]});};
+ const s=aybarsStoreSummary(state,now);
+ tables.push({name:'Özet',rows:[['Bilgi','Değer'],['Mağaza',account.store?.name||''],['Şehir',account.store?.city||''],['Oluşturulma',now.toISOString()],['Gün (İstanbul)',s.today.day],['Bugünkü net satış (TL)',s.today.total],['Bugünkü satış adedi',s.today.count],['Bugünkü iade kaydı',s.today.refundCount],['Ürün sayısı',s.products],['Açıklama','Buluta kaydedilmiş verilerin kopyasıdır. Excel değişiklikleri kasaya aktarılmaz.']]});
+ add('Ürünler',parse('ps_products'),['id','name','barcode','category','price','cost','stock']);
+ const sales=parse('ps_sales_history');add('Satışlar',sales,['id','date','time','paymentType','total','customerName','itemsSummary']);
+ add('Satış kalemleri',sales.flatMap(s=>(Array.isArray(s.soldItems)?s.soldItems:[]).map(item=>({saleId:String(s.id??''),date:s.date,...item}))),['saleId','date','name','barcode','qty','returnedQty','price']);
+ const collections={ps_customers:'Müşteriler',ps_expenses:'Giderler',ps_suppliers:'Tedarikçiler',ps_orders:'Siparişler',ps_daily_closes:'Gün sonları',ps_platform_pending:'Bekleyen siparişler',ps_delivered_orders:'Teslim edilenler',ps_deficits:'Açıklar',ps_held_carts:'Bekleyen sepetler',ps_bundles:'Paketler',ps_waste_records:'Fireler',ps_stock_movements:'Stok hareketleri'};
+ for(const [key,name] of Object.entries(collections))add(name,parse(key),['id']);
+ const ns='http://schemas.openxmlformats.org/spreadsheetml/2006/main',decl='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+ const files={};
+ files['[Content_Types].xml']=decl+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'+tables.map((_,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')+'</Types>';
+ files['_rels/.rels']=decl+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
+ files['xl/workbook.xml']=decl+`<workbook xmlns="${ns}" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>`+tables.map((t,i)=>`<sheet name="${xlsxXML(t.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')+'</sheets></workbook>';
+ files['xl/_rels/workbook.xml.rels']=decl+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+tables.map((_,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')+`<Relationship Id="rId${tables.length+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
+ files['xl/styles.xml']=decl+`<styleSheet xmlns="${ns}"><numFmts count="2"><numFmt numFmtId="164" formatCode='#,##0.00&quot; ₺&quot;;[Red]-#,##0.00&quot; ₺&quot;'/><numFmt numFmtId="165" formatCode="#,##0.###"/></numFmts><fonts count="3"><font><sz val="10"/><color rgb="FF172B4D"/><name val="Arial"/></font><font><b/><sz val="10"/><color rgb="FF172B4D"/><name val="Arial"/></font><font><b/><sz val="12"/><color rgb="FFFFFFFF"/><name val="Arial"/></font></fonts><fills count="6"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFEDF1F5"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFF7F9FC"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FF064E3B"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFECFDF5"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="10"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyFont="1" applyFill="1" applyNumberFormat="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyNumberFormat="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyFont="1" applyFill="1" applyNumberFormat="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="3" borderId="0" xfId="0" applyFont="1" applyFill="1" applyNumberFormat="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyFont="1" applyFill="1" applyNumberFormat="1" applyAlignment="1"><alignment vertical="center" wrapText="1" horizontal="right"/></xf><xf numFmtId="164" fontId="0" fillId="3" borderId="0" xfId="0" applyFont="1" applyFill="1" applyNumberFormat="1" applyAlignment="1"><alignment vertical="center" wrapText="1" horizontal="right"/></xf><xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyFont="1" applyFill="1" applyNumberFormat="1" applyAlignment="1"><alignment vertical="center" wrapText="1" horizontal="right"/></xf><xf numFmtId="165" fontId="0" fillId="3" borderId="0" xfId="0" applyFont="1" applyFill="1" applyNumberFormat="1" applyAlignment="1"><alignment vertical="center" wrapText="1" horizontal="right"/></xf><xf numFmtId="0" fontId="2" fillId="4" borderId="0" xfId="0" applyFont="1" applyFill="1" applyNumberFormat="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="164" fontId="1" fillId="5" borderId="0" xfId="0" applyFont="1" applyFill="1" applyNumberFormat="1" applyAlignment="1"><alignment vertical="center" wrapText="1" horizontal="right"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
+
+ const column=n=>{let out='';for(n++;n;n=Math.floor((n-1)/26))out=String.fromCharCode(65+(n-1)%26)+out;return out;};
+ const money=/^(price|cost|total|amount|balance|customPrice|unitCost|totalLoss|splitCash|splitCard|splitTransfer|splitCredit|subtotal|discountAmount|vatTotal)$/i;
+ const colWidth=key=>/barcode|phone/i.test(key)?23:/description|summary|address|items|batches/i.test(key)?46:/name|supplier|category/i.test(key)?30:/date|time|created|updated/i.test(key)?24:/id$/i.test(key)?22:18;
+ tables.forEach((table,i)=>{
+  const width=Math.max(1,...table.rows.map(r=>r.length)),last=column(width-1)+table.rows.length,overview=i===0;
+  const cols=Array.from({length:width},(_,c)=>'<col min="'+(c+1)+'" max="'+(c+1)+'" width="'+(overview?(c===0?34:70):colWidth(table.keys?.[c]||''))+'" customWidth="1"/>').join('');
+  const rows=table.rows.map((row,r)=>'<row r="'+(r+1)+'" ht="'+(r===0?34:overview&&r===table.rows.length-1?48:30)+'" customHeight="1">'+row.map((v,c)=>{
+   const numeric=typeof v==='number'&&Number.isFinite(v),stripe=r%2===0?1:0,key=table.keys?.[c]||'';
+   let style=r===0?(overview?8:1):numeric?(money.test(key)?4:6)+stripe:2+stripe;
+   if(overview&&r===5)style=c===1?9:3;
+   const attrs='r="'+column(c)+(r+1)+'" s="'+style+'"';
+   return numeric?'<c '+attrs+'><v>'+v+'</v></c>':'<c '+attrs+' t="inlineStr"><is><t xml:space="preserve">'+xlsxXML(String(v??'').slice(0,32767))+'</t></is></c>';
+  }).join('')+'</row>').join('');
+  files['xl/worksheets/sheet'+(i+1)+'.xml']=decl+'<worksheet xmlns="'+ns+'"><sheetPr><tabColor rgb="FF'+(overview?'064E3B':'6485A8')+'"/></sheetPr><dimension ref="A1:'+last+'"/><sheetViews><sheetView workbookViewId="0" showGridLines="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><sheetFormatPr defaultRowHeight="30"/><cols>'+cols+'</cols><sheetData>'+rows+'</sheetData>'+(overview?'':'<autoFilter ref="A1:'+last+'"/>')+'</worksheet>';
+ });
+ return xlsxZip(files);
+}

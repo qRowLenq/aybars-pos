@@ -128,6 +128,8 @@ function selectRefundItem(index) {
   const remaining = Number(item.qty) - Number(item.returnedQty || 0);
   if (!(remaining > 0)) return;
   dialog.dataset.itemIndex = String(index);
+  dialog.dataset.refundCommand = crypto.randomUUID();
+  document.getElementById('refundCondition').value='';
   document.querySelectorAll('[data-item-row]').forEach(row => row.classList.toggle('history-selected-item', Number(row.dataset.itemRow) === index));
   document.getElementById('refundProductName').textContent = item.name;
   const qty = document.getElementById('refundQuantity');
@@ -153,7 +155,7 @@ function completeSelectedRefund(event) {
   try{
     if(!item || !sale || sale.isRefund || sale.refunded)throw Error('İade edilebilir bir ürün seç.');
     const matches=customers.filter(c=>sale.customerId!=null ? String(c.id)===String(sale.customerId) : c.name===sale.customerName);
-    const record=saveRefundTransaction({lines:[{item,index,qty:Number(document.getElementById('refundQuantity').value)}],method:document.getElementById('refundMethod').value,receipt:document.getElementById('refundReceipt').value,customer:matches.length===1 ? matches[0] : null,sale});
+    const record=saveRefundTransaction({lines:[{item,index,qty:Number(document.getElementById('refundQuantity').value)}],method:document.getElementById('refundMethod').value,receipt:document.getElementById('refundReceipt').value,customer:matches.length===1 ? matches[0] : null,sale,condition:document.getElementById("refundCondition").value,commandId:dialog.dataset.refundCommand});
     openSaleDetails(sale.id);
     toast(historyMoney(-record.total)+' iade kaydedildi · '+record.paymentType+' · '+(record.isOfficial ? 'Fişli' : 'Fişsiz'),'success');
     return true;

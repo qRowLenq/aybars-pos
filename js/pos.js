@@ -385,13 +385,13 @@ function renderCatalog() {
 }
 
 // ── Cart ──
-function addToCart(p) {
+function addToCart(p, quantity=1) {
   const item = cart.find(i => i.id === p.id);
   const vatRate = p.vatRate !== undefined ? p.vatRate : 20;
   if (item) {
-    item.qty++;
+    item.qty+=quantity;
   } else {
-    cart.push({ ...p, vatRate, qty: 1, customPrice: p.price, originalPrice: p.price });
+    cart.push({ ...p, vatRate, qty: quantity, customPrice: p.price, originalPrice: p.price });
   }
   renderCart();
 }
@@ -517,7 +517,7 @@ function completeSale(payType, splitDetails = null, splitData = null) {
   const custName = cust ? cust.name : "Tezgâh";
   const itemsSummary = cart.map(i => `${i.qty}x ${i.name} (${i.customPrice.toFixed(2)} ₺)`).join(", ");
 
-  deductCartStock(cart);
+  const allocations = deductCartStock(cart);
 
   const isReceiptOfficial = document.getElementById("posReceiptOfficial")
     ? document.getElementById("posReceiptOfficial").checked
@@ -551,7 +551,7 @@ function completeSale(payType, splitDetails = null, splitData = null) {
 
   const saleRecord = {
     id: Date.now(), date: nowDate(), time: nowTime(),
-    customerId: cust ? cust.id : null, customerName: custName, itemsSummary, soldItems: [...cart],
+    customerId: cust ? cust.id : null, customerName: custName, itemsSummary, soldItems: cart.map(i=>({...i,allocations:i.isBundle?null:allocations.get(String(i.id))})),
     total, vatTotal: Number(vatTotal.toFixed(2)),
     paymentType: splitDetails ? `Parçalı (${splitDetails})` : payType,
     splitCash: Number(splitCash.toFixed(2)),
@@ -575,6 +575,7 @@ function completeSale(payType, splitDetails = null, splitData = null) {
 
   sendToGoogleSheets({
     action: "save_sale",
+    transactionId:saleRecord.id,
     date: saleRecord.date,
     time: saleRecord.time,
     customerName: custName,
@@ -612,7 +613,7 @@ function completeSale(payType, splitDetails = null, splitData = null) {
   if (document.getElementById("cartCustomerSelect")) document.getElementById("cartCustomerSelect").value = "";
   if (document.getElementById("quickCartDiscountInput")) document.getElementById("quickCartDiscountInput").value = "";
   setPosReceiptDefaultUnofficial();
-  renderCart(); renderCatalog(); renderPosSalesHistory(); saveData(); updateAllBadges();
+  renderCart(); renderCatalog(); renderPosSalesHistory(); saveData(); updateAllBadges(); renderPanelFavorites();
   if (typeof renderSktRadarWidget === "function") renderSktRadarWidget();
   toast(`✅ ${total.toFixed(2)} ₺ satış tamamlandı! ${isOfficial ? '(🧾 Fişli)' : '(📝 Fişsiz)'}`);
   focusCatalogSearch();
@@ -860,7 +861,8 @@ function chargeToCredit() {
 function holdCurrentCart() {
   if (cart.length === 0) return toast("Sepet boş!", "warning");
   const label = prompt("Sepet ismi:", `Sepet #${heldCarts.length + 1}`);
-  heldCarts.push({ id: Date.now(), label: label || "Askı", time: nowTime(), items: [...cart] });
+  heldCarts.push({ id: Date.now(), label: label || "Askı", time: nowTime(), items: [...cart], customerId:document.getElementById("cartCustomerSelect")?.value||"" });
+  if(document.getElementById("cartCustomerSelect"))document.getElementById("cartCustomerSelect").value="";
   cart = [];
   saveData(); renderCart(); updateAllBadges();
   toast("⏸️ Sepet askıya alındı!");
@@ -887,8 +889,11 @@ function openHoldCartModal() {
 }
 
 function restoreHeldCart(idx) {
-  cart = [...heldCarts[idx].items];
+  const original=heldCarts[idx];if(!original)return;
+  if(cart.length)holdCurrentCart();
   heldCarts.splice(idx, 1);
+  cart = original.items;
+  document.getElementById("cartCustomerSelect").value=original.customerId||"";
   saveData(); renderCart(); closeModal("holdCartsModal"); updateAllBadges();
 }
 
@@ -1254,7 +1259,9 @@ function handleScannedBarcodeOnPos(barcodeString, sourceInput = null) {
   const codeNoZero = code.replace(/^0+/, "").toLowerCase();
 
   // 1. Exact barcode match (case-insensitive and trimmed)
-  let matchedProduct = pList.find(p => p && p.barcode && String(p.barcode).trim().toLowerCase() === codeLower);
+  let exact;
+  try{exact=BlueStock.barcode(pList,code);}catch(error){toast(error.message,"warning");return;}
+  let matchedProduct = exact?.product || pList.find(p => p && p.barcode && String(p.barcode).trim().toLowerCase() === codeLower);
 
   // 2. Barcode match ignoring leading zeros (0869... vs 869...)
   if (!matchedProduct && code.length >= 7) {
@@ -1298,7 +1305,7 @@ function handleScannedBarcodeOnPos(barcodeString, sourceInput = null) {
 
   if (matchedProduct) {
     // Ürün bulundu: Sepete anında 1 adet ekle ve ses çal
-    addToCart(matchedProduct);
+    addToCart(matchedProduct,exact?.factor||1);
     playBarcodeBeep(true);
     toast(`✅ ${matchedProduct.name} sepete eklendi!`, "success");
 

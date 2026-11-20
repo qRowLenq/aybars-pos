@@ -14,7 +14,9 @@ function refundSheetsPayload(record) {
     unoffTransfer:record.isOfficial ? 0 : record.splitTransfer,vatTotal:record.vatTotal,isOfficial:record.isOfficial,
     transactionId:record.id,isRefund:true,refundSource:record.refundSource,originalSaleId:record.originalSaleId};
 }
-function saveRefundTransaction({lines,method,receipt,customer,sale=null}) {
+function saveRefundTransaction({lines,method,receipt,customer,sale=null,condition,commandId}) {
+  if(!sale || !commandId || !["sellable","damaged"].includes(condition))throw Error("Orijinal satışı ve ürünün durumunu seçin.");
+  const prior=salesHistory.find(row=>row.refundCommand===commandId);if(prior)return prior;
   if (isDayClosed(nowDate())) throw Error('Aktif kasa günü kapalı. Açık kasa gününe geçip yeniden dene.');
   if (!lines.length) throw Error('İade için ürün ekle.');
   if (!['Nakit','Kredi Kartı','Havale / IBAN','Veresiye'].includes(method)) throw Error('Geri ödeme yöntemini seç.');
@@ -37,7 +39,7 @@ function saveRefundTransaction({lines,method,receipt,customer,sale=null}) {
     vat+=rate>0 ? qty*price-qty*price/(1+rate/100) : 0;
     const parts=item.isBundle ? (item.bundleItems || []).map(b=>({id:b.productId,qty:Number(b.qty)*qty})) : [{id:item.id,qty}];
     if (!parts.length) throw Error('Paket içeriği bulunamadı.');
-    stockLines.push(...parts);
+    stockLines.push(...parts.map(part=>({...part,priorQty:Number(sale.soldItems[line.index].returnedQty)||0,original:item.isBundle?null:item.allocations})));
   }
   amount=Math.round(amount*100)/100; vat=Math.round(vat*100)/100;
   if (!Number.isFinite(amount) || !Number.isFinite(vat)) throw Error('İade tutarı hesaplanamadı.');
@@ -48,7 +50,7 @@ function saveRefundTransaction({lines,method,receipt,customer,sale=null}) {
     if (previous+amount>Number(sale.total)+0.01) throw Error('İade tutarı satışın kalan tutarını aşıyor.');
   }
   const summary=lines.map(({item,qty})=>`${qty}x ${item.name} (${historyMoney(item.customPrice ?? item.price)})`).join(', ');
-  const record={id:'refund_'+crypto.randomUUID(),date:nowDate(),time:nowTime(),
+  const record={refundCommand:commandId,condition,id:'refund_'+crypto.randomUUID(),date:nowDate(),time:nowTime(),
     customerId:customer?.id ?? sale?.customerId ?? null,customerName:customer?.name || sale?.customerName || 'Tezgâh',
     originalSaleId:sale?.id ?? null,originalSaleDate:sale?.date ?? null,isRefund:true,refundSource:sale ? 'sale' : 'cart',
     originalItemIndex:sale && lines.length===1 ? lines[0].index : null,
@@ -57,15 +59,24 @@ function saveRefundTransaction({lines,method,receipt,customer,sale=null}) {
     paymentType:method,splitCash:method==='Nakit' ? -amount : 0,splitCard:method==='Kredi Kartı' ? -amount : 0,
     splitTransfer:method==='Havale / IBAN' ? -amount : 0,splitCredit:method==='Veresiye' ? -amount : 0,
     isOfficial:receipt==='official'};
-  const snapshot=JSON.stringify({products,customers,salesHistory});
+  const snapshot=JSON.stringify({products,customers,salesHistory,wasteRecords});
   if(sale){
     for(const line of lines) sale.soldItems[line.index].returnedQty=Number(sale.soldItems[line.index].returnedQty || 0)+line.qty;
     sale.refunded=sale.soldItems.every(item=>Number(item.returnedQty || 0)>=Number(item.qty));
   }
   for(const line of stockLines){
     const product=products.find(p=>String(p.id)===String(line.id));
-    product.stock=(Number(product.stock)||0)+line.qty;
-    if(Array.isArray(product.batches) && product.batches.length) product.batches.push({lotNumber:record.id,qty:line.qty,initialQty:line.qty,cost:Number(product.cost)||0,expiry:'',source:'İade',date:record.date});
+    const allocations=[];let skip=line.priorQty,left=line.qty;
+    for(const a of line.original||[]){const off=Math.min(skip,a.qty);skip-=off;const qty=Math.min(left,a.qty-off);if(qty>0)allocations.push({...a,qty});left-=qty;}
+    if(left>0)allocations.push({lotNumber:record.id,cost:Number(product.cost)||0,expiry:"",qty:left});
+    if(condition==="damaged"){
+      const totalLoss=BlueStock.cost(allocations);
+      wasteRecords.unshift({id:crypto.randomUUID(),refundId:record.id,productId:product.id,productName:product.name,qty:line.qty,unitCost:totalLoss/line.qty,totalLoss,reason:"Hasarlı iade",note:"",allocations,date:record.date,time:record.time});
+    }else{
+      product.stock=(Number(product.stock)||0)+line.qty;
+      product.batches ||= [];
+      for(const a of allocations)product.batches.push({...a,initialQty:a.qty,source:"İade",date:record.date});
+    }
   }
   if(customer){
     if(method==='Veresiye')customer.balance=Math.round((Number(customer.balance)-amount)*100)/100;
@@ -73,9 +84,9 @@ function saveRefundTransaction({lines,method,receipt,customer,sale=null}) {
     customer.purchaseHistory.unshift({saleId:record.id,date:record.date,time:record.time,items:record.itemsSummary,total:-amount,payment:`İade (${method})`});
   }
   salesHistory.unshift(record);
-  try{saveData();}catch(error){
+  try{if(window.desktopStorage)desktopStorage.transaction(saveData);else saveData();}catch(error){
     const before=JSON.parse(snapshot);
-    products=window.products=before.products;customers=window.customers=before.customers;salesHistory=window.salesHistory=before.salesHistory;
+    products=window.products=before.products;customers=window.customers=before.customers;salesHistory=window.salesHistory=before.salesHistory;wasteRecords=window.wasteRecords=before.wasteRecords;
     try{saveData();}catch(_){}
     throw Error('İade kaydedilemedi. Tarayıcı depolamasını kontrol et.');
   }

@@ -5,6 +5,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 function fixture(){
   const c=vm.createContext({document:{getElementById:()=>null},toast:()=>{},focusCatalogSearch:()=>{},cart:[],products:[]});
+  vm.runInContext(fs.readFileSync(path.join(__dirname,'../../js/stock-domain.js'),'utf8'),c);
   vm.runInContext(fs.readFileSync(path.join(__dirname,'../../js/stock-flow.js'),'utf8'),c);
   return c;
 }

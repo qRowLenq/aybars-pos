@@ -705,6 +705,7 @@ function renderDeficitsTable() {
         <td><span class="chip ${d.ordered ? 'chip-ok' : 'chip-warn'}">${d.ordered ? '✅ Sipariş Verildi' : '⏳ Bekliyor'}</span></td>
         <td class="flex gap-1">
           <button class="btn btn-success btn-xs" onclick="toggleDeficitOrdered(${idx})">${d.ordered ? 'Geri Al' : '✅ Verildi'}</button>
+          ${d.ordered && d.orderQty ? '<button class="btn btn-outline btn-xs" onclick="updateDeficitReceipt('+idx+')">Teslim: '+(d.receivedQty||0)+' / '+d.orderQty+'</button>' : ''}
           <button class="btn btn-danger btn-xs" onclick="removeDeficit(${idx})">Sil</button>
         </td></tr>`).join('');
   }
@@ -752,7 +753,12 @@ function addManualDeficit() {
   saveData(); renderDeficitsTable();
 }
 
-function toggleDeficitOrdered(idx) { manualDeficits[idx].ordered = !manualDeficits[idx].ordered; saveData(); renderDeficitsTable(); }
+function toggleDeficitOrdered(idx) {
+  const line=manualDeficits[idx];if(!line)return;
+  if(!line.ordered && line.productId){const answer=prompt("Tedarikçiye kaç adet sipariş verildi?",String(line.orderQty||1));if(answer===null)return;const qty=Number(answer);if(!Number.isSafeInteger(qty)||qty<=0)return toast("Pozitif tam sayı girin.","warning");line.orderQty=qty;line.receivedQty=0;}
+  line.ordered=!line.ordered;saveData();renderDeficitsTable();
+}
+function updateDeficitReceipt(idx){const row=manualDeficits[idx];if(!row?.ordered||!row.orderQty)return;const answer=prompt("Toplam kaç adet teslim alındı? Fiili stok girişini mevcut Stok Girişi ekranından yapın.",String(row.receivedQty||0));if(answer===null)return;const qty=Number(answer);if(!answer.trim()||!Number.isSafeInteger(qty)||qty<0||qty>row.orderQty)return toast("Teslim adedi 0 ile sipariş miktarı arasında olmalı.","warning");row.receivedQty=qty;saveData();renderDeficitsTable();}
 function removeDeficit(idx) { manualDeficits.splice(idx, 1); saveData(); renderDeficitsTable(); }
 
 function copyDeficits(mode) {

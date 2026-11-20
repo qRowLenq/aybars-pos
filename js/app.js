@@ -674,6 +674,7 @@ function importData(event) {
 
 // ── App Initialization ──
 function initializeApp() {
+  if(typeof renderPanelFavorites==="function")renderPanelFavorites();
   try { loadState(); } catch(e) { console.error("loadState error:", e); }
   try { initCategoryBar(); } catch(e) { console.error("initCategoryBar error:", e); }
   try { populateCategoryDropdowns(); } catch(e) { console.error("populateCategoryDropdowns error:", e); }
